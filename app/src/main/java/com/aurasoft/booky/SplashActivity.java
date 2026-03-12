@@ -1,12 +1,22 @@
 package com.aurasoft.booky;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -14,11 +24,52 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        // Fullscreen Logic
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.hide(WindowInsets.Type.systemBars() | WindowInsets.Type.navigationBars());
+            }
+        } else {
+            getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+
         setContentView(R.layout.activity_splash);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+
+        ImageView im = findViewById(R.id.logoImg);
+        Glide.with(this).asBitmap().load(R.drawable.img_6).override(300).into(im);
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (findViewById(R.id.progressBar) != null) {
+                findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            }
+        }, 1000);
+
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            checkUserStatus();
+        }, 3500);
+    }
+
+    private void checkUserStatus() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        Intent intent;
+        if (user != null) {
+
+            intent = new Intent(SplashActivity.this, MainActivity.class);
+        } else {
+
+            intent = new Intent(SplashActivity.this, GetstartedActivity.class);
+        }
+
+        startActivity(intent);
+        finish();
     }
 }

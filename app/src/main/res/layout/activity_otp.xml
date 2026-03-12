@@ -67,27 +67,51 @@ android:id="@+id/main"
 
         <EditText
             android:id="@+id/otp1"
+            style="@style/OtpEditTextStyle"
             android:layout_width="55dp"
             android:layout_height="60dp"
-            style="@style/OtpEditTextStyle" />
+            android:inputType="number"
+            android:gravity="center"/>
 
         <EditText
             android:id="@+id/otp2"
             android:layout_width="55dp"
             android:layout_height="60dp"
-            style="@style/OtpEditTextStyle" />
+            style="@style/OtpEditTextStyle"
+            android:inputType="number"
+            android:gravity="center"/>
 
         <EditText
             android:id="@+id/otp3"
             android:layout_width="55dp"
             android:layout_height="60dp"
-            style="@style/OtpEditTextStyle" />
+            style="@style/OtpEditTextStyle"
+            android:inputType="number"
+            android:gravity="center"/>
 
         <EditText
             android:id="@+id/otp4"
             android:layout_width="55dp"
             android:layout_height="60dp"
-            style="@style/OtpEditTextStyle" />
+            style="@style/OtpEditTextStyle"
+            android:inputType="number"
+            android:gravity="center"/>
+
+        <EditText
+            android:id="@+id/otp5"
+            android:layout_width="55dp"
+            android:layout_height="60dp"
+            style="@style/OtpEditTextStyle"
+            android:inputType="number"
+            android:gravity="center"/>
+
+        <EditText
+            android:id="@+id/otp6"
+            android:layout_width="55dp"
+            android:layout_height="60dp"
+            style="@style/OtpEditTextStyle"
+            android:inputType="number"
+            android:gravity="center"/>
 
     </LinearLayout>
 
