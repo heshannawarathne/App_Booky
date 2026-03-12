@@ -1,7 +1,10 @@
 package com.aurasoft.booky;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +14,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class NameEntryActivity extends AppCompatActivity {
@@ -32,9 +38,51 @@ public class NameEntryActivity extends AppCompatActivity {
         });
 
 
-        mAuth = Fire.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         etName = findViewById(R.id.etName);
 
+        findViewById(R.id.btnFinish).setOnClickListener(v -> {
+            saveUserToFirestore();
+        });
+
+    }
+
+    private void saveUserToFirestore() {
+        String name = etName.getText().toString().trim();
+
+        if (name.isEmpty()) {
+            etName.setError("කරුණාකර ඔබේ නම ඇතුළත් කරන්න");
+            return;
+        }
+
+        // දැනට Login වී සිටින පරිශීලකයාගේ UID එක සහ Phone Number එක ගැනීම
+        if (mAuth.getCurrentUser() != null) {
+            String uid = mAuth.getCurrentUser().getUid();
+            String phone = mAuth.getCurrentUser().getPhoneNumber();
+
+
+            Map<String, Object> user = new HashMap<>();
+            user.put("name", name);
+            user.put("phone", phone);
+            user.put("uid", uid);
+            user.put("joinedAt", System.currentTimeMillis());
+
+
+            db.collection("Users").document(uid)
+                    .set(user)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(NameEntryActivity.this, "ලියාපදිංචිය සාර්ථකයි!", Toast.LENGTH_SHORT).show();
+
+
+                        Intent intent = new Intent(NameEntryActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(NameEntryActivity.this, "දෝෂයක් ඇතිවිය: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
     }
 }
