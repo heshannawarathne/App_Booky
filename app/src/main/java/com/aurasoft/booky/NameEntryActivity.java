@@ -2,11 +2,14 @@ package com.aurasoft.booky;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,17 +28,24 @@ public class NameEntryActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
+    private AlertDialog loadingDialog;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_name_entry);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        initLoadingDialog();
+
+
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -44,6 +54,8 @@ public class NameEntryActivity extends AppCompatActivity {
 
         findViewById(R.id.btnFinish).setOnClickListener(v -> {
             saveUserToFirestore();
+            loadingDialog.show();
+
         });
 
     }
@@ -72,6 +84,8 @@ public class NameEntryActivity extends AppCompatActivity {
             db.collection("Users").document(uid)
                     .set(user)
                     .addOnSuccessListener(aVoid -> {
+                        loadingDialog.dismiss();
+
                         Toast.makeText(NameEntryActivity.this, "ලියාපදිංචිය සාර්ථකයි!", Toast.LENGTH_SHORT).show();
 
 
@@ -81,8 +95,29 @@ public class NameEntryActivity extends AppCompatActivity {
                         finish();
                     })
                     .addOnFailureListener(e -> {
+                        loadingDialog.dismiss();
+
                         Toast.makeText(NameEntryActivity.this, "දෝෂයක් ඇතිවිය: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
+        }
+    }
+
+    private void initLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // ඔබේ dialog_loading.xml එක inflate කරනවා
+        View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+        builder.setView(view);
+        builder.setCancelable(false);
+
+        loadingDialog = builder.create();
+
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+//            loadingDialog.getWindow().setGravity(Gravity.BOTTOM); // යටටම ගැනීමට
+
+            WindowManager.LayoutParams layoutParams = loadingDialog.getWindow().getAttributes();
+            layoutParams.y = 50;
+            loadingDialog.getWindow().setAttributes(layoutParams);
         }
     }
 }

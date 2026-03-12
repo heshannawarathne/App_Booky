@@ -56,5 +56,8 @@ dependencies {
 
     implementation("com.google.firebase:firebase-firestore")
 
+    implementation libs.lottie
+
+
 
 }

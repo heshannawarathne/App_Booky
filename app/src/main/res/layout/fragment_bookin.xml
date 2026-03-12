@@ -1,0 +1,229 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C1C5C4">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:background="@drawable/bg_login_header"
+                android:padding="20dp">
+
+<!--                <de.hdodenhof.circleimageview.CircleImageView-->
+<!--                    android:id="@+id/profileImage"-->
+<!--                    android:layout_width="46dp"-->
+<!--                    android:layout_height="46dp"-->
+<!--                    android:src="@drawable/img_15" />-->
+
+                <TextView
+                android:id="@+id/userName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/profileImage"
+                android:layout_marginStart="10dp"
+                android:layout_alignTop="@id/profileImage"
+                android:text="Heshan Nawarathna"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"/>
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@id/profileImage"
+                    android:src="@drawable/img_16" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/profileImage"
+                    android:layout_marginTop="30dp"
+                    android:text="Book your Seat"
+                    android:textColor="@color/white"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="316dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="-60dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="8dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ECE7E7"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <RelativeLayout
+                        android:layout_width="287dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/rounded_input_background"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp">
+
+                        <ImageView
+                            android:id="@+id/fromIcon"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:background="@drawable/circle_icon_background"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:src="@drawable/img_12"
+                            android:padding="10dp"/>
+
+                        <TextView
+                            android:id="@+id/fromLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/fromIcon"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:text="From"
+                            android:textColor="#3F3D3D"
+                            android:textSize="13sp"/>
+
+                        <Spinner
+                            android:id="@+id/fromSpinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/fromIcon"
+                            android:layout_below="@id/fromLabel"
+                            android:layout_marginStart="15dp"
+                            android:background="@android:color/transparent"
+                            android:textColor="@color/black"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="287dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:background="@drawable/rounded_input_background">
+
+                        <ImageView
+                            android:id="@+id/toIcon"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/circle_icon_background"
+                            android:padding="10dp"
+                            android:src="@drawable/img_14" />
+
+                        <TextView
+                            android:id="@+id/toLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_toEndOf="@id/toIcon"
+                            android:text="To"
+                            android:textColor="#3F3D3D"
+                            android:textSize="13sp" />
+
+                        <Spinner
+                            android:id="@+id/toSpinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/toLabel"
+                            android:layout_marginStart="15dp"
+                            android:layout_toEndOf="@id/toIcon"
+                            android:background="@android:color/transparent"
+                            android:textColor="@color/black" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="287dp"
+                        android:layout_height="59dp"
+                        android:background="#B1C8C6"
+                        android:alpha="0.4"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="15dp"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/dateLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Date"
+                            android:textColor="#3F3D3D"
+                            android:textSize="13sp"/>
+                        <TextView
+                            android:id="@+id/dateValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/dateLabel"
+                            android:text="20 July 2023"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </RelativeLayout>
+
+                    <Button
+                        android:layout_width="279dp"
+                        android:layout_height="55dp"
+                        android:layout_gravity="center_horizontal"
+                        android:backgroundTint="#3A7B73"
+                        android:text="Search"
+                        android:textAllCaps="false"
+                        android:textSize="20sp"
+                        android:background="@drawable/button_teal_rounded"
+                        android:fontFamily="Arimo"
+                        app:cornerRadius="32dp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:layout_marginTop="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today All Buses"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="see All"
+                    android:textColor="#383838"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/busRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_marginBottom="100dp" /> </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

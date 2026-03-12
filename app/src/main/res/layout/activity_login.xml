@@ -86,7 +86,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+94 ⌵"
+                android:text="+94  |"
                 android:textColor="#7D7D7D"
                 android:textSize="16sp" />
 

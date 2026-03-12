@@ -4,22 +4,25 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 
+
 public class OtpActivity extends AppCompatActivity {
+
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class OtpActivity extends AppCompatActivity {
 //            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
 //            return insets;
 //        });
+
+        initLoadingDialog();
 
         EditText otp1 = findViewById(R.id.otp1);
         EditText otp2 = findViewById(R.id.otp2);
@@ -132,10 +137,16 @@ public class OtpActivity extends AppCompatActivity {
 
     private void verifyOtp(String code, String verificationId, FirebaseAuth auth) {
 
+        loadingDialog.show();
+
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
 
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
+
+
+                    if (loadingDialog != null) loadingDialog.dismiss();
+
                     if (task.isSuccessful()) {
                         // Firebase හරහා මෙය නව පරිශීලකයෙක්දැයි පරීක්ෂා කිරීම
                         boolean isNewUser = task.getResult().getAdditionalUserInfo().isNewUser();
@@ -164,4 +175,24 @@ public class OtpActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void initLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // ඔබේ dialog_loading.xml එක inflate කරනවා
+        View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+        builder.setView(view);
+        builder.setCancelable(false);
+
+        loadingDialog = builder.create();
+
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+//            loadingDialog.getWindow().setGravity(Gravity.BOTTOM); // යටටම ගැනීමට
+
+            WindowManager.LayoutParams layoutParams = loadingDialog.getWindow().getAttributes();
+            layoutParams.y = 50;
+            loadingDialog.getWindow().setAttributes(layoutParams);
+        }
+    }
+
 }
