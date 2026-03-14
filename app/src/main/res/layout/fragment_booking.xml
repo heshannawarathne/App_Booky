@@ -1,0 +1,218 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C1C5C4">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:background="#3A7B73"
+                android:paddingTop="50dp"
+                android:paddingStart="25dp"
+                android:paddingEnd="25dp">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/profileImg"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:src="@drawable/img_15" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/profileImg"
+                    android:layout_marginStart="15dp"
+                    android:layout_alignTop="@id/profileImg"
+                    android:text="Heshan Nawarathna"
+                    android:textColor="@color/white"
+                    android:textSize="19sp" />
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/img_16" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/profileImg"
+                    android:layout_marginTop="27dp"
+                    android:text="Book your Seat"
+                    android:layout_marginLeft="66dp"
+                    android:textColor="#FFFDFD"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="316dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="-60dp"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="10dp">
+
+                <LinearLayout
+                    android:layout_width="369dp"
+                    android:layout_height="376dp"
+                    android:background="#ECE7E7"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+                    <RelativeLayout
+                        android:layout_width="285dp"
+                        android:layout_height="71dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/input_box_bg">
+
+                        <ImageView
+                            android:id="@+id/fIcon"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/white_circle_bg"
+                            android:padding="12dp"
+                            android:src="@drawable/img_12" />
+
+                        <TextView
+                            android:id="@+id/fLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_toEndOf="@id/fIcon"
+                            android:text="From"
+                            android:textSize="13sp" />
+
+                        <Spinner
+                            android:id="@+id/fromSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/fLabel"
+                            android:layout_marginStart="11dp"
+                            android:layout_toEndOf="@id/fIcon"
+                            android:background="@android:color/transparent" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="286dp"
+                        android:layout_height="71dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/input_box_bg">
+
+                        <ImageView
+                            android:id="@+id/tIcon"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/white_circle_bg"
+                            android:padding="12dp"
+                            android:src="@drawable/img_14" />
+
+                        <TextView
+                            android:id="@+id/tLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="15dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_toEndOf="@id/tIcon"
+                            android:text="To"
+                            android:textSize="13sp" />
+
+                        <Spinner
+                            android:id="@+id/toSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tLabel"
+                            android:layout_marginStart="11dp"
+                            android:layout_toEndOf="@id/tIcon"
+                            android:background="@android:color/transparent" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/dateBox"
+                        android:layout_width="283dp"
+                        android:layout_height="65dp"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/input_box_bg"
+                        android:backgroundTint="#4DB1C8C6"
+                        android:paddingStart="20dp">
+
+                        <TextView
+                            android:id="@+id/dLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Date"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/dateValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/dLabel"
+                            android:text="20 July 2023"
+                            android:textColor="#383838"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </RelativeLayout>
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnSearch"
+                        android:layout_width="280dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/button_teal_rounded"
+                        android:text="Search"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today All Buses"
+                    android:textColor="@color/black"
+                    android:textSize="25sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="see All"
+                    android:textColor="#383838"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/busRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:padding="10dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
