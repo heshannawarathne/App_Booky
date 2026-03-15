@@ -17,11 +17,13 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:background="#3A7B73"
-                android:paddingTop="50dp"
+                android:layout_height="250dp"
+                android:background="@drawable/bg_login_header"
                 android:paddingStart="25dp"
+                android:paddingTop="50dp"
                 android:paddingEnd="25dp">
+
+
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profileImg"
@@ -32,16 +34,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/profileImg"
-                    android:layout_marginStart="15dp"
                     android:layout_alignTop="@id/profileImg"
+                    android:layout_marginStart="15dp"
+                    android:layout_toEndOf="@id/profileImg"
                     android:text="Heshan Nawarathna"
                     android:textColor="@color/white"
                     android:textSize="19sp" />
 
                 <ImageView
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_alignParentEnd="true"
                     android:src="@drawable/img_16" />
 
@@ -49,9 +51,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/profileImg"
-                    android:layout_marginTop="27dp"
-                    android:text="Book your Seat"
                     android:layout_marginLeft="66dp"
+                    android:layout_marginTop="9dp"
+                    android:text="Book your Seat"
                     android:textColor="#FFFDFD"
                     android:textSize="32sp"
                     android:textStyle="bold" />

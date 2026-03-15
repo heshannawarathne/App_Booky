@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C1C5C4">
+
+    <View
+        android:id="@+id/headerView"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_login_header"
+
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="Select Your Seat"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.283"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/legendLayout"
+        android:layout_width="235dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.664"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_seat_selected" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="15dp"
+                android:text="Selected"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_seat_available" />
+
+            <TextView
+                android:layout_width="78dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Available"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_seat_female" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="22dp"
+                android:text="Female"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_seat_male" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Male"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="310dp"
+        android:layout_height="509dp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="13dp"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnProceed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headerView">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="507dp"
+            android:alignmentMode="alignMargins"
+            android:columnCount="5"
+            android:padding="5dp"
+            android:rowCount="12">
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="1" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:layout_width="2dp"
+                android:background="@drawable/bg_seat_female"
+                android:text="2" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_row="0"
+                android:layout_column="2"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="3" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="5" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="6" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="7" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="8" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="9" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="10" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="11" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="12" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="13" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="14" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="15" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="16" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="17" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="18" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="19" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="20" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="21" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="22" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="23" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="24" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:layout_width="3dp"
+                android:text="25" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="26" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="27" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="28" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="29" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="30" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="31" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="32" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_female"
+                android:text="33" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="34" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_male"
+                android:text="35" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="36" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="37" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:layout_width="1dp"
+                android:text="38" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="39" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="40" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="41" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="42" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="0.4" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="43" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="44" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_selected"
+                android:text="45" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:background="@drawable/bg_seat_selected"
+                android:text="46" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="47" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="48" />
+
+            <TextView
+                style="@style/SeatStyle"
+                android:text="49" />
+
+        </GridLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnProceed"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/button_teal_rounded"
+        android:text="Proceed"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/img_18"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

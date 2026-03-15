@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "145154911764",
+    "firebase_url": "https://bookyapp-bef0e-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "bookyapp-bef0e",
     "storage_bucket": "bookyapp-bef0e.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.aurasoft.booky"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "145154911764-jhb4esi7t2frupvf7s0qj5unho9bvvhs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aurasoft.booky",
+            "certificate_hash": "e1bfa154dc86cca0c9abfa088b59b84ef0c1136e"
+          }
+        },
+        {
+          "client_id": "145154911764-v13dnvi56sk0kesb24l4dhkqmkmeft81.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDXpaWcnE8QQFHmwYOgPvj6wAzi8Ldks74"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145154911764-v13dnvi56sk0kesb24l4dhkqmkmeft81.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

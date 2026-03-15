@@ -1,5 +1,6 @@
 package com.aurasoft.booky;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.aurasoft.booky.fragment.BookingFragment;
 import com.aurasoft.booky.fragment.ScheduleFragment;
+import com.aurasoft.booky.fragment.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.MaterialShapeDrawable;
@@ -39,14 +41,12 @@ public class MainActivity extends AppCompatActivity {
         shapeDrawable.setFillColor(ColorStateList.valueOf(Color.parseColor("#3A7B73")));
         bottomNav.setBackground(shapeDrawable);
 
-// 1. App එක මුලින්ම open වෙනකොට Home (BookingFragment) එක පෙන්වන්න
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new BookingFragment())
                     .commit();
         }
 
-// 2. Navigation Item එකක් click කරනකොට ක්‍රියාත්මක වන Listener එක
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int id = item.getItemId();
@@ -56,9 +56,10 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_schedule) {
                 selectedFragment = new ScheduleFragment();
             } else if (id == R.id.nav_trips) {
-                // selectedFragment = new TripsFragment();
+                Intent i = new Intent(MainActivity.this, SeatSelectionActivity.class);
+                startActivity(i);
             } else if (id == R.id.nav_settings) {
-                // selectedFragment = new SettingsFragment();
+                selectedFragment = new SettingsFragment();
             }
 
             if (selectedFragment != null) {
