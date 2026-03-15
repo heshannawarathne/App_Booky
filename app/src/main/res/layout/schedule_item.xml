@@ -5,13 +5,14 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="0dp"
+    app:cardElevation="2dp"
     app:cardBackgroundColor="#ECE7E7">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:padding="16dp"
-        android:layout_height="100dp">
+        android:layout_height="wrap_content"
+        android:minHeight="100dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -25,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:text="no - ND 2456"
                 android:textColor="#383838"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -35,16 +36,40 @@
                 android:text="Badulla - Makumbura"
                 android:textColor="#111111"
                 android:textSize="17sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:layout_marginTop="2dp"/>
 
-            <TextView
-                android:id="@+id/busTime"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2.30 PM"
-                android:textColor="#383838"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/busTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2.30 PM"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="  |  "
+                    android:textColor="#555555"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/busDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mar 16, 2026"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
 
         <View
@@ -56,17 +81,17 @@
             android:background="@drawable/call_btn_circle" />
 
         <ImageView
-            android:layout_width="92dp"
-            android:layout_height="match_parent"
+            android:layout_width="89dp"
+            android:layout_height="71dp"
             android:layout_alignStart="@id/callBtnBg"
             android:layout_alignTop="@id/callBtnBg"
             android:layout_alignEnd="@id/callBtnBg"
             android:layout_alignBottom="@id/callBtnBg"
             android:layout_centerInParent="false"
-            android:layout_marginStart="-19dp"
-            android:layout_marginTop="-15dp"
-            android:layout_marginEnd="-18dp"
-            android:layout_marginBottom="-14dp"
+            android:layout_marginStart="-16dp"
+            android:layout_marginTop="-3dp"
+            android:layout_marginEnd="-17dp"
+            android:layout_marginBottom="-20dp"
             android:padding="5dp"
             android:src="@drawable/img_17" />
 

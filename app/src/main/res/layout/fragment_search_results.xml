@@ -36,9 +36,10 @@
         android:paddingHorizontal="16dp">
 
         <TextView
+            android:id="@+id/fromCity"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:text="Badulla"
+            android:text="Badul"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -61,6 +62,7 @@
             android:background="@drawable/line" />
 
         <TextView
+            android:id="@+id/tocity"
             android:layout_width="115dp"
             android:layout_height="wrap_content"
             android:text="Makumbura"
@@ -70,6 +72,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/dateBus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
