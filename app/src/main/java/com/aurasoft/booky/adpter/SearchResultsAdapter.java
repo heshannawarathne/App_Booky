@@ -39,7 +39,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ScheduleModel bus = busList.get(position);
 
-        // මිල සහ වේලාව පෙන්වීම
+
         holder.tvPrice.setText("Rs. " + bus.getPrice());
 
         if (bus.getDeparture_time() != null) {
@@ -50,7 +50,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         holder.btnCall.setOnClickListener(v -> {
             String number = bus.getPhone_number();
 
-            // පර්මිෂන් තියෙනවා නම් විතරක් ACTION_CALL පාවිච්චි කරන්න
             if (v.getContext().checkSelfPermission(android.Manifest.permission.CALL_PHONE)
                     == android.content.pm.PackageManager.PERMISSION_GRANTED) {
 
@@ -64,9 +63,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             }
         });
 
-        // --- Book Now Logic (සීට් තෝරන පේජ් එකට යන්න) ---
         holder.itemView.setOnClickListener(v -> {
-            // මෙතනදී අපි පස්සේ SeatBooking එකට යන logic එක ලියමු
             Toast.makeText(v.getContext(), "Opening seat selection for " + bus.getSchedule_id(), Toast.LENGTH_SHORT).show();
         });
     }
@@ -84,7 +81,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             super(itemView);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvTime = itemView.findViewById(R.id.tvTime);
-            btnCall = itemView.findViewById(R.id.btncall); // XML එකේ ID එක හරියටම btncall නේද කියලා බලන්න
+            btnCall = itemView.findViewById(R.id.btncall);
         }
     }
 }

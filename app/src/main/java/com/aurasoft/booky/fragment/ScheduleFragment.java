@@ -33,35 +33,34 @@ public class ScheduleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
 
-        // 1. RecyclerView එක හොයාගන්න (ඔයාගේ XML එකේ ID එක recyclerView කියලා හිතමු)
+
         recyclerView = view.findViewById(R.id.scheduleRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 2. List එක සහ Adapter එක Initialize කරන්න
+
         scheduleList = new ArrayList<>();
         adapter = new ScheduleAdapter(scheduleList, getContext());
         recyclerView.setAdapter(adapter);
 
-        // 3. Firestore instance එක ගන්න
+
         db = FirebaseFirestore.getInstance();
 
-        // 4. දත්ත load කරන්න function එක call කරන්න
+
         loadSchedules();
 
         ImageView backBtn = view.findViewById(R.id.btnBack);
 
-        // 2. Click Listener එකක් දාන්න
+
         backBtn.setOnClickListener(v -> {
             BookingFragment bookingFragment = new BookingFragment();
 
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, bookingFragment) // මෙතන R.id.fragment_container කියන්නේ ඔයා Fragment පෙන්වන XML එකේ තියෙන FrameLayout එකේ ID එක
-                    .setTransition(androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE) // පොඩි animation එකක්
+                    .replace(R.id.fragment_container, bookingFragment)
+                    .setTransition(androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commit();
         });
         adapter.setOnItemClickListener(model -> {
-            // ඊළඟ Fragment එකට (SeatSelectionFragment) යන කෝඩ් එක මෙතනට එනවා
-            // උදාහරණයක් විදිහට:
+
     /*
     Bundle bundle = new Bundle();
     bundle.putString("scheduleId", model.getSchedule_id());
@@ -83,14 +82,14 @@ public class ScheduleFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 101) {
             if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getContext(), "Permission Granted! දැන් නැවත කෝල් බොත්තම ඔබන්න.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Permission Granted! Click Again.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void loadSchedules() {
         db.collection("Schedules")
-                .orderBy("departure_time", Query.Direction.ASCENDING) // වෙලාව අනුව පිළිවෙළට ගන්න
+                .orderBy("departure_time", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     scheduleList.clear();

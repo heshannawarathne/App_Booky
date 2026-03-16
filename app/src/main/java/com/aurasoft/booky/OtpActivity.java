@@ -90,7 +90,6 @@ public class OtpActivity extends AppCompatActivity {
                         otp6.getText().toString();
 
                 if (otpCode.length() == 6) {
-                    // 2. Firebase එකට කෝඩ් එක යවනවා
                     verifyOtp(otpCode, mVerificationId, mAuth);
                 } else {
                     Toast.makeText(OtpActivity.this, "please Entaer valid Otp", Toast.LENGTH_SHORT).show();
@@ -133,7 +132,6 @@ public class OtpActivity extends AppCompatActivity {
     }
 
 
-    //firebase verification for code
 
     private void verifyOtp(String code, String verificationId, FirebaseAuth auth) {
 
@@ -148,29 +146,22 @@ public class OtpActivity extends AppCompatActivity {
                     if (loadingDialog != null) loadingDialog.dismiss();
 
                     if (task.isSuccessful()) {
-                        // Firebase හරහා මෙය නව පරිශීලකයෙක්දැයි පරීක්ෂා කිරීම
                         boolean isNewUser = task.getResult().getAdditionalUserInfo().isNewUser();
 
                         Intent intent;
                         if (isNewUser) {
-                            // පළමු වතාවට එන කෙනෙක් නම් Name Entry Screen එකට
                             intent = new Intent(OtpActivity.this, NameEntryActivity.class);
                         } else {
-                            // දැනටමත් සිටින පරිශීලකයෙක් නම් Home Screen එකට
                             intent = new Intent(OtpActivity.this, MainActivity.class);
                         }
 
-                        // *** වැදගත්: Flags සෙට් කළ යුත්තේ startActivity කිරීමට පෙරයි ***
-                        // මෙය මගින් Login සහ OTP Screens සියල්ලම Stack එකෙන් ඉවත් කරයි
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
                         startActivity(intent);
 
-                        // වර්තමාන OtpActivity එක වසා දැමීම
                         finish();
 
                     } else {
-                        // OTP එක වැරදියි හෝ වෙනත් දෝෂයක්
                         Toast.makeText(OtpActivity.this, "Wrong OTP, please try again", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -178,7 +169,6 @@ public class OtpActivity extends AppCompatActivity {
 
     private void initLoadingDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // ඔබේ dialog_loading.xml එක inflate කරනවා
         View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
         builder.setView(view);
         builder.setCancelable(false);
@@ -187,7 +177,6 @@ public class OtpActivity extends AppCompatActivity {
 
         if (loadingDialog.getWindow() != null) {
             loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-//            loadingDialog.getWindow().setGravity(Gravity.BOTTOM); // යටටම ගැනීමට
 
             WindowManager.LayoutParams layoutParams = loadingDialog.getWindow().getAttributes();
             layoutParams.y = 50;

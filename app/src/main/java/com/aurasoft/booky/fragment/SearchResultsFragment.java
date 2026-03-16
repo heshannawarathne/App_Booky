@@ -27,7 +27,7 @@ public class SearchResultsFragment extends Fragment {
     private RecyclerView recyclerView;
     private SearchResultsAdapter adapter;
     private List<ScheduleModel> busList;
-    private TextView tvCount; // Global variable එකක් විදිහට ගත්තා crash එක නැති කරන්න
+    private TextView tvCount;
 
     public SearchResultsFragment() {
     }
@@ -37,9 +37,8 @@ public class SearchResultsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
 
-        // UI Elements Initialize කිරීම
         recyclerView = view.findViewById(R.id.rvBusList);
-        tvCount = view.findViewById(R.id.tvCount); // onCreateView එකේදීම initialize කළා
+        tvCount = view.findViewById(R.id.tvCount);
         TextView tvFrom = view.findViewById(R.id.fromCity);
         TextView tvTo = view.findViewById(R.id.tocity);
         TextView tvDate = view.findViewById(R.id.dateBus);
@@ -49,7 +48,6 @@ public class SearchResultsFragment extends Fragment {
         adapter = new SearchResultsAdapter(busList);
         recyclerView.setAdapter(adapter);
 
-        // Bundle එකෙන් දත්ත කියවීම සහ Header එක Set කිරීම
         if (getArguments() != null) {
             String fromLocation = getArguments().getString("FROM");
             String toLocation = getArguments().getString("TO");
@@ -59,21 +57,17 @@ public class SearchResultsFragment extends Fragment {
             tvTo.setText(toLocation);
             tvDate.setText(busDate);
 
-            // Data load කරන්න මෙතඩ් එකට දත්ත යවනවා
             loadBusData(fromLocation, toLocation);
         }
 
         ImageView backBtn = view.findViewById(R.id.btnBack);
 
-        // 2. Click Listener එකක් දාන්න
         backBtn.setOnClickListener(v -> {
-            // මේකෙන් වෙන්නේ කලින් හිටපු Fragment එකට (BookingFragment එකට) ආපහු යන එක
             if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                 getParentFragmentManager().popBackStack();
             }
         });
 
-        // පර්මිෂන් එක දැනටමත් දීලා නැත්නම් විතරක් ඉල්ලන්න
         if (androidx.core.app.ActivityCompat.checkSelfPermission(requireContext(),
                 android.Manifest.permission.CALL_PHONE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
 
@@ -104,10 +98,8 @@ public class SearchResultsFragment extends Fragment {
                         }
                     }
 
-                    // බස් ලිස්ට් එක ලෝඩ් කිරීම
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         ScheduleModel model = doc.toObject(ScheduleModel.class);
-                        // Document ID එක අනිවාර්යයෙන්ම ඕනේ වෙනවා සීට් බුක් කරන්න
                         model.setSchedule_id(doc.getId());
                         busList.add(model);
                     }
