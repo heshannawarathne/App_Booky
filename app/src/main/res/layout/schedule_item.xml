@@ -3,97 +3,107 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="#ECE7E7">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:padding="16dp"
         android:layout_height="wrap_content"
-        android:minHeight="100dp">
+        android:padding="16dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerVertical="true">
+            android:layout_width="254dp"
+            android:layout_height="66dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="33dp"
+            android:layout_toStartOf="@id/actionContainer"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/busNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="no - ND 2456"
-                android:textColor="#383838"
-                android:textSize="13sp"
+                android:background="@drawable/bus_item_background"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="ND 2456"
+                android:textColor="#008080"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/busRoute"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:text="Badulla - Makumbura"
-                android:textColor="#111111"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                android:layout_marginTop="2dp"/>
+                android:textColor="#222222"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/call_btn_circle"
+                    app:tint="#777777" />
 
                 <TextView
                     android:id="@+id/busTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2.30 PM"
-                    android:textColor="#555555"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:layout_marginStart="4dp"
+                    android:text="02:30 PM"
+                    android:textColor="#777777"
+                    android:textSize="13sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="  |  "
-                    android:textColor="#555555"
-                    android:textSize="14sp" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="12dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="#DDDDDD" />
 
                 <TextView
                     android:id="@+id/busDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Mar 16, 2026"
-                    android:textColor="#555555"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textColor="#777777"
+                    android:textSize="13sp" />
             </LinearLayout>
         </LinearLayout>
 
-        <View
-            android:id="@+id/callBtnBg"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+        <FrameLayout
+            android:id="@+id/actionContainer"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/call_btn_circle" />
+            android:layout_centerVertical="true">
 
-        <ImageView
-            android:layout_width="89dp"
-            android:layout_height="71dp"
-            android:layout_alignStart="@id/callBtnBg"
-            android:layout_alignTop="@id/callBtnBg"
-            android:layout_alignEnd="@id/callBtnBg"
-            android:layout_alignBottom="@id/callBtnBg"
-            android:layout_centerInParent="false"
-            android:layout_marginStart="-16dp"
-            android:layout_marginTop="-3dp"
-            android:layout_marginEnd="-17dp"
-            android:layout_marginBottom="-20dp"
-            android:padding="5dp"
-            android:src="@drawable/img_17" />
+            <View
+                android:id="@+id/callBtnBg"
+                android:layout_width="60dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:background="@drawable/call_btn_circle" />
+
+            <ImageView
+                android:id="@+id/busImg"
+                android:layout_width="30dp"
+                android:layout_gravity="center"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:src="@drawable/call" />
+        </FrameLayout>
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

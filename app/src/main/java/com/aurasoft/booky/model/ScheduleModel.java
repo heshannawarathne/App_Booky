@@ -9,6 +9,7 @@ public class ScheduleModel {
     private com.google.firebase.Timestamp departure_time;
     private String phone_number;
 
+
     public String getPhone_number() {
         return phone_number;
     }

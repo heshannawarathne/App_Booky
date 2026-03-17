@@ -13,10 +13,10 @@
 
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="46dp"
+        android:layout_marginTop="55dp"
         android:src="@drawable/img_18" />
 
     <TextView
@@ -26,8 +26,7 @@
         android:layout_marginTop="46dp"
         android:text="Settings"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
-        android:textStyle="bold" />
+        android:textSize="26sp"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -67,23 +66,28 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
+
                         <LinearLayout
                             android:layout_width="240dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Push Notifications"
+                                android:text="Notifications"
                                 android:textColor="#141414"
                                 android:textStyle="bold" />
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Receive updates on flight changes, etc."
                                 android:textSize="12sp" />
                         </LinearLayout>
+
                         <com.google.android.material.switchmaterial.SwitchMaterial
+                            id="@+id/switchNotifications"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
@@ -92,28 +96,70 @@
                             app:trackTint="#3A7B73" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#666666" android:layout_marginVertical="10dp" android:alpha="0.2"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#666666"
+                        android:layout_marginVertical="10dp"
+                        android:alpha="0.2" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
+
                         <LinearLayout
                             android:layout_width="240dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Email Notifications"
+                                android:text="Call Access"
                                 android:textColor="#141414"
                                 android:textStyle="bold" />
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Get booking confirmations, reminders, etc."
                                 android:textSize="12sp" />
                         </LinearLayout>
+
                         <com.google.android.material.switchmaterial.SwitchMaterial
+                            id="@+id/switchCallAccess"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            app:thumbTint="@color/white"
+                            app:trackTint="#3A7B73" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:layout_width="240dp"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Location Access"
+                                android:textColor="#141414"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Get booking confirmations, reminders, etc."
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            id="@+id/switchLocation"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
@@ -146,17 +192,25 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Language" android:textColor="#141414"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="English" android:textColor="#141414"/>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Language"
+                            android:textColor="#141414" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="English"
+                            android:textColor="#141414" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#666666" android:layout_marginVertical="10dp" android:alpha="0.2"/>
 
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="App Theme" android:textColor="#141414"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="Light" android:textColor="#141414"/>
-                    </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -170,20 +224,22 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvPrivacyPolicy"
                 android:layout_width="match_parent"
-
                 android:layout_height="50dp"
                 android:layout_marginEnd="20dp"
                 android:text="Privacy Policy"
                 android:gravity="center_vertical"
-                android:drawableEnd="@drawable/arrow"/>
+                android:drawableEnd="@drawable/arrow" />
+
             <TextView
+                android:id="@+id/tvTerms"
                 android:layout_width="match_parent"
                 android:layout_marginEnd="20dp"
                 android:layout_height="50dp"
                 android:text="Terms of Service"
                 android:gravity="center_vertical"
-                android:drawableEnd="@drawable/arrow"/>
+                android:drawableEnd="@drawable/arrow" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -194,6 +250,7 @@
                 app:cardElevation="0dp">
 
                 <TextView
+                    android:id="@+id/cvProfile"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
@@ -203,7 +260,7 @@
                     android:textStyle="bold"
                     android:layout_marginEnd="10dp"
 
-                    android:drawableEnd="@drawable/arrow2"/>
+                    android:drawableEnd="@drawable/arrow2" />
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>

@@ -6,6 +6,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 
 
@@ -23,9 +24,12 @@
         <item name="android:textSize">14sp</item>
         <item name="android:background">@drawable/bg_seat_design</item>
     </style>
-
+    <style name="CircleImage">
+        <item name="cornerSize">50%</item>
+    </style>
 
 
 
 </resources>
+
 

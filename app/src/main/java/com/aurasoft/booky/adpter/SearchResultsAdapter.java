@@ -1,5 +1,6 @@
 package com.aurasoft.booky.adpter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -10,10 +11,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
+import com.aurasoft.booky.SeatSelectionActivity;
 import com.aurasoft.booky.model.ScheduleModel;
 
 import java.text.SimpleDateFormat;
@@ -38,6 +41,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ScheduleModel bus = busList.get(position);
+
+
 
         // මිල සහ වේලාව පෙන්වීම
         holder.tvPrice.setText("Rs. " + bus.getPrice());
@@ -69,6 +74,28 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             // මෙතනදී අපි පස්සේ SeatBooking එකට යන logic එක ලියමු
             Toast.makeText(v.getContext(), "Opening seat selection for " + bus.getSchedule_id(), Toast.LENGTH_SHORT).show();
         });
+
+        holder.btnBookNow.setOnClickListener(v -> {
+            Context context = v.getContext();
+            Intent intent = new Intent(context, SeatSelectionActivity.class);
+
+            // bus.getPrice() එක මොන වර්ගයකින් තිබුණත් මේකෙන් හරියටම int එකක් හදනවා
+            int priceValue = 0;
+            try {
+                priceValue = Integer.parseInt(String.valueOf(bus.getPrice()));
+            } catch (Exception e) {
+                priceValue = 0;
+            }
+
+            intent.putExtra("SCHEDULE_ID", bus.getSchedule_id());
+            intent.putExtra("TICKET_PRICE", priceValue); // අනිවාර්යයෙන් Int එකක් යවන්නේ
+
+            context.startActivity(intent);
+        });
+
+
+
+
     }
 
     @Override
@@ -79,12 +106,15 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvPrice, tvTime;
         ImageButton btnCall;
+        AppCompatButton btnBookNow;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvTime = itemView.findViewById(R.id.tvTime);
             btnCall = itemView.findViewById(R.id.btncall); // XML එකේ ID එක හරියටම btncall නේද කියලා බලන්න
+            btnBookNow = itemView.findViewById(R.id.btnBookNow);
         }
     }
 }

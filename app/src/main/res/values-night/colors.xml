@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <color name="bg_grey">#1A1C1E</color>
+    <color name="background">#1A1C1E</color>
+
+    <color name="white">#2D3135</color>
+    <color name="off_white">#2D3135</color>
+    <color name="others_boxes_field">#373C41</color>
+
+    <color name="black">#E2E2E2</color> <color name="ap_title">#C4C7C5</color> <color name="book_item_color">#A8ADAF</color>
+
+    <color name="primary_teal">#3A7B73</color>
+
+    <color name="main_teal">#78D3C6</color>
+    <color name="selection_root">#3F4948</color>
+    <color name="text_teal">#B2DFDB</color>
+
+
+    <color name="call_red">#F2B8B5</color>
+    <color name="df_seat">#444746</color>
+</resources>

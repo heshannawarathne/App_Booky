@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.aurasoft.booky.fragment.BookingFragment;
+import com.aurasoft.booky.fragment.MyTripFragment;
 import com.aurasoft.booky.fragment.ScheduleFragment;
 import com.aurasoft.booky.fragment.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -56,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_schedule) {
                 selectedFragment = new ScheduleFragment();
             } else if (id == R.id.nav_trips) {
-                Intent i = new Intent(MainActivity.this, SeatSelectionActivity.class);
-                startActivity(i);
+                selectedFragment = new MyTripFragment();
+
+
             } else if (id == R.id.nav_settings) {
                 selectedFragment = new SettingsFragment();
             }

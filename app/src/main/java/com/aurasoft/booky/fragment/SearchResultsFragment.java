@@ -16,30 +16,32 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.adpter.SearchResultsAdapter;
 import com.aurasoft.booky.model.ScheduleModel;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SearchResultsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SearchResultsAdapter adapter;
     private List<ScheduleModel> busList;
-    private TextView tvCount; // Global variable එකක් විදිහට ගත්තා crash එක නැති කරන්න
+    private TextView tvCount;
 
-    public SearchResultsFragment() {
-    }
-
+    public SearchResultsFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
 
-        // UI Elements Initialize කිරීම
         recyclerView = view.findViewById(R.id.rvBusList);
-        tvCount = view.findViewById(R.id.tvCount); // onCreateView එකේදීම initialize කළා
+        tvCount = view.findViewById(R.id.tvCount);
         TextView tvFrom = view.findViewById(R.id.fromCity);
         TextView tvTo = view.findViewById(R.id.tocity);
         TextView tvDate = view.findViewById(R.id.dateBus);
@@ -49,78 +51,78 @@ public class SearchResultsFragment extends Fragment {
         adapter = new SearchResultsAdapter(busList);
         recyclerView.setAdapter(adapter);
 
-        // Bundle එකෙන් දත්ත කියවීම සහ Header එක Set කිරීම
         if (getArguments() != null) {
             String fromLocation = getArguments().getString("FROM");
             String toLocation = getArguments().getString("TO");
-            String busDate = getArguments().getString("DATE_STR");
+            String busDateStr = getArguments().getString("DATE_STR");
 
             tvFrom.setText(fromLocation);
             tvTo.setText(toLocation);
-            tvDate.setText(busDate);
+            tvDate.setText(busDateStr);
 
-            // Data load කරන්න මෙතඩ් එකට දත්ත යවනවා
-            loadBusData(fromLocation, toLocation);
+            // මෙතනදී දිනයත් එක්කම load කරන්න යවනවා
+            loadBusData(fromLocation, toLocation, busDateStr);
         }
 
         ImageView backBtn = view.findViewById(R.id.btnBack);
-
-        // 2. Click Listener එකක් දාන්න
         backBtn.setOnClickListener(v -> {
-            // මේකෙන් වෙන්නේ කලින් හිටපු Fragment එකට (BookingFragment එකට) ආපහු යන එක
             if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                 getParentFragmentManager().popBackStack();
             }
         });
 
-        // පර්මිෂන් එක දැනටමත් දීලා නැත්නම් විතරක් ඉල්ලන්න
-        if (androidx.core.app.ActivityCompat.checkSelfPermission(requireContext(),
-                android.Manifest.permission.CALL_PHONE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 101);
-        }
-
-
-
         return view;
     }
 
-    private void loadBusData(String from, String to) {
-        FirebaseFirestore.getInstance().collection("Schedules")
-                .whereEqualTo("from", from)
-                .whereEqualTo("to", to)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    busList.clear();
+    private void loadBusData(String from, String to, String dateStr) {
+        try {
+            // 1. String එකක් විදිහට ලැබෙන දිනය Date object එකකට හරවනවා
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+            Date selectedDate = sdf.parse(dateStr);
 
-                    int count = queryDocumentSnapshots.size();
+            if (selectedDate == null) return;
 
-                    // Available Buses count එක set කිරීම
-                    if (tvCount != null) {
-                        if (count > 0) {
-                            tvCount.setText(count + " Available Buses");
-                        } else {
-                            tvCount.setText("No Buses Available");
+            // 2. දවසේ ආරම්භය (00:00:00)
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(selectedDate);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            Timestamp start = new Timestamp(calendar.getTime());
+
+            // 3. දවසේ අවසානය (23:59:59)
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            Timestamp end = new Timestamp(calendar.getTime());
+
+            // 4. Firestore Query එක (From, To සහ Date Range)
+            FirebaseFirestore.getInstance().collection("Schedules")
+                    .whereEqualTo("from", from)
+                    .whereEqualTo("to", to)
+                    .whereGreaterThanOrEqualTo("departure_time", start)
+                    .whereLessThanOrEqualTo("departure_time", end)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        busList.clear();
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            ScheduleModel model = doc.toObject(ScheduleModel.class);
+                            model.setSchedule_id(doc.getId());
+                            busList.add(model);
                         }
-                    }
 
-                    // බස් ලිස්ට් එක ලෝඩ් කිරීම
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        ScheduleModel model = doc.toObject(ScheduleModel.class);
-                        // Document ID එක අනිවාර්යයෙන්ම ඕනේ වෙනවා සීට් බුක් කරන්න
-                        model.setSchedule_id(doc.getId());
-                        busList.add(model);
-                    }
+                        if (tvCount != null) {
+                            tvCount.setText(busList.size() > 0 ? busList.size() + " Available Buses" : "No Buses Available");
+                        }
+                        adapter.notifyDataSetChanged();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("FIRESTORE_ERROR", e.getMessage());
+                        Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
 
-                    adapter.notifyDataSetChanged();
-
-                    if (busList.isEmpty()) {
-                        Toast.makeText(getContext(), "No buses found for this route", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("FIRESTORE_ERROR", e.getMessage());
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

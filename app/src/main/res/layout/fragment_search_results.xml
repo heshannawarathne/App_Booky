@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#C1C5C4"> <RelativeLayout
+    android:background="#ffff"> <RelativeLayout
     android:id="@+id/topBar"
     android:layout_width="match_parent"
     android:layout_height="231dp"
@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="31dp"
         android:layout_marginTop="50dp"
         android:src="@drawable/img_18" />
@@ -24,7 +24,7 @@
         android:layout_marginTop="44dp"
         android:text="Search Results"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -37,7 +37,7 @@
 
         <TextView
             android:id="@+id/fromCity"
-            android:layout_width="80dp"
+            android:layout_width="78dp"
             android:layout_height="wrap_content"
             android:text="Badul"
             android:textColor="#FFFFFF"
