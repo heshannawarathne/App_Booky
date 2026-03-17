@@ -62,7 +62,16 @@ public class ScheduleFragment extends Fragment {
                     .commit();
         });
         adapter.setOnItemClickListener(model -> {
+<<<<<<< HEAD
             Intent intent = new Intent(getContext(), SeatSelectionActivity.class);
+=======
+
+    /*
+    Bundle bundle = new Bundle();
+    bundle.putString("scheduleId", model.getSchedule_id());
+    SeatSelectionFragment seatFragment = new SeatSelectionFragment();
+    seatFragment.setArguments(bundle);
+>>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
 
 
             intent.putExtra("SCHEDULE_ID", model.getSchedule_id());
@@ -85,7 +94,7 @@ public class ScheduleFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 101) {
             if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getContext(), "Permission Granted! දැන් නැවත කෝල් බොත්තම ඔබන්න.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Permission Granted! Click Again.", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -33,6 +33,12 @@ public class SearchResultsFragment extends Fragment {
     private SearchResultsAdapter adapter;
     private List<ScheduleModel> busList;
     private TextView tvCount;
+<<<<<<< HEAD
+=======
+
+    public SearchResultsFragment() {
+    }
+>>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
 
     public SearchResultsFragment() {}
 
@@ -60,17 +66,36 @@ public class SearchResultsFragment extends Fragment {
             tvTo.setText(toLocation);
             tvDate.setText(busDateStr);
 
+<<<<<<< HEAD
             // මෙතනදී දිනයත් එක්කම load කරන්න යවනවා
             loadBusData(fromLocation, toLocation, busDateStr);
         }
 
         ImageView backBtn = view.findViewById(R.id.btnBack);
+=======
+            loadBusData(fromLocation, toLocation);
+        }
+
+        ImageView backBtn = view.findViewById(R.id.btnBack);
+
+>>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
         backBtn.setOnClickListener(v -> {
             if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                 getParentFragmentManager().popBackStack();
             }
         });
 
+<<<<<<< HEAD
+=======
+        if (androidx.core.app.ActivityCompat.checkSelfPermission(requireContext(),
+                android.Manifest.permission.CALL_PHONE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 101);
+        }
+
+
+
+>>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
         return view;
     }
 
@@ -111,6 +136,7 @@ public class SearchResultsFragment extends Fragment {
                             busList.add(model);
                         }
 
+<<<<<<< HEAD
                         if (tvCount != null) {
                             tvCount.setText(busList.size() > 0 ? busList.size() + " Available Buses" : "No Buses Available");
                         }
@@ -120,6 +146,13 @@ public class SearchResultsFragment extends Fragment {
                         Log.e("FIRESTORE_ERROR", e.getMessage());
                         Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
+=======
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        ScheduleModel model = doc.toObject(ScheduleModel.class);
+                        model.setSchedule_id(doc.getId());
+                        busList.add(model);
+                    }
+>>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
 
         } catch (Exception e) {
             e.printStackTrace();

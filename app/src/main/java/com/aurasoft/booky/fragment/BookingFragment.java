@@ -40,11 +40,11 @@ public class BookingFragment extends Fragment {
     private Spinner fromSpinner, toSpinner;
     private FirebaseFirestore db;
     private List<String> cityList;
-    private ArrayAdapter<String> cityAdapter; // Spinner adapter එක
+    private ArrayAdapter<String> cityAdapter; // Spinner adapter
     private TextView dateValue;
     private RelativeLayout dateBox;
 
-    // RecyclerView සඳහා variables
+    // RecyclerView variables
     private RecyclerView recyclerView;
     private com.aurasoft.booky.adpter.BusAdapter busAdapter;
     private List<ScheduleModel> busList;
@@ -83,21 +83,17 @@ public class BookingFragment extends Fragment {
         setupDatePicker();
 
         button.setOnClickListener(v -> {
-            // 1. තෝරගත්ත From, To සහ Date එක ලබාගැනීම
             String from = fromSpinner.getSelectedItem().toString();
             String to = toSpinner.getSelectedItem().toString();
             String selectedDateStr = dateValue.getText().toString();
             Log.d("DEBUG_DATE", "Data: '" + selectedDateStr + "'");
 
-            // 2. Date එක Timestamp Range එකකට හරවා ගැනීම
-            // 15 March 2026 කියන format එකට ගැලපෙන්නේ මේකයි
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
 
             try {
                 Date date = sdf.parse(selectedDateStr);
                 if (date == null) return;
 
-                // දවසේ ආරම්භය (00:00:00)
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -105,13 +101,11 @@ public class BookingFragment extends Fragment {
                 calendar.set(Calendar.SECOND, 0);
                 Date dayStart = calendar.getTime();
 
-                // දවසේ අවසානය (23:59:59)
                 calendar.set(Calendar.HOUR_OF_DAY, 23);
                 calendar.set(Calendar.MINUTE, 59);
                 calendar.set(Calendar.SECOND, 59);
                 Date dayEnd = calendar.getTime();
 
-                // 3. Firestore Query එක (Range Query)
                 FirebaseFirestore.getInstance().collection("Schedules")
                         .whereEqualTo("from", from)
                         .whereEqualTo("to", to)
@@ -120,7 +114,6 @@ public class BookingFragment extends Fragment {
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
                             if (!queryDocumentSnapshots.isEmpty()) {
-                                // බස් තියෙනවා නම් විතරක් ඊළඟ Fragment එකට යනවා
                                 Bundle bundle = new Bundle();
                                 bundle.putString("FROM", from);
                                 bundle.putString("TO", to);
@@ -138,7 +131,6 @@ public class BookingFragment extends Fragment {
                             }
                         })
                         .addOnFailureListener(e -> {
-                            // මෙතන තමයි Index එක නැතිනම් ඒ Link එක එන්නේ
                             Log.e("FIRESTORE_ERROR", e.getMessage());
                             Toast.makeText(getContext(), "Error: Check Logcat for Index link", Toast.LENGTH_LONG).show();
                         });
@@ -151,25 +143,22 @@ public class BookingFragment extends Fragment {
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        FirebaseFirestore db = FirebaseFirestore.getInstance(); // Firestore පාවිච්චි කරනවා නම්
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         TextView userNameTv = view.findViewById(R.id.userName);
 
         if (currentUser != null) {
-            // 1. මුලින්ම බලනවා Google Sign-in එකෙන් Display Name එකක් තියෙනවද කියලා
             String googleName = currentUser.getDisplayName();
 
             if (googleName != null && !googleName.isEmpty()) {
-                // Google නම තියෙනවා නම් ඒකෙන් First Name එක අරන් පෙන්වනවා
                 String firstName = googleName.split(" ")[0];
                 userNameTv.setText("Hello, " + firstName + "!");
             } else {
-                // 2. Google නමක් නැත්නම් (Mobile Login), Firestore එකෙන් නම ගන්නවා
                 String uid = currentUser.getUid();
 
                 db.collection("Users").document(uid).get().addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String nameFromDb = documentSnapshot.getString("name"); // ඔයා save කරපු field name එක
+                        String nameFromDb = documentSnapshot.getString("name");
                         if (nameFromDb != null && !nameFromDb.isEmpty()) {
                             String firstName = nameFromDb.split(" ")[0];
                             userNameTv.setText("Hello, " + firstName + "!");
@@ -183,16 +172,14 @@ public class BookingFragment extends Fragment {
             }
         }
 
-        TextView seeAllBtn = view.findViewById(R.id.seeAll); // XML එකේ ID එක 'seeAll' කියලා හිතමු
+        TextView seeAllBtn = view.findViewById(R.id.seeAll);
 
-// 2. Click Listener එකක් දාන්න
         seeAllBtn.setOnClickListener(v -> {
-            // ScheduleFragment එකට මාරු වීම
             ScheduleFragment scheduleFragment = new ScheduleFragment();
 
             getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, scheduleFragment) // R.id.fragment_container කියන්නේ ඔයාගේ FrameLayout එකේ ID එක
-                    .addToBackStack(null) // මේක දැම්මම තමයි Back කරද්දී ආයෙත් BookingFragment එකට එන්නේ
+                    .replace(R.id.fragment_container, scheduleFragment)
+                    .addToBackStack(null)
                     .setTransition(androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
         });
@@ -260,20 +247,18 @@ public class BookingFragment extends Fragment {
     }
 
     private void setupDatePicker() {
-        // 1. අද දිනය default පෙන්වන්න (යූසර් තෝරන්න කලින්)
         SimpleDateFormat initialSdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
         dateValue.setText(initialSdf.format(new Date()));
 
         dateBox.setOnClickListener(v -> {
-            // 2. අතීත දින disable කිරීමට Constraints සැකසීම
             CalendarConstraints constraints = new CalendarConstraints.Builder()
-                    .setValidator(DateValidatorPointForward.now()) // අදින් පස්සේ දවස් විතරක් enable කරයි
+                    .setValidator(DateValidatorPointForward.now())
                     .build();
 
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Select Date")
-                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds()) // Default අද දවස select වී තිබීම
-                    .setCalendarConstraints(constraints) // Constraint එක එකතු කිරීම
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .setCalendarConstraints(constraints)
                     .build();
 
             datePicker.show(getChildFragmentManager(), "DATE_PICKER");
