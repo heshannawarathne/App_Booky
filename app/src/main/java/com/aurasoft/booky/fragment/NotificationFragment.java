@@ -1,66 +1,52 @@
 package com.aurasoft.booky.fragment;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
+import com.aurasoft.booky.adpter.NotificationAdapter;
+import com.aurasoft.booky.model.NotificationModel;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link NotificationFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class NotificationFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public NotificationFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment NotificationFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static NotificationFragment newInstance(String param1, String param2) {
-        NotificationFragment fragment = new NotificationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private RecyclerView recyclerView;
+    private NotificationAdapter adapter;
+    private List<NotificationModel> notificationList;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_notification, container, false);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notification, container, false);
+        recyclerView = view.findViewById(R.id.rvNotifications);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // නිකන් පෙන්වන්න Dummy Data ටිකක් දාමු
+        notificationList = new ArrayList<>();
+        notificationList.add(new NotificationModel("Booking Confirmed", "Your seat B12 is reserved for Colombo-Kandy.", "Just now"));
+        notificationList.add(new NotificationModel("Special Offer", "Get 10% off on your next trip! Use code BUS10", "2 hours ago"));
+        notificationList.add(new NotificationModel("Bus Update", "Bus ND-4562 is arriving at Maharagama in 5 mins.", "Yesterday"));
+
+        adapter = new NotificationAdapter(notificationList);
+        recyclerView.setAdapter(adapter);
+
+        // Clear All Button එකට
+        TextView btnClearAll = view.findViewById(R.id.btnClearAll);
+        btnClearAll.setOnClickListener(v -> {
+            notificationList.clear();
+            adapter.notifyDataSetChanged();
+            // මෙතනදී පස්සේ DB එකත් clear කරන code එක දානවා
+        });
+
+        return view;
     }
 }
