@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -26,6 +27,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/img_15"
+                android:layout_marginTop="20dp"
                 app:civ_border_color="@color/white"
                 app:civ_border_width="2dp" />
 
@@ -42,6 +44,7 @@
                 android:textStyle="bold" />
 
             <ImageView
+                android:id="@+id/imgbell"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_alignParentEnd="true"
@@ -79,6 +82,7 @@
                     android:layout_height="65dp"
                     android:layout_marginBottom="12dp"
                     android:background="@drawable/input_box_bg">
+
                     <ImageView
                         android:id="@+id/fIcon"
                         android:layout_width="40dp"
@@ -88,6 +92,7 @@
                         android:background="@drawable/white_circle_bg"
                         android:padding="10dp"
                         android:src="@drawable/img_12" />
+
                     <TextView
                         android:id="@+id/fLabel"
                         android:layout_width="wrap_content"
@@ -95,17 +100,25 @@
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/fIcon"
+                        android:alpha="0.7"
                         android:text="From"
-                        android:textSize="12sp"
-                        android:alpha="0.7"/>
-                    <Spinner
+                        android:textSize="12sp" />
+
+                    <AutoCompleteTextView
                         android:id="@+id/fromSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/fLabel"
                         android:layout_marginStart="8dp"
+                        android:layout_marginEnd="10dp"
                         android:layout_toEndOf="@id/fIcon"
-                        android:background="@android:color/transparent" />
+                        android:background="@android:color/transparent"
+                        android:hint="Select Origin"
+                        android:inputType="none"
+                        android:paddingTop="5dp"
+                        android:textColor="@color/book_item_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -113,6 +126,7 @@
                     android:layout_height="65dp"
                     android:layout_marginBottom="12dp"
                     android:background="@drawable/input_box_bg">
+
                     <ImageView
                         android:id="@+id/tIcon"
                         android:layout_width="40dp"
@@ -122,6 +136,7 @@
                         android:background="@drawable/white_circle_bg"
                         android:padding="10dp"
                         android:src="@drawable/img_14" />
+
                     <TextView
                         android:id="@+id/tLabel"
                         android:layout_width="wrap_content"
@@ -129,17 +144,25 @@
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="8dp"
                         android:layout_toEndOf="@id/tIcon"
+                        android:alpha="0.7"
                         android:text="To"
-                        android:textSize="12sp"
-                        android:alpha="0.7"/>
-                    <Spinner
+                        android:textSize="12sp" />
+
+                    <AutoCompleteTextView
                         android:id="@+id/toSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tLabel"
                         android:layout_marginStart="8dp"
+                        android:layout_marginEnd="10dp"
                         android:layout_toEndOf="@id/tIcon"
-                        android:background="@android:color/transparent" />
+                        android:background="@android:color/transparent"
+                        android:hint="Select Destination"
+                        android:inputType="none"
+                        android:paddingTop="5dp"
+                        android:textColor="@color/book_item_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -150,14 +173,16 @@
                     android:background="@drawable/input_box_bg"
                     android:backgroundTint="@color/others_boxes_field"
                     android:paddingStart="15dp">
+
                     <TextView
                         android:id="@+id/dLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:alpha="0.7"
                         android:text="Date"
-                        android:textSize="12sp"
-                        android:alpha="0.7"/>
+                        android:textSize="12sp" />
+
                     <TextView
                         android:id="@+id/dateValue"
                         android:layout_width="wrap_content"

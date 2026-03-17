@@ -43,11 +43,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         ScheduleModel bus = busList.get(position);
 
 
-<<<<<<< HEAD
 
-        // මිල සහ වේලාව පෙන්වීම
-=======
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
         holder.tvPrice.setText("Rs. " + bus.getPrice());
 
         if (bus.getDeparture_time() != null) {
@@ -113,12 +109,12 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             super(itemView);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvTime = itemView.findViewById(R.id.tvTime);
-<<<<<<< HEAD
+
             btnCall = itemView.findViewById(R.id.btncall); // XML එකේ ID එක හරියටම btncall නේද කියලා බලන්න
             btnBookNow = itemView.findViewById(R.id.btnBookNow);
-=======
+
             btnCall = itemView.findViewById(R.id.btncall);
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
+
         }
     }
 }

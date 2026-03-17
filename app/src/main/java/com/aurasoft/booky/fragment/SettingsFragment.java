@@ -1,78 +1,95 @@
 package com.aurasoft.booky.fragment;
 
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
 
 import com.aurasoft.booky.R;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-
-// Switches
-
-
 public class SettingsFragment extends Fragment {
 
-    SwitchMaterial switchNotifications, switchCallAccess, switchLocation;
+    // Switches
+    private SwitchMaterial switchNotifications, switchCallAccess, switchLocation, switchDarkMode;
+
     // Clickable Items
-    TextView tvPrivacyPolicy, tvTerms;
-    CardView cvProfile;
-    ImageView btnBack;
+    private TextView tvPrivacyPolicy, tvTerms, tvLegalContent;
+    private View cvProfile; // XML එකේ Profile එක තියෙන්නේ CardView එකක් ඇතුළේ නිසා
+    private ImageView btnBack;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    // Layouts
+    private LinearLayout settingsMenuLayout;
 
     public SettingsFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SettingsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SettingsFragment newInstance(String param1, String param2) {
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        // Layout එක inflate කරනවා
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
+        // 1. UI Elements initialize කරනවා
+        settingsMenuLayout = view.findViewById(R.id.settingsMenuLayout);
+        tvLegalContent = view.findViewById(R.id.tvLegalContent);
+
+        tvPrivacyPolicy = view.findViewById(R.id.tvPrivacyPolicy);
+        tvTerms = view.findViewById(R.id.tvTerms);
+        cvProfile = view.findViewById(R.id.cvProfile);
+        btnBack = view.findViewById(R.id.btnBack);
+
+        // Switches
+        switchNotifications = view.findViewById(R.id.switchNotifications);
+        switchCallAccess = view.findViewById(R.id.switchCallAccess);
+        switchLocation = view.findViewById(R.id.switchLocation);
+        switchDarkMode = view.findViewById(R.id.switchDarkMode);
+
+        // 2. Privacy Policy එක පෙන්වන Logic එක
+        tvPrivacyPolicy.setOnClickListener(v -> {
+            showLegalContent(getString(R.string.privacy_policy_text));
+        });
+
+        // 3. Terms of Service එක පෙන්වන Logic එක
+        tvTerms.setOnClickListener(v -> {
+            showLegalContent(getString(R.string.terms_of_service_text));
+        });
+
+        // 4. Profile Fragment එකට යාම
+        cvProfile.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new ProfileFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // 5. Back Button එකේ වැදගත් Logic එක
+        btnBack.setOnClickListener(v -> {
+            // පරිශීලකයා Privacy/Terms බලන ගමන් නම් ඉන්නේ, ආයේ Settings මෙනු එකට එන්න
+            if (tvLegalContent.getVisibility() == View.VISIBLE) {
+                tvLegalContent.setVisibility(View.GONE);
+                settingsMenuLayout.setVisibility(View.VISIBLE);
+            } else {
+                // නැත්නම් කලින් හිටපු Fragment (Home) එකට යන්න
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                }
+            }
+        });
+
+        return view;
+    }
+
+    // මෙනු එක හංගලා නීතිමය කරුණු පෙන්නන්න පාවිච්චි කරන method එක
+    private void showLegalContent(String text) {
+        settingsMenuLayout.setVisibility(View.GONE);
+        tvLegalContent.setVisibility(View.VISIBLE);
+        tvLegalContent.setText(text);
     }
 }

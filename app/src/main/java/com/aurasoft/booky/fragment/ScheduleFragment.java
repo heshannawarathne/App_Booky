@@ -35,49 +35,37 @@ public class ScheduleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
 
-
+        // UI Initialization
         recyclerView = view.findViewById(R.id.scheduleRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
 
         scheduleList = new ArrayList<>();
         adapter = new ScheduleAdapter(scheduleList, getContext());
         recyclerView.setAdapter(adapter);
 
-
         db = FirebaseFirestore.getInstance();
-
 
         loadSchedules();
 
         ImageView backBtn = view.findViewById(R.id.btnBack);
 
-
+        // Back button action
         backBtn.setOnClickListener(v -> {
             BookingFragment bookingFragment = new BookingFragment();
-
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, bookingFragment)
                     .setTransition(androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                     .commit();
         });
+
+        // Click listener for seat selection
         adapter.setOnItemClickListener(model -> {
-<<<<<<< HEAD
             Intent intent = new Intent(getContext(), SeatSelectionActivity.class);
-=======
-
-    /*
-    Bundle bundle = new Bundle();
-    bundle.putString("scheduleId", model.getSchedule_id());
-    SeatSelectionFragment seatFragment = new SeatSelectionFragment();
-    seatFragment.setArguments(bundle);
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
-
-
             intent.putExtra("SCHEDULE_ID", model.getSchedule_id());
 
             int priceValue = 0;
             try {
+                // Price එක string එකක් නම් integer එකකට හරවනවා
                 priceValue = Integer.parseInt(String.valueOf(model.getPrice()));
             } catch (Exception e) {
                 priceValue = 0;
@@ -86,6 +74,7 @@ public class ScheduleFragment extends Fragment {
 
             startActivity(intent);
         });
+
         return view;
     }
 

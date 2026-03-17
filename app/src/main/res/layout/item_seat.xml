@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tvSeat"
     style="@style/SeatStyle"
-    android:layout_width="43dp"
+    android:layout_width="57dp"
     android:layout_height="42dp"
     android:layout_margin="1dp"
     android:gravity="center"

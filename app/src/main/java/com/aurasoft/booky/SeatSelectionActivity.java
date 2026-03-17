@@ -10,25 +10,22 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.adpter.SeatAdapter;
-import com.aurasoft.booky.fragment.BookingFragment;
 import com.aurasoft.booky.model.SeatModel;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SeatSelectionActivity extends AppCompatActivity implements SeatAdapter.OnSeatClickListener {
 
@@ -52,39 +49,30 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
 
         db = FirebaseFirestore.getInstance();
 
-        // 1. Views Initialize කිරීම (මේක උඩටම ගන්න)
         tvTotalAmount = findViewById(R.id.tvTotalAmount);
         btnProceed = findViewById(R.id.btnProceed);
         recyclerView = findViewById(R.id.recyclerViewSeats);
 
-        // 2. Intent Data ලබාගැනීම
         currentScheduleId = getIntent().getStringExtra("SCHEDULE_ID");
-
         ticketPrice = getIntent().getIntExtra("TICKET_PRICE", 0);
-        Log.d("DEBUG_PRICE", "Ticket Price is: " + ticketPrice); // මේක දාලා Logcat එකේ බලන්න
 
-        // 3. Layout එක සෙට් කිරීම
         setupSeatLayout();
 
-        // 4. Firestore එකෙන් දැනට බුක් කරපු දත්ත ලෝඩ් කිරීම
         if (currentScheduleId != null) {
             loadBookedSeats(currentScheduleId);
         }
+
         btnProceed.setOnClickListener(v -> {
             if (totalAmount > 0) {
-                // මීළඟට යන Activity එකේ නම මෙතන දෙන්න (උදා: MapActivity)
                 Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
-
-                // මූලික දත්ත ටික යවනවා
                 intent.putExtra("SCHEDULE_ID", currentScheduleId);
                 intent.putExtra("TOTAL_PRICE", totalAmount);
 
-                // තෝරගත්ත සීට් සහ ඒවායේ ජෙන්ඩර් එක List විදිහට එකතු කරගමු
                 ArrayList<String> selectedSeats = new ArrayList<>();
                 ArrayList<String> selectedGenders = new ArrayList<>();
 
                 for (SeatModel seat : seatList) {
-                    if (seat.getStatus() == 1) { // Selected seats
+                    if (seat.getStatus() == 1) {
                         selectedSeats.add(seat.getSeatName());
                         selectedGenders.add(seat.getSelectedGender());
                     }
@@ -92,25 +80,18 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
 
                 intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
                 intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
-
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Please select at least one seat!", Toast.LENGTH_SHORT).show();
             }
         });
 
-
         ImageView backBtn = findViewById(R.id.imageView);
-
-        backBtn.setOnClickListener(v -> {
-
-            finish();
-        });
+        backBtn.setOnClickListener(v -> finish());
     }
 
     private void updateTotalPrice() {
         if (tvTotalAmount == null) return;
-
         int selectedCount = 0;
         for (SeatModel seat : seatList) {
             if (seat.getStatus() == 1) {
@@ -118,12 +99,7 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             }
         }
         totalAmount = selectedCount * ticketPrice;
-
-        // String.valueOf පාවිච්චි කිරීමෙන් අනිවාර්යයෙන්ම Text එක වැටෙනවා
         tvTotalAmount.setText("Total: LKR " + String.valueOf(totalAmount));
-
-        // Debug කරලා බලන්න ඇත්තටම මෙතනට එනවද කියලා
-        Log.d("DEBUG_UI", "Price Updated: " + totalAmount);
     }
 
     private void makeFullScreen() {
@@ -157,29 +133,46 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     public void onSeatClick(int position) {
         SeatModel clickedSeat = seatList.get(position);
 
-        if (clickedSeat.getStatus() == 0) { // Available නම් Dialog එක පෙන්වන්න
+        if (clickedSeat.getStatus() == 0) {
             showGenderSelectionDialog(position);
-        } else if (clickedSeat.getStatus() == 1) { // Unselect කරනවා නම්
+        } else if (clickedSeat.getStatus() == 1) {
             clickedSeat.setStatus(0);
             clickedSeat.setSelectedGender("");
             adapter.notifyItemChanged(position);
-            updateTotalPrice(); // status එක මාරු කළාට පස්සේ මිල update කරන්න
+            updateTotalPrice();
         } else if (clickedSeat.getStatus() == 2 || clickedSeat.getStatus() == 3) {
             Toast.makeText(this, "Already Booked!", Toast.LENGTH_SHORT).show();
         }
     }
 
+    // මෙතන තමයි අලුත් BottomSheetDialog එක තියෙන්නේ
     private void showGenderSelectionDialog(int position) {
-        String[] genders = {"Male", "Female"};
-        new AlertDialog.Builder(this)
-                .setTitle("Select Gender")
-                .setItems(genders, (dialog, which) -> {
-                    SeatModel seat = seatList.get(position);
-                    seat.setStatus(1); // Selected
-                    seat.setSelectedGender(which == 0 ? "male" : "female");
-                    adapter.notifyItemChanged(position);
-                    updateTotalPrice(); // මිල update කරන්න
-                }).show();
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.layout_gender_selection, null);
+        bottomSheetDialog.setContentView(sheetView);
+
+        LinearLayout btnMale = sheetView.findViewById(R.id.btnMale);
+        LinearLayout btnFemale = sheetView.findViewById(R.id.btnFemale);
+
+        btnMale.setOnClickListener(v -> {
+            applyGenderSelection(position, "male");
+            bottomSheetDialog.dismiss();
+        });
+
+        btnFemale.setOnClickListener(v -> {
+            applyGenderSelection(position, "female");
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void applyGenderSelection(int position, String gender) {
+        SeatModel seat = seatList.get(position);
+        seat.setStatus(1); // Selected
+        seat.setSelectedGender(gender);
+        adapter.notifyItemChanged(position);
+        updateTotalPrice();
     }
 
     private void loadBookedSeats(String scheduleId) {
@@ -201,6 +194,4 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                 })
                 .addOnFailureListener(e -> Log.e("Firestore", "Error: " + e.getMessage()));
     }
-
-
 }

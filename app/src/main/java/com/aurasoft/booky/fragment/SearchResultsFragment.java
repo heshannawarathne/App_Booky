@@ -33,30 +33,30 @@ public class SearchResultsFragment extends Fragment {
     private SearchResultsAdapter adapter;
     private List<ScheduleModel> busList;
     private TextView tvCount;
-<<<<<<< HEAD
-=======
 
     public SearchResultsFragment() {
+        // Required empty public constructor
     }
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
-
-    public SearchResultsFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search_results, container, false);
 
+        // UI Initialization
         recyclerView = view.findViewById(R.id.rvBusList);
         tvCount = view.findViewById(R.id.tvCount);
         TextView tvFrom = view.findViewById(R.id.fromCity);
         TextView tvTo = view.findViewById(R.id.tocity);
         TextView tvDate = view.findViewById(R.id.dateBus);
+        ImageView backBtn = view.findViewById(R.id.btnBack);
 
+        // RecyclerView Setup
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         busList = new ArrayList<>();
         adapter = new SearchResultsAdapter(busList);
         recyclerView.setAdapter(adapter);
 
+        // Get Search Data from Arguments
         if (getArguments() != null) {
             String fromLocation = getArguments().getString("FROM");
             String toLocation = getArguments().getString("TO");
@@ -66,42 +66,29 @@ public class SearchResultsFragment extends Fragment {
             tvTo.setText(toLocation);
             tvDate.setText(busDateStr);
 
-<<<<<<< HEAD
-            // මෙතනදී දිනයත් එක්කම load කරන්න යවනවා
+            // බස් දත්ත Load කිරීම
             loadBusData(fromLocation, toLocation, busDateStr);
         }
 
-        ImageView backBtn = view.findViewById(R.id.btnBack);
-=======
-            loadBusData(fromLocation, toLocation);
-        }
-
-        ImageView backBtn = view.findViewById(R.id.btnBack);
-
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
+        // Back Button Action
         backBtn.setOnClickListener(v -> {
             if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                 getParentFragmentManager().popBackStack();
             }
         });
 
-<<<<<<< HEAD
-=======
+        // Permission check for calling (අවශ්‍ය නම් පමණක්)
         if (androidx.core.app.ActivityCompat.checkSelfPermission(requireContext(),
                 android.Manifest.permission.CALL_PHONE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
             requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 101);
         }
 
-
-
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
         return view;
     }
 
     private void loadBusData(String from, String to, String dateStr) {
         try {
-            // 1. String එකක් විදිහට ලැබෙන දිනය Date object එකකට හරවනවා
+            // 1. String දිනය Date object එකකට හරවනවා
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
             Date selectedDate = sdf.parse(dateStr);
 
@@ -121,7 +108,7 @@ public class SearchResultsFragment extends Fragment {
             calendar.set(Calendar.SECOND, 59);
             Timestamp end = new Timestamp(calendar.getTime());
 
-            // 4. Firestore Query එක (From, To සහ Date Range)
+            // 4. Firestore Query
             FirebaseFirestore.getInstance().collection("Schedules")
                     .whereEqualTo("from", from)
                     .whereEqualTo("to", to)
@@ -136,7 +123,7 @@ public class SearchResultsFragment extends Fragment {
                             busList.add(model);
                         }
 
-<<<<<<< HEAD
+                        // UI එක Update කිරීම
                         if (tvCount != null) {
                             tvCount.setText(busList.size() > 0 ? busList.size() + " Available Buses" : "No Buses Available");
                         }
@@ -146,13 +133,6 @@ public class SearchResultsFragment extends Fragment {
                         Log.e("FIRESTORE_ERROR", e.getMessage());
                         Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
-=======
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        ScheduleModel model = doc.toObject(ScheduleModel.class);
-                        model.setSchedule_id(doc.getId());
-                        busList.add(model);
-                    }
->>>>>>> adcfead175adc68cc986614a4c607cc203e898bd
 
         } catch (Exception e) {
             e.printStackTrace();
