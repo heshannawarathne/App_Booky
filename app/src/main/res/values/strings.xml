@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="my_google_client_id">145154911764-v13dnvi56sk0kesb24l4dhkqmkmeft81.apps.googleusercontent.com</string>
-
+    <string name="mapbox_access_token">pk.eyJ1IjoicHJhbW9kOTE4NCIsImEiOiJjbW12eXF4YnIwbWdhMnNwejVweGQ1ODR5In0.VypLwtDMmky5fa7kKF4Hyg</string>
     <string name="privacy_policy_text">
     Last Updated: March 2026\n\n
     Welcome to Booky! We value your privacy and are committed to protecting your personal data.\n\n

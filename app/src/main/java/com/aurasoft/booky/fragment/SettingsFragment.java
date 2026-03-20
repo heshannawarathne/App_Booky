@@ -1,5 +1,10 @@
 package com.aurasoft.booky.fragment;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,7 +12,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.aurasoft.booky.R;
@@ -15,34 +25,30 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SettingsFragment extends Fragment {
 
-    // Switches
     private SwitchMaterial switchNotifications, switchCallAccess, switchLocation, switchDarkMode;
-
-    // Clickable Items
-    private TextView tvPrivacyPolicy, tvTerms, tvLegalContent;
-    private View cvProfile; // XML එකේ Profile එක තියෙන්නේ CardView එකක් ඇතුළේ නිසා
+    private TextView tvPrivacyPolicy, tvTerms, tvLegalContent, btnLogout;
+    private View cvProfile, cvDeveloper;
     private ImageView btnBack;
-
-    // Layouts
     private LinearLayout settingsMenuLayout;
+
+    private static final String PREFS_NAME = "SettingsPrefs";
 
     public SettingsFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Layout එක inflate කරනවා
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // 1. UI Elements initialize කරනවා
+        // --- UI Elements Initialize ---
         settingsMenuLayout = view.findViewById(R.id.settingsMenuLayout);
         tvLegalContent = view.findViewById(R.id.tvLegalContent);
-
         tvPrivacyPolicy = view.findViewById(R.id.tvPrivacyPolicy);
         tvTerms = view.findViewById(R.id.tvTerms);
         cvProfile = view.findViewById(R.id.cvProfile);
+        cvDeveloper = view.findViewById(R.id.cvDeveloper); // Fix: Added initialization
+        btnLogout = view.findViewById(R.id.btnLogout);     // Logout initialization
         btnBack = view.findViewById(R.id.btnBack);
 
         // Switches
@@ -51,45 +57,184 @@ public class SettingsFragment extends Fragment {
         switchLocation = view.findViewById(R.id.switchLocation);
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
 
-        // 2. Privacy Policy එක පෙන්වන Logic එක
-        tvPrivacyPolicy.setOnClickListener(v -> {
-            showLegalContent(getString(R.string.privacy_policy_text));
-        });
+        // --- 1. Logout Underline Effect ---
+        if (btnLogout != null) {
+            btnLogout.setPaintFlags(btnLogout.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            btnLogout.setOnClickListener(v -> {
+                // මෙතනට ඔයාගේ Logout Logic එක දාන්න (Firebase signout etc.)
+                Toast.makeText(getContext(), "Logging out...", Toast.LENGTH_SHORT).show();
+            });
+        }
 
-        // 3. Terms of Service එක පෙන්වන Logic එක
-        tvTerms.setOnClickListener(v -> {
-            showLegalContent(getString(R.string.terms_of_service_text));
-        });
+        // --- 2. Load Saved Settings ---
+        loadSettings();
 
-        // 4. Profile Fragment එකට යාම
-        cvProfile.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ProfileFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
+        // --- 3. Click Listeners ---
 
-        // 5. Back Button එකේ වැදගත් Logic එක
+        // Privacy Policy
+        tvPrivacyPolicy.setOnClickListener(v -> showLegalContent(getPrivacyPolicyText()));
+
+        // Terms of Service
+        tvTerms.setOnClickListener(v -> showLegalContent(getTermsOfServiceText()));
+
+        // About Developer
+        if (cvDeveloper != null) {
+            cvDeveloper.setOnClickListener(v -> showLegalContent(getDeveloperInfoText()));
+        }
+
+        // Profile Navigation
+        if (cvProfile != null) {
+            cvProfile.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new ProfileFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
+
+        // Back Button Logic
         btnBack.setOnClickListener(v -> {
-            // පරිශීලකයා Privacy/Terms බලන ගමන් නම් ඉන්නේ, ආයේ Settings මෙනු එකට එන්න
             if (tvLegalContent.getVisibility() == View.VISIBLE) {
                 tvLegalContent.setVisibility(View.GONE);
                 settingsMenuLayout.setVisibility(View.VISIBLE);
             } else {
-                // නැත්නම් කලින් හිටපු Fragment (Home) එකට යන්න
                 if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                     getParentFragmentManager().popBackStack();
                 }
             }
         });
 
+        // --- 4. Switch Listeners ---
+
+        switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> saveSetting("notifications", isChecked));
+
+        switchCallAccess.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, 101);
+                } else {
+                    saveSetting("call_access", true);
+                }
+            } else {
+                saveSetting("call_access", false);
+            }
+        });
+
+        switchLocation.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 102);
+                } else {
+                    saveSetting("location_access", true);
+                }
+            } else {
+                saveSetting("location_access", false);
+            }
+        });
+
+        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                saveSetting("dark_mode", true);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                saveSetting("dark_mode", false);
+            }
+        });
+
         return view;
     }
 
-    // මෙනු එක හංගලා නීතිමය කරුණු පෙන්නන්න පාවිච්චි කරන method එක
-    private void showLegalContent(String text) {
+    // --- Data Methods ---
+
+    private String getPrivacyPolicyText() {
+        return "<b>Last Updated: March 2026</b><br><br>" +
+                "Welcome to <b>Booky</b>! We value your privacy and are committed to protecting your personal data.<br><br>" +
+                "<b>1. Information We Collect</b><br>" +
+                "• Profile Information: When you log in via Google, we collect your name, email, and profile picture.<br>" +
+                "• Contact Information: For mobile logins, we collect your phone number to verify your account.<br>" +
+                "• Booking Data: We store information about your bus seat bookings to provide you with tickets and history.<br><br>" +
+                "<b>2. How We Use Your Data</b><br>" +
+                "• To provide and maintain our service.<br>" +
+                "• To notify you about changes to your bookings.<br>" +
+                "• To provide customer support.<br><br>" +
+                "<b>3. Data Storage</b><br>" +
+                "Your data is securely stored in <b>Firebase (Google Cloud)</b>. We do not sell your personal information to third parties.<br><br>" +
+                "<b>4. Security</b><br>" +
+                "The security of your data is important to us, but remember that no method of transmission over the Internet is 100% secure.<br><br>" +
+                "<b>5. Contact Us</b><br>" +
+                "If you have any questions about this Privacy Policy, please contact us at <u>support@aurasoft.com</u>.";
+    }
+
+    private String getTermsOfServiceText() {
+        return "By using the <b>Booky</b> mobile application, you agree to the following terms and conditions:<br><br>" +
+                "<b>1. Acceptance of Terms</b><br>" +
+                "By accessing this app, you acknowledge that you have read, understood, and agreed to be bound by these terms.<br><br>" +
+                "<b>2. Booking and Payments</b><br>" +
+                "• All bookings made through the app are subject to seat availability.<br>" +
+                "• Ticket prices are determined by the bus operators and are subject to change.<br>" +
+                "• Users must provide accurate information when booking.<br><br>" +
+                "<b>3. Cancellation and Refunds</b><br>" +
+                "• Cancellation policies vary by bus operator. Please check before booking.<br>" +
+                "• Refund processing may take 3-5 working days depending on your payment method.<br><br>" +
+                "<b>4. User Responsibilities</b><br>" +
+                "• You are responsible for maintaining the confidentiality of your account.<br>" +
+                "• You agree not to use the app for any fraudulent or illegal activities.<br><br>" +
+                "<b>5. Limitation of Liability</b><br>" +
+                "Booky is a platform to connect passengers with bus services. We are not responsible for bus delays, breakdowns, or service issues caused by the transport operators.";
+    }
+
+    private String getDeveloperInfoText() {
+        return "About the Developer<br><br>" +
+                "Hi, I'm Heshan Nawarathna, the developer behind Booky.<br><br>" +
+                "Booky was created with the mission to make bus travel in Sri Lanka more convenient and accessible for everyone.<br><br>" +
+                "<b>Developer:</b> Heshan Nawarathna<br>" +
+                "<b>Company:</b> AuraSoft Systems<br>" +
+                "<b>Website:</b> <u>www.aurasoft.com</u><br>" +
+                "<b>Contact:</b> <u>support@aurasoft.com</u><br><br>" +
+                "Thank you for supporting local independent developers!";
+    }
+
+    private void showLegalContent(String content) {
         settingsMenuLayout.setVisibility(View.GONE);
         tvLegalContent.setVisibility(View.VISIBLE);
-        tvLegalContent.setText(text);
+
+        // HTML Text එක හරියට display කරවීමට
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            tvLegalContent.setText(android.text.Html.fromHtml(content, android.text.Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            tvLegalContent.setText(android.text.Html.fromHtml(content));
+        }
+
+        // ලින්ක් එකක් ක්ලික් කළ විට වෙබ් බ්‍රවුසරය විවෘත වීමට මෙය අනිවාර්ය වේ
+        tvLegalContent.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
+    }
+
+    private void saveSetting(String key, boolean value) {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    private void loadSettings() {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        switchCallAccess.setChecked(sharedPreferences.getBoolean("call_access", false));
+        switchLocation.setChecked(sharedPreferences.getBoolean("location_access", false));
+        switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
+        switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode",
+                AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (requestCode == 101) saveSetting("call_access", true);
+            if (requestCode == 102) saveSetting("location_access", true);
+        } else {
+            if (requestCode == 101) switchCallAccess.setChecked(false);
+            if (requestCode == 102) switchLocation.setChecked(false);
+        }
     }
 }

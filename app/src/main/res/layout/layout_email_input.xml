@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/gender_box"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvSheetTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Email Address"
+        android:textColor="@color/main_teal"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Your ticket will be sent to your email address"
+        android:textColor="#666"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/etEmailInput"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:hint="example@gmail.com"
+        android:inputType="textEmailAddress"
+        android:padding="12dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmEmail"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="@color/main_teal"
+        android:text="Confirm" />
+
+</LinearLayout>

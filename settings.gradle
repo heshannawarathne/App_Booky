@@ -11,11 +11,25 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://jitpack.io"
+        }
+
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = "mapbox"
+                password = "sk.eyJ1IjoicHJhbW9kOTE4NCIsImEiOiJjbW12eXlhcmoyaGdpMnJxeDRjYXFwNm9yIn0.er2ftXcfsWeg3rOZnYgOUg"
+            }
+        }
     }
 }
 

@@ -1,159 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-android:id="@+id/main"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ECE7E7">
-
-    <View
-        android:id="@+id/headerBg"
-        android:layout_width="match_parent"
-        android:layout_height="260dp"
-        android:background="@drawable/bg_login_header"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:background="#F5F7F8"
+    tools:context=".OtpActivity">
 
     <ImageView
         android:id="@+id/otpImg"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:scaleType="fitEnd"
-        app:layout_constraintBottom_toBottomOf="@+id/headerBg"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintHeight_percent="0.40"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.942"
         app:srcCompat="@drawable/img_4" />
 
-    <TextView
-        android:id="@+id/tvVerifyTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:fontFamily="sans-serif-condensed"
-        android:text="Verify OTP"
-        android:textColor="#14304A"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/headerBg" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/bottom_fade_gradient"
+        app:layout_constraintBottom_toBottomOf="@+id/otpImg" />
 
-    <TextView
-        android:id="@+id/tvOtpDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Security first! Enter the OTP sent to your phone"
-        android:textColor="#727070"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvVerifyTitle" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="-30dp"
+        android:background="@drawable/login_content_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/otpImg">
 
-    <LinearLayout
-        android:id="@+id/otpContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvOtpDesc">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="32dp"
+            android:paddingBottom="40dp">
 
-        <EditText
-            android:id="@+id/otp1"
-            style="@style/OtpEditTextStyle"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            android:inputType="number"
-            android:gravity="center"/>
+            <TextView
+                android:id="@+id/tvVerifyTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="Verify OTP"
+                android:textColor="#1A1A1A"
+                android:textSize="30sp"
+                android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/otp2"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            style="@style/OtpEditTextStyle"
-            android:inputType="number"
-            android:gravity="center"/>
+            <TextView
+                android:id="@+id/tvOtpDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="Security first! Enter the 6-digit code \nsent to your phone"
+                android:textColor="#666666"
+                android:textSize="15sp"
+                android:lineHeight="22sp"/>
 
-        <EditText
-            android:id="@+id/otp3"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            style="@style/OtpEditTextStyle"
-            android:inputType="number"
-            android:gravity="center"/>
+            <LinearLayout
+                android:id="@+id/otpContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/otp4"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            style="@style/OtpEditTextStyle"
-            android:inputType="number"
-            android:gravity="center"/>
+                <EditText android:id="@+id/otp1" style="@style/ModernOtpBox" />
+                <EditText android:id="@+id/otp2" style="@style/ModernOtpBox" />
+                <EditText android:id="@+id/otp3" style="@style/ModernOtpBox" />
+                <EditText android:id="@+id/otp4" style="@style/ModernOtpBox" />
+                <EditText android:id="@+id/otp5" style="@style/ModernOtpBox" />
+                <EditText android:id="@+id/otp6" style="@style/ModernOtpBox" />
 
-        <EditText
-            android:id="@+id/otp5"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            style="@style/OtpEditTextStyle"
-            android:inputType="number"
-            android:gravity="center"/>
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/otp6"
-            android:layout_width="55dp"
-            android:layout_height="60dp"
-            style="@style/OtpEditTextStyle"
-            android:inputType="number"
-            android:gravity="center"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerify"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="40dp"
+                android:text="Verify &amp; Proceed"
+                android:textAllCaps="false"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                android:backgroundTint="#3A7B73"
+                app:elevation="4dp" />
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center"
+                android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvDidntReceive"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="Didn’t Receive OTP ?"
-        android:textColor="#606060"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/otpContainer" />
+                <TextView
+                    android:id="@+id/tvDidntReceive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Didn’t receive the code?"
+                    android:textColor="#999999"
+                    android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/tvResendCode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Resend Code"
-        android:textColor="#000000"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvDidntReceive" />
+                <TextView
+                    android:id="@+id/tvResendCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:padding="8dp"
+                    android:text="Resend New Code"
+                    android:textColor="#3A7B73"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnVerify"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/button_teal_rounded"
-        android:text="Verify"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvResendCode" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

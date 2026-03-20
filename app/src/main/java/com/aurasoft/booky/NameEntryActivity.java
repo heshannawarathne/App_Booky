@@ -64,7 +64,7 @@ public class NameEntryActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
 
         if (name.isEmpty()) {
-            etName.setError("කරුණාකර ඔබේ නම ඇතුළත් කරන්න");
+            etName.setError("please Enter your Name");
             return;
         }
 
@@ -86,7 +86,7 @@ public class NameEntryActivity extends AppCompatActivity {
                     .addOnSuccessListener(aVoid -> {
                         loadingDialog.dismiss();
 
-                        Toast.makeText(NameEntryActivity.this, "ලියාපදිංචිය සාර්ථකයි!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(NameEntryActivity.this, "Registration Successfull!", Toast.LENGTH_SHORT).show();
 
 
                         Intent intent = new Intent(NameEntryActivity.this, MainActivity.class);
@@ -97,7 +97,7 @@ public class NameEntryActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> {
                         loadingDialog.dismiss();
 
-                        Toast.makeText(NameEntryActivity.this, "දෝෂයක් ඇතිවිය: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(NameEntryActivity.this, "something Wrong: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         }
     }

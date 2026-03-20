@@ -23,6 +23,7 @@ import com.aurasoft.booky.model.SeatModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
 
     private TextView tvTotalAmount;
     private int totalAmount = 0;
+    private ListenerRegistration seatListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +64,12 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             loadBookedSeats(currentScheduleId);
         }
 
+        // ✅ මෙතන තමයි Map එකට යන විදිහට හැදුවේ
         btnProceed.setOnClickListener(v -> {
             if (totalAmount > 0) {
+                // මුලින්ම MapActivity එකට ගිහින් ඉමු Pickup Location එක තෝරන්න
                 Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
+
                 intent.putExtra("SCHEDULE_ID", currentScheduleId);
                 intent.putExtra("TOTAL_PRICE", totalAmount);
 
@@ -80,6 +85,7 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
 
                 intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
                 intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
+
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Please select at least one seat!", Toast.LENGTH_SHORT).show();
@@ -145,7 +151,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         }
     }
 
-    // මෙතන තමයි අලුත් BottomSheetDialog එක තියෙන්නේ
     private void showGenderSelectionDialog(int position) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View sheetView = getLayoutInflater().inflate(R.layout.layout_gender_selection, null);
@@ -176,22 +181,47 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     }
 
     private void loadBookedSeats(String scheduleId) {
-        db.collection("Schedules").document(scheduleId).collection("BookedSeats")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        String seatNo = doc.getId();
-                        String gender = doc.getString("gender");
+        seatListener = db.collection("Schedules").document(scheduleId).collection("BookedSeats")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e("Firestore", "Listen failed: " + error.getMessage());
+                        return;
+                    }
 
+                    if (value != null) {
                         for (SeatModel seat : seatList) {
-                            if (seat.getSeatName().equals(seatNo)) {
-                                if ("male".equals(gender)) seat.setStatus(2);
-                                else if ("female".equals(gender)) seat.setStatus(3);
+                            if (seat.getStatus() == 2 || seat.getStatus() == 3) {
+                                seat.setStatus(0);
                             }
                         }
+
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            String seatNo = doc.getId();
+                            String gender = doc.getString("gender");
+
+                            for (SeatModel seat : seatList) {
+                                if (seat.getSeatName().trim().equals(seatNo.trim())) {
+                                    if (gender != null && gender.equalsIgnoreCase("male")) {
+                                        seat.setStatus(2);
+                                    } else if (gender != null && gender.equalsIgnoreCase("female")) {
+                                        seat.setStatus(3);
+                                    } else {
+                                        seat.setStatus(2);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
                     }
-                    adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> Log.e("Firestore", "Error: " + e.getMessage()));
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (seatListener != null) {
+            seatListener.remove();
+        }
     }
 }

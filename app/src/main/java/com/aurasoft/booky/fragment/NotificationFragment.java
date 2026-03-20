@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -45,6 +46,15 @@ public class NotificationFragment extends Fragment {
             notificationList.clear();
             adapter.notifyDataSetChanged();
             // මෙතනදී පස්සේ DB එකත් clear කරන code එක දානවා
+        });
+
+        ImageView btnBack = view.findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(v -> {
+            // මේකෙන් දැනට තියෙන fragment එක අයින් වෙලා කලින් තිබ්බ එකට යනවා
+            if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                getParentFragmentManager().popBackStack();
+            }
         });
 
         return view;

@@ -23,6 +23,7 @@ import com.aurasoft.booky.model.ScheduleModel;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,7 +39,6 @@ import java.util.Locale;
 
 public class BookingFragment extends Fragment {
 
-    // Spinner වෙනුවට AutoCompleteTextView පාවිච්චි කරමු
     private AutoCompleteTextView fromSpinner, toSpinner;
     private FirebaseFirestore db;
     private List<String> cityList;
@@ -55,7 +55,7 @@ public class BookingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_booking, container, false);
 
-        // Views Initialize කිරීම
+
         fromSpinner = view.findViewById(R.id.fromSpinner);
         toSpinner = view.findViewById(R.id.toSpinner);
         dateBox = view.findViewById(R.id.dateBox);
@@ -67,12 +67,10 @@ public class BookingFragment extends Fragment {
         cityList = new ArrayList<>();
         busList = new ArrayList<>();
 
-        // 1. Adapter එක Setup කිරීම (Custom layout එක පාවිච්චි කර ඇත)
         cityAdapter = new ArrayAdapter<>(getContext(), R.layout.list_item_dropdown, cityList);
         fromSpinner.setAdapter(cityAdapter);
         toSpinner.setAdapter(cityAdapter);
 
-        // 2. Click කළ සැනින් Dropdown එක පෙන්වීමට
         fromSpinner.setOnClickListener(v -> fromSpinner.showDropDown());
         toSpinner.setOnClickListener(v -> toSpinner.showDropDown());
 
@@ -86,12 +84,18 @@ public class BookingFragment extends Fragment {
 
         // Search Button Logic
         button.setOnClickListener(v -> {
-            String from = fromSpinner.getText().toString(); // .getSelectedItem() වෙනුවට .getText()
+            String from = fromSpinner.getText().toString();
             String to = toSpinner.getText().toString();
             String selectedDateStr = dateValue.getText().toString();
 
             if (from.equals("Select") || to.equals("Select")) {
-                Toast.makeText(getContext(), "Please select locations", Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast toast = Toast.makeText(requireActivity().getApplicationContext(),
+                                "Please select locations", Toast.LENGTH_LONG);
+                        toast.show();
+                    });
+                }
                 return;
             }
 
@@ -108,22 +112,18 @@ public class BookingFragment extends Fragment {
                     .commit();
         });
 
-        // XML එකේ තියෙන Bell Icon එක මුලින්ම අඳුන්වා දෙමු
-        ImageView bellIcon = view.findViewById(R.id.imgbell); // මෙතන අයිකන් එකේ ID එක හරිද බලන්න
+        ImageView bellIcon = view.findViewById(R.id.imgbell);
 
         bellIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Notification Fragment එකට මාරු වෙමු
                 Fragment notificationFragment = new NotificationFragment();
 
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, notificationFragment) // MainActivity එකේ FrameLayout ID එක
-                        .addToBackStack(null) // Back කරොත් ආයේ Booking එකටම එන්න පුළුවන් වෙන්න
+                        .replace(R.id.fragment_container, notificationFragment)
+                        .addToBackStack(null)
                         .commit();
 
-                // (Optional) මෙනු බාර් එකේ Notification item එක select වෙන්න ඕනේ නම්:
-                // ((MainActivity)getActivity()).bottomNavigation.getMenu().findItem(R.id.nav_notifications).setChecked(true);
             }
         });
 
@@ -142,7 +142,6 @@ public class BookingFragment extends Fragment {
                         }
                         cityAdapter.notifyDataSetChanged();
 
-                        // මුලින්ම "Select" කියලා පෙන්වන්න
                         fromSpinner.setText(cityList.get(0), false);
                         toSpinner.setText(cityList.get(0), false);
                     }
