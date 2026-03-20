@@ -1,82 +1,172 @@
-<androidx.cardview.widget.CardView
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    app:cardCornerRadius="15dp"
-    app:cardElevation="5dp">
+    android:layout_marginHorizontal="5dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="6dp"
+    app:cardMaxElevation="10dp"
+    app:cardPreventCornerOverlap="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:background="#ffffff">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/header_gradient"
+            android:padding="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/bus_font"
+                android:layout_marginEnd="12dp"/>
 
             <TextView
                 android:id="@+id/tvBusName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Booky Higway Express"
-                android:textColor="#008080"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:text="ND-2314"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:textColor="#000000"
+                android:textStyle="bold"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:background="@drawable/bg_status_upcoming"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:text="Upcoming"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginVertical="10dp"
-            android:background="#DDDDDD" />
+                android:text="UPCOMING"
+                android:textColor="#ffffff"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:background="@drawable/bg_status_upcoming" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="6dp">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Date" android:textSize="12sp" android:alpha="0.6"/>
-                <TextView android:id="@+id/tvTripDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2024-05-20" android:textStyle="bold"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Seats" android:textSize="12sp" android:alpha="0.6"/>
-                <TextView android:id="@+id/tvTripSeats" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="05, 06" android:textStyle="bold"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/tvRouteDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total" android:textSize="12sp" android:alpha="0.6"/>
-                <TextView android:id="@+id/tvTripPrice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LKR 2500" android:textColor="#D32F2F" android:textStyle="bold"/>
+                android:layout_marginBottom="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Badulla → Makumbura"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="65dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
+                        android:text="Date"
+                        android:textColor="#777777"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvTripDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20 March 2026"
+                        android:textColor="#222222"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
+                        android:text="Time"
+                        android:textColor="#777777"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvTripTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="05:04 AM"
+                        android:textColor="#222222"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#f0f0f0"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_airline_seat_recline_extra"
+
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvSeatCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="02 Seats Booked"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#C2185B"/>
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

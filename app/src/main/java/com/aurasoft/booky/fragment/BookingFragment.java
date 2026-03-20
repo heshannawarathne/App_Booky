@@ -1,12 +1,18 @@
 package com.aurasoft.booky.fragment;
 
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView; // මේක මාරු කළා
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -23,7 +29,6 @@ import com.aurasoft.booky.model.ScheduleModel;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,10 +56,12 @@ public class BookingFragment extends Fragment {
     private List<ScheduleModel> busList;
     private Button button;
 
+    // Custom Loading Dialog
+    private AlertDialog loadingDialog;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_booking, container, false);
-
 
         fromSpinner = view.findViewById(R.id.fromSpinner);
         toSpinner = view.findViewById(R.id.toSpinner);
@@ -66,6 +73,9 @@ public class BookingFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         cityList = new ArrayList<>();
         busList = new ArrayList<>();
+
+        // Setup Custom Loading Dialog
+        setupLoadingDialog();
 
         cityAdapter = new ArrayAdapter<>(getContext(), R.layout.list_item_dropdown, cityList);
         fromSpinner.setAdapter(cityAdapter);
@@ -91,9 +101,8 @@ public class BookingFragment extends Fragment {
             if (from.equals("Select") || to.equals("Select")) {
                 if (isAdded()) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast toast = Toast.makeText(requireActivity().getApplicationContext(),
-                                "Please select locations", Toast.LENGTH_LONG);
-                        toast.show();
+                        Toast.makeText(requireActivity().getApplicationContext(),
+                                "Please select locations", Toast.LENGTH_LONG).show();
                     });
                 }
                 return;
@@ -113,27 +122,41 @@ public class BookingFragment extends Fragment {
         });
 
         ImageView bellIcon = view.findViewById(R.id.imgbell);
-
-        bellIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Fragment notificationFragment = new NotificationFragment();
-
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, notificationFragment)
-                        .addToBackStack(null)
-                        .commit();
-
-            }
+        bellIcon.setOnClickListener(v -> {
+            Fragment notificationFragment = new NotificationFragment();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, notificationFragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
         return view;
     }
 
+    private void setupLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        loadingDialog = builder.create();
+
+        if (loadingDialog.getWindow() != null) {
+            Window window = loadingDialog.getWindow();
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = Gravity.BOTTOM;
+            params.y = 80;
+            window.setAttributes(params);
+        }
+    }
+
     private void loadCitiesFromFirestore() {
+        if (loadingDialog != null) loadingDialog.show();
+
         db.collection("Locations")
                 .get()
                 .addOnCompleteListener(task -> {
+                    if (loadingDialog != null) loadingDialog.dismiss();
                     if (task.isSuccessful()) {
                         cityList.clear();
                         cityList.add("Select");
@@ -159,6 +182,8 @@ public class BookingFragment extends Fragment {
             calendar.set(Calendar.HOUR_OF_DAY, 23);
             Date dayEnd = calendar.getTime();
 
+            if (loadingDialog != null) loadingDialog.show();
+
             db.collection("Schedules")
                     .whereEqualTo("from", from)
                     .whereEqualTo("to", to)
@@ -166,6 +191,7 @@ public class BookingFragment extends Fragment {
                     .whereLessThanOrEqualTo("departure_time", dayEnd)
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (loadingDialog != null) loadingDialog.dismiss();
                         if (!queryDocumentSnapshots.isEmpty()) {
                             Bundle bundle = new Bundle();
                             bundle.putString("FROM", from);
@@ -178,8 +204,12 @@ public class BookingFragment extends Fragment {
                                     .replace(R.id.fragment_container, resultFragment)
                                     .addToBackStack(null).commit();
                         } else {
-                            Toast.makeText(getContext(), "No buses found", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "No buses found for this route", Toast.LENGTH_SHORT).show();
                         }
+                    })
+                    .addOnFailureListener(e -> {
+                        if (loadingDialog != null) loadingDialog.dismiss();
+                        Toast.makeText(getContext(), "Search failed. Please try again.", Toast.LENGTH_SHORT).show();
                     });
         } catch (ParseException e) { e.printStackTrace(); }
     }
@@ -205,7 +235,6 @@ public class BookingFragment extends Fragment {
         }
     }
 
-    // LoadTodayAllBuses සහ setupDatePicker පරණ විදිහටම තියෙන්න දෙන්න
     private void loadTodayAllBuses() {
         Calendar calStart = Calendar.getInstance();
         calStart.set(Calendar.HOUR_OF_DAY, 0);
@@ -245,5 +274,13 @@ public class BookingFragment extends Fragment {
             datePicker.show(getChildFragmentManager(), "DATE_PICKER");
             datePicker.addOnPositiveButtonClickListener(selection -> dateValue.setText(sdf.format(new Date(selection))));
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 }

@@ -1,14 +1,21 @@
 package com.aurasoft.booky.fragment;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +24,7 @@ import com.aurasoft.booky.R;
 import com.aurasoft.booky.SeatSelectionActivity;
 import com.aurasoft.booky.adpter.ScheduleAdapter;
 import com.aurasoft.booky.model.ScheduleModel;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -30,33 +38,32 @@ public class ScheduleFragment extends Fragment {
     private ScheduleAdapter adapter;
     private List<ScheduleModel> scheduleList;
     private FirebaseFirestore db;
+    private AlertDialog loadingDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        return inflater.inflate(R.layout.fragment_schedule, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // UI Initialization
         recyclerView = view.findViewById(R.id.scheduleRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        db = FirebaseFirestore.getInstance();
+        setupLoadingDialog();
+
         scheduleList = new ArrayList<>();
+        // මෙතනදී filter වුණු ලිස්ට් එකක් ඇඩැප්ටර් එකට යනවා
         adapter = new ScheduleAdapter(scheduleList, getContext());
         recyclerView.setAdapter(adapter);
 
-        db = FirebaseFirestore.getInstance();
-
+        // Load Data
         loadSchedules();
 
-        ImageView backBtn = view.findViewById(R.id.btnBack);
-
-        // Back button action
-        backBtn.setOnClickListener(v -> {
-            BookingFragment bookingFragment = new BookingFragment();
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, bookingFragment)
-                    .setTransition(androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .commit();
-        });
 
         // Click listener for seat selection
         adapter.setOnItemClickListener(model -> {
@@ -65,34 +72,60 @@ public class ScheduleFragment extends Fragment {
 
             int priceValue = 0;
             try {
-                // Price එක string එකක් නම් integer එකකට හරවනවා
+                // Number එකක් String කරලා ආයේ Int කරනවාට වඩා direct casting එක හොඳයි
                 priceValue = Integer.parseInt(String.valueOf(model.getPrice()));
             } catch (Exception e) {
                 priceValue = 0;
             }
             intent.putExtra("TICKET_PRICE", priceValue);
-
             startActivity(intent);
         });
+//        ImageView backBtn = view.findViewById(R.id.btnBack);
+//        backBtn.setOnClickListener(v -> {
+//            if (getParentFragmentManager() != null) {
+//                // මේකෙන් වෙන්නේ stack එකේ කලින් හිටපු fragment එකට පස්සට යන එක
+//                getParentFragmentManager().popBackStack();
+//            }
+//        });
 
-        return view;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 101) {
-            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getContext(), "Permission Granted! Click Again.", Toast.LENGTH_SHORT).show();
-            }
+    private void setupLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
+
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        loadingDialog = builder.create();
+
+        if (loadingDialog.getWindow() != null) {
+            Window window = loadingDialog.getWindow();
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = Gravity.BOTTOM;
+            params.y = 80;
+            window.setAttributes(params);
         }
     }
 
     private void loadSchedules() {
+        if (loadingDialog != null) loadingDialog.show();
+
+        // දැනට තියෙන වෙලාව ගමු
+        Timestamp now = Timestamp.now();
+
+        // --- මෙතන තමයි වැදගත්ම වෙනස ---
+        // අපි Query එකෙන්ම කියනවා Departure Time එක දැනට වඩා වැඩි ඒව විතරක් දෙන්න කියලා.
         db.collection("Schedules")
+                .whereGreaterThan("departure_time", now)
                 .orderBy("departure_time", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (loadingDialog != null) loadingDialog.dismiss();
+
                     scheduleList.clear();
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         ScheduleModel model = doc.toObject(ScheduleModel.class);
@@ -101,10 +134,25 @@ public class ScheduleFragment extends Fragment {
                             scheduleList.add(model);
                         }
                     }
-                    adapter.notifyDataSetChanged();
+
+                    // ඇඩැප්ටර් එකට අලුත් ඩේටා ටික දැනුම් දෙනවා
+                    adapter.updateList(scheduleList);
+
+                    if (scheduleList.isEmpty()) {
+                        Toast.makeText(getContext(), "No upcoming schedules found.", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .addOnFailureListener(e -> {
+                    if (loadingDialog != null) loadingDialog.dismiss();
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 }

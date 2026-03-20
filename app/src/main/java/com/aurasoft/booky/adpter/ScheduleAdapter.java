@@ -18,8 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.model.ScheduleModel;
+import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,7 +31,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     private Context context;
     private OnItemClickListener listener;
 
-    // Interface for item click (to go to Seat Selection)
     public interface OnItemClickListener {
         void onItemClick(ScheduleModel model);
     }
@@ -39,8 +40,31 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     }
 
     public ScheduleAdapter(List<ScheduleModel> scheduleList, Context context) {
-        this.scheduleList = scheduleList;
+        // මෙතනදී අපි පරණ schedules අයින් කරලා අලුත් ලිස්ට් එකක් හදාගන්නවා
+        this.scheduleList = filterUpcomingSchedules(scheduleList);
         this.context = context;
+    }
+
+    // --- පරණ Schedules අයින් කරන Logic එක ---
+    private List<ScheduleModel> filterUpcomingSchedules(List<ScheduleModel> fullList) {
+        List<ScheduleModel> filteredList = new ArrayList<>();
+        Timestamp currentTime = Timestamp.now(); // දැනට තියෙන වෙලාව
+
+        for (ScheduleModel model : fullList) {
+            if (model.getDeparture_time() != null) {
+                // වෙලාව දැනට වඩා වැඩි නම් විතරක් ලිස්ට් එකට එකතු කරනවා
+                if (model.getDeparture_time().compareTo(currentTime) > 0) {
+                    filteredList.add(model);
+                }
+            }
+        }
+        return filteredList;
+    }
+
+    // දත්ත අලුතින් අප්ඩේට් කරනවා නම් මේ මෙතඩ් එක පාවිච්චි කරන්න පුළුවන්
+    public void updateList(List<ScheduleModel> newList) {
+        this.scheduleList = filterUpcomingSchedules(newList);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -57,7 +81,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         holder.busNumber.setText("no - " + model.getBus_no());
         holder.busRoute.setText(model.getFrom() + " - " + model.getTo());
 
-        // Formatting Date and Time
         if (model.getDeparture_time() != null) {
             SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
             holder.busTime.setText(timeFormat.format(model.getDeparture_time().toDate()));
@@ -72,15 +95,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         holder.callBtn.setOnClickListener(v -> {
             String phoneNumber = model.getPhone_number();
             if (phoneNumber != null && !phoneNumber.isEmpty()) {
-
-                // පර්මිෂන් තියෙනවද කියලා චෙක් කරනවා
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-                    // කෙලින්ම call එක යනවා
                     Intent intent = new Intent(Intent.ACTION_CALL);
                     intent.setData(Uri.parse("tel:" + phoneNumber));
                     context.startActivity(intent);
                 } else {
-                    // පර්මිෂන් නැත්නම් පර්මිෂන් ඉල්ලනවා
                     if (context instanceof FragmentActivity) {
                         ActivityCompat.requestPermissions((FragmentActivity) context,
                                 new String[]{Manifest.permission.CALL_PHONE}, 101);
@@ -92,7 +111,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             }
         });
 
-        // Full Item Click (Go to Seat Selection)
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(model);

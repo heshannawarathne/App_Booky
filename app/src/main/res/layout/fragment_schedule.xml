@@ -11,18 +11,18 @@
     android:background="@drawable/top_bar_rounded_bottom"
     app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/img_18"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+<!--    <ImageView-->
+<!--        android:id="@+id/btnBack"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginTop="40dp"-->
+<!--        android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--        android:padding="8dp"-->
+<!--        android:src="@drawable/img_18"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        />-->
 
     <TextView
         android:id="@+id/headerTitle"

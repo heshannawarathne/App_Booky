@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -34,34 +33,36 @@ public class SettingsFragment extends Fragment {
     private static final String PREFS_NAME = "SettingsPrefs";
 
     public SettingsFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // --- UI Elements Initialize ---
+
         settingsMenuLayout = view.findViewById(R.id.settingsMenuLayout);
         tvLegalContent = view.findViewById(R.id.tvLegalContent);
         tvPrivacyPolicy = view.findViewById(R.id.tvPrivacyPolicy);
         tvTerms = view.findViewById(R.id.tvTerms);
         cvProfile = view.findViewById(R.id.cvProfile);
-        cvDeveloper = view.findViewById(R.id.cvDeveloper); // Fix: Added initialization
-        btnLogout = view.findViewById(R.id.btnLogout);     // Logout initialization
+        cvDeveloper = view.findViewById(R.id.cvDeveloper);
+        btnLogout = view.findViewById(R.id.btnLogout);
         btnBack = view.findViewById(R.id.btnBack);
 
-        // Switches
+
+        btnBack.setVisibility(View.GONE);
+
+
         switchNotifications = view.findViewById(R.id.switchNotifications);
         switchCallAccess = view.findViewById(R.id.switchCallAccess);
         switchLocation = view.findViewById(R.id.switchLocation);
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
 
-        // --- 1. Logout Underline Effect ---
+
         if (btnLogout != null) {
             btnLogout.setPaintFlags(btnLogout.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             btnLogout.setOnClickListener(v -> {
-                // මෙතනට ඔයාගේ Logout Logic එක දාන්න (Firebase signout etc.)
                 Toast.makeText(getContext(), "Logging out...", Toast.LENGTH_SHORT).show();
             });
         }
@@ -71,18 +72,14 @@ public class SettingsFragment extends Fragment {
 
         // --- 3. Click Listeners ---
 
-        // Privacy Policy
         tvPrivacyPolicy.setOnClickListener(v -> showLegalContent(getPrivacyPolicyText()));
 
-        // Terms of Service
         tvTerms.setOnClickListener(v -> showLegalContent(getTermsOfServiceText()));
 
-        // About Developer
         if (cvDeveloper != null) {
             cvDeveloper.setOnClickListener(v -> showLegalContent(getDeveloperInfoText()));
         }
 
-        // Profile Navigation
         if (cvProfile != null) {
             cvProfile.setOnClickListener(v -> {
                 getParentFragmentManager().beginTransaction()
@@ -97,10 +94,8 @@ public class SettingsFragment extends Fragment {
             if (tvLegalContent.getVisibility() == View.VISIBLE) {
                 tvLegalContent.setVisibility(View.GONE);
                 settingsMenuLayout.setVisibility(View.VISIBLE);
-            } else {
-                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
-                    getParentFragmentManager().popBackStack();
-                }
+                // Back වුණාම ආයෙත් Back Button එක Hide කරනවා
+                btnBack.setVisibility(View.GONE);
             }
         });
 
@@ -145,7 +140,7 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    // --- Data Methods ---
+    // --- Data Methods (ඔයාගේ Content එක එලෙසම ඇත) ---
 
     private String getPrivacyPolicyText() {
         return "<b>Last Updated: March 2026</b><br><br>" +
@@ -199,14 +194,14 @@ public class SettingsFragment extends Fragment {
         settingsMenuLayout.setVisibility(View.GONE);
         tvLegalContent.setVisibility(View.VISIBLE);
 
-        // HTML Text එක හරියට display කරවීමට
+        // Content එක පෙන්වන විට Back Button එක Enable කරනවා
+        btnBack.setVisibility(View.VISIBLE);
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             tvLegalContent.setText(android.text.Html.fromHtml(content, android.text.Html.FROM_HTML_MODE_LEGACY));
         } else {
             tvLegalContent.setText(android.text.Html.fromHtml(content));
         }
-
-        // ලින්ක් එකක් ක්ලික් කළ විට වෙබ් බ්‍රවුසරය විවෘත වීමට මෙය අනිවාර්ය වේ
         tvLegalContent.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
     }
 

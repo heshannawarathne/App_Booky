@@ -1,31 +1,47 @@
 package com.aurasoft.booky.model;
 
-public class TripModel {
+import com.google.firebase.Timestamp;
 
-    private String busName, date, from, to, price, status;
+import java.util.ArrayList;
+
+public class TripModel {
+    private String busNo;
+    private String date;
+    private String time;
+    private String fromLocation;
+    private String toLocation;
+    private String status;
+    private String userId;
+    private long totalPrice;
+    private ArrayList<String> seats;
+
+    private Timestamp timestamp;
 
     public TripModel() {
     }
 
-    public TripModel(String busName, String date, String from, String to, String price, String status) {
-        this.busName = busName;
-        this.date = date;
-        this.from = from;
-        this.to = to;
-        this.price = price;
-        this.status = status;
+    public String getFromLocation() {
+        return fromLocation;
     }
 
-    public String getBusName() {
-
-        if (busName == null || busName.isEmpty()) {
-            return "Booky Higway Express";
-        }
-        return busName;
+    public void setFromLocation(String fromLocation) {
+        this.fromLocation = fromLocation;
     }
 
-    public void setBusName(String busName) {
-        this.busName = busName;
+    public String getToLocation() {
+        return toLocation;
+    }
+
+    public void setToLocation(String toLocation) {
+        this.toLocation = toLocation;
+    }
+
+    public String getBusNo() {
+        return busNo;
+    }
+
+    public void setBusNo(String busNo) {
+        this.busNo = busNo;
     }
 
     public String getDate() {
@@ -36,29 +52,14 @@ public class TripModel {
         this.date = date;
     }
 
-    public String getFrom() {
-        return from;
+    public String getTime() {
+        return time;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
 
     public String getStatus() {
         return status;
@@ -66,5 +67,50 @@ public class TripModel {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public long getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(long totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public ArrayList<String> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(ArrayList<String> seats) {
+        this.seats = seats;
+    }
+
+    // 2. මෙන්න මේ Getter එක නැති නිසයි Adapter එකේ error එක ආවේ
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getFormattedDate() {
+        return date;
+    }
+
+    public String getFormattedTime() {
+        return time;
+    }
+
+    public String getSeatCount() {
+        return (seats != null) ? String.valueOf(seats.size()) : "0";
     }
 }

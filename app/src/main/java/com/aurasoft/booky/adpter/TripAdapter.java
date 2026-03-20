@@ -1,14 +1,13 @@
 package com.aurasoft.booky.adpter;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.model.TripModel;
-
 import java.util.List;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder> {
@@ -22,32 +21,59 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
     @NonNull
     @Override
     public TripViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // my_trip.xml එක සම්බන්ධ කිරීම
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_trip, parent, false);
         return new TripViewHolder(view);
     }
+
 
     @Override
     public void onBindViewHolder(@NonNull TripViewHolder holder, int position) {
         TripModel trip = tripList.get(position);
 
-        // 1. Bus Name පෙන්වීම
-        holder.tvBusName.setText(trip.getBusName());
+        // 1. බස් එකේ අංකය
+        holder.tvBusName.setText(trip.getBusNo() != null ? trip.getBusNo() : "N/A");
 
-        // 2. දිනය පෙන්වීම
+        // 2. Route එක (From ➝ To)
+        String from = (trip.getFromLocation() != null) ? trip.getFromLocation() : "N/A";
+        String to = (trip.getToLocation() != null) ? trip.getToLocation() : "N/A";
+        holder.tvRoute.setText(from + " ➝ " + to);
+
+        // 3. දිනය සහ වෙලාව
         holder.tvDate.setText(trip.getDate());
+        holder.tvTime.setText(trip.getTime());
 
-        // 3. From සහ To එකතු කර Route එක පෙන්වීම (Badulla → Colombo වගේ)
-        String fullRoute = trip.getFrom() + " → " + trip.getTo();
-        holder.tvRoute.setText(fullRoute);
+        // 4. සීට් ගණන සහ සීට් අංක (Seats List එක පාවිච්චි කරමින්)
+        if (trip.getSeats() != null && !trip.getSeats().isEmpty()) {
+            int count = trip.getSeats().size();
 
-        // 4. මිල පෙන්වීම
-        holder.tvPrice.setText("LKR " + trip.getPrice());
+            // ලිස්ට් එක [A1, A2] වගේ තියෙන එක "A1, A2" විදිහට සකස් කරනවා
+            String seatNumbers = trip.getSeats().toString()
+                    .replace("[", "")
+                    .replace("]", "");
 
-        // 5. Status එක (Upcoming/Completed) පෙන්වීම
-        holder.tvStatus.setText(trip.getStatus());
+            // අවසාන ප්‍රතිඵලය: "2 Seats (A1, A2)"
+            holder.tvSeatCount.setText(count + " Seats (" + seatNumbers + ")");
+        } else {
+            holder.tvSeatCount.setText("0 Seats");
+        }
 
-        // Status එක අනුව පාට වෙනස් කරනවා නම් මෙතනින් කරන්න පුළුවන්
+        // 5. Status එක (කලින් වගේමයි)
+        if (trip.getTimestamp() != null) {
+            long currentTime = System.currentTimeMillis();
+            long departureTime = trip.getTimestamp().toDate().getTime();
+
+            if (departureTime < currentTime) {
+                holder.tvStatus.setText("COMPLETED");
+                holder.tvStatus.setTextColor(R.color.black);
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_compleate);
+                holder.itemView.setAlpha(0.6f);
+            } else {
+                holder.tvStatus.setText("UPCOMING");
+                holder.tvStatus.setTextColor(R.color.black);
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_status_upcoming);
+                holder.itemView.setAlpha(1.0f);
+            }
+        }
     }
 
     @Override
@@ -56,14 +82,15 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
     }
 
     public static class TripViewHolder extends RecyclerView.ViewHolder {
-        // IDs ඔයාගේ my_trip.xml එකේ තියෙන ඒවාටම ගැලපෙන්න ඕනේ
-        TextView tvBusName, tvDate, tvRoute, tvPrice, tvStatus;
+        TextView tvBusName, tvRoute, tvDate, tvTime, tvSeatCount, tvStatus;
 
         public TripViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvBusName = itemView.findViewById(R.id.tvBusName);
+            tvRoute = itemView.findViewById(R.id.tvRouteDisplay);
             tvDate = itemView.findViewById(R.id.tvTripDate);
-            tvRoute = itemView.findViewById(R.id.tvBusName); // XML එකේ route එකට තියෙන ID එක
-            tvPrice = itemView.findViewById(R.id.tvPrice);
+            tvTime = itemView.findViewById(R.id.tvTripTime);
+            tvSeatCount = itemView.findViewById(R.id.tvSeatCount);
             tvStatus = itemView.findViewById(R.id.tvStatus);
         }
     }

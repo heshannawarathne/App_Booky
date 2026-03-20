@@ -2,18 +2,28 @@ package com.aurasoft.booky;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
-import android.view.ViewGroup;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
@@ -35,8 +45,6 @@ import lk.payhere.androidsdk.model.InitRequest;
 import lk.payhere.androidsdk.model.StatusResponse;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import android.view.LayoutInflater;
-import android.view.View;
 
 public class BookingSummaryActivity extends AppCompatActivity {
 
@@ -47,19 +55,28 @@ public class BookingSummaryActivity extends AppCompatActivity {
     private int totalPrice;
     private ArrayList<String> selectedSeats, selectedGenders;
 
+    private AlertDialog loadingDialog;
+    private AlertDialog noInternetDialog;
+
+    private ConnectivityManager connectivityManager;
+    private ConnectivityManager.NetworkCallback networkCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_summary);
 
-        // UI Initialize
+        setupLoadingDialog();
+
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        startNetworkMonitoring();
+
         tvPickup = findViewById(R.id.tvSummaryPickup);
         tvSeatsList = findViewById(R.id.tvSummarySeatsList);
         tvUnitPrice = findViewById(R.id.tvUnitPrice);
         tvTotalAmount = findViewById(R.id.tvSummaryTotal);
         btnPayNow = findViewById(R.id.btnConfirmPayment);
 
-        // Data from Intent (Flow එකේ එන ටික)
         scheduleId = getIntent().getStringExtra("SCHEDULE_ID");
         totalPrice = getIntent().getIntExtra("TOTAL_PRICE", 0);
         selectedSeats = getIntent().getStringArrayListExtra("SELECTED_SEATS");
@@ -68,7 +85,88 @@ public class BookingSummaryActivity extends AppCompatActivity {
 
         setupUI();
 
-        btnPayNow.setOnClickListener(v -> startPayHerePayment());
+        btnPayNow.setOnClickListener(v -> {
+            if (isVpnConnection(this)) {
+                showVpnDialog();
+            } else if (!isNetworkAvailable()) {
+                showNoInternetDialog();
+            } else {
+                startPayHerePayment();
+            }
+        });
+    }
+
+    private void startNetworkMonitoring() {
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                runOnUiThread(() -> {
+                    if (noInternetDialog != null && noInternetDialog.isShowing()) {
+                        noInternetDialog.dismiss();
+                    }
+                });
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                runOnUiThread(() -> showNoInternetDialog());
+            }
+        };
+
+        connectivityManager.registerNetworkCallback(
+                new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(),
+                networkCallback
+        );
+    }
+
+    private boolean isVpnConnection(Context context) {
+        Network activeNetwork = connectivityManager.getActiveNetwork();
+        if (activeNetwork != null) {
+            NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(activeNetwork);
+            return caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
+        }
+        return false;
+    }
+
+    private boolean isNetworkAvailable() {
+        Network activeNetwork = connectivityManager.getActiveNetwork();
+        if (activeNetwork != null) {
+            NetworkCapabilities caps = connectivityManager.getNetworkCapabilities(activeNetwork);
+            return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        }
+        return false;
+    }
+
+    private void showVpnDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View layoutView = getLayoutInflater().inflate(R.layout.dialog_vpn_warning, null);
+        builder.setView(layoutView);
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        layoutView.findViewById(R.id.btnOk).setOnClickListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+        dialog.show();
+    }
+
+    private void showNoInternetDialog() {
+        if (noInternetDialog != null && noInternetDialog.isShowing()) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View layoutView = getLayoutInflater().inflate(R.layout.dialog_no_internet, null);
+        builder.setView(layoutView);
+        builder.setCancelable(false);
+
+        noInternetDialog = builder.create();
+        if (noInternetDialog.getWindow() != null) noInternetDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        layoutView.findViewById(R.id.btnRefresh).setOnClickListener(v -> {
+            if (isNetworkAvailable()) noInternetDialog.dismiss();
+            else Toast.makeText(this, "Still no connection...", Toast.LENGTH_SHORT).show();
+        });
+        noInternetDialog.show();
     }
 
     private void setupUI() {
@@ -131,45 +229,40 @@ public class BookingSummaryActivity extends AppCompatActivity {
     private void checkUserEmailAndProceed() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
+        if (loadingDialog != null) loadingDialog.show();
 
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             saveBookingToFirestore(user.getEmail());
-            return;
-        }
-
-        String userId = user.getUid();
-        FirebaseFirestore.getInstance().collection("Users").document(userId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists() && documentSnapshot.contains("email")) {
-                        saveBookingToFirestore(documentSnapshot.getString("email"));
-                    } else {
+        } else {
+            FirebaseFirestore.getInstance().collection("Users").document(user.getUid())
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists() && documentSnapshot.contains("email")) {
+                            saveBookingToFirestore(documentSnapshot.getString("email"));
+                        } else {
+                            if (loadingDialog != null) loadingDialog.dismiss();
+                            showEmailInputDialog();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        if (loadingDialog != null) loadingDialog.dismiss();
                         showEmailInputDialog();
-                    }
-                })
-                .addOnFailureListener(e -> showEmailInputDialog());
+                    });
+        }
     }
 
     private void showEmailInputDialog() {
-        // 1. BottomSheetDialog එකක් ක්‍රියාත්මක කරමු
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-
-        // 2. ඒකට අදාළ UI එක dynamic විදිහට හදාගමු
-        // (මේකට වෙනම XML එකක් හදන්නත් පුළුවන්, නැත්නම් කලින් වගේම code එකෙන් හදමු)
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.layout_email_input, null);
-
-        // --- Layout එක ඇතුලේ තියෙන components (XML එකේ තියෙන විදිහට) ---
         EditText input = bottomSheetView.findViewById(R.id.etEmailInput);
         MaterialButton btnConfirm = bottomSheetView.findViewById(R.id.btnConfirmEmail);
         TextView tvTitle = bottomSheetView.findViewById(R.id.tvSheetTitle);
-
-        tvTitle.setText("E-Ticket එක සඳහා Email ලිපිනය");
+        tvTitle.setText("Email address for the E-Ticket");
         input.setHint("example@gmail.com");
 
         btnConfirm.setOnClickListener(v -> {
             String email = input.getText().toString().trim();
             if (!email.isEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-
                 String userId = FirebaseAuth.getInstance().getUid();
                 if (userId != null) {
                     Map<String, Object> userData = new HashMap<>();
@@ -177,17 +270,15 @@ public class BookingSummaryActivity extends AppCompatActivity {
                     FirebaseFirestore.getInstance().collection("Users").document(userId)
                             .set(userData, SetOptions.merge());
                 }
-
-                bottomSheetDialog.dismiss(); // Dialog එක වහනවා
+                bottomSheetDialog.dismiss();
+                if (loadingDialog != null) loadingDialog.show();
                 saveBookingToFirestore(email);
-
             } else {
-                Toast.makeText(this, "කරුණාකර නිවැරදි Email එකක් ඇතුළත් කරන්න", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please Enter valid email", Toast.LENGTH_SHORT).show();
             }
         });
-
         bottomSheetDialog.setContentView(bottomSheetView);
-        bottomSheetDialog.setCancelable(false); // පිටතින් click කළොත් වැහෙන්නේ නැති වෙන්න
+        bottomSheetDialog.setCancelable(false);
         bottomSheetDialog.show();
     }
 
@@ -195,46 +286,31 @@ public class BookingSummaryActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = FirebaseAuth.getInstance().getUid();
 
-        // ✅ Firestore එකෙන් Schedule විස්තර ඇදලා ගන්නා කොටස
         db.collection("Schedules").document(scheduleId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
-                // Firestore එකේ තියෙන field names මේවාම නේද බලන්න (busNo, date, time)
                 String busNo = doc.getString("bus_no");
-
                 String dateStr = "N/A";
                 String timeStr = "N/A";
+                Object departureTimeObject = doc.get("departure_time");
 
                 try {
-                    // 1. මුලින්ම Timestamp එකක්ද කියලා බලනවා
-                    Object timeObject = doc.get("departure_time");
-
-                    if (timeObject instanceof com.google.firebase.Timestamp) {
-                        com.google.firebase.Timestamp ts = (com.google.firebase.Timestamp) timeObject;
+                    if (departureTimeObject instanceof com.google.firebase.Timestamp) {
+                        com.google.firebase.Timestamp ts = (com.google.firebase.Timestamp) departureTimeObject;
                         java.util.Date dateObj = ts.toDate();
                         dateStr = android.text.format.DateFormat.format("dd MMM yyyy", dateObj).toString();
                         timeStr = android.text.format.DateFormat.format("hh:mm a", dateObj).toString();
                     }
-                    // 2. Timestamp එකක් නෙවෙයි නම් String එකක්ද කියලා බලනවා
-                    else if (timeObject instanceof String) {
-                        String fullDateTime = (String) timeObject;
-                        // String එකේ තියෙන්නේ "17 March 2026 at..." වගේ නම් ඒකම පෙන්වනවා
-                        dateStr = fullDateTime;
-                        timeStr = "";
-                    }
-                } catch (Exception e) {
-                    Log.e("DEBUG_BOOKY", "Error parsing date: " + e.getMessage());
-                }
+                } catch (Exception e) { Log.e("DEBUG_BOOKY", "Error parsing date: " + e.getMessage()); }
 
                 final String finalBusNo = (busNo != null) ? busNo : "N/A";
                 final String finalDate = dateStr;
                 final String finalTime = timeStr;
 
-
                 Map<String, Object> booking = new HashMap<>();
                 booking.put("userId", uid);
                 booking.put("email", userEmail);
                 booking.put("scheduleId", scheduleId);
-                booking.put("busNo", busNo);
+                booking.put("busNo", finalBusNo);
                 booking.put("date", finalDate);
                 booking.put("time", finalTime);
                 booking.put("seats", selectedSeats);
@@ -242,7 +318,10 @@ public class BookingSummaryActivity extends AppCompatActivity {
                 booking.put("totalPrice", totalPrice);
                 booking.put("pickup", pickupAddress);
                 booking.put("status", "Confirmed");
-                booking.put("timestamp", FieldValue.serverTimestamp());
+                booking.put("fromLocation", doc.getString("from"));
+                booking.put("toLocation", doc.getString("to"));
+                booking.put("timestamp", departureTimeObject);
+                booking.put("booking_date", FieldValue.serverTimestamp());
 
                 db.collection("Bookings").add(booking).addOnSuccessListener(documentReference -> {
                     WriteBatch batch = db.batch();
@@ -257,10 +336,11 @@ public class BookingSummaryActivity extends AppCompatActivity {
                     }
 
                     batch.commit().addOnCompleteListener(task -> {
+                        if (loadingDialog != null) loadingDialog.dismiss();
                         if (task.isSuccessful()) {
-                            // ✅ ලබාගත්තු විස්තර සමඟ Email එක යවනවා
-                            sendTicketEmail(userEmail, busNo, finalDate,finalTime);
+                            sendTicketEmail(userEmail, finalBusNo, finalDate, finalTime);
                             Toast.makeText(this, "Booking Successful! Ticket Sent 🎉", Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(this, MainActivity.class));
                             finish();
                         }
                     });
@@ -271,7 +351,6 @@ public class BookingSummaryActivity extends AppCompatActivity {
 
     private void sendTicketEmail(String recipientEmail, String busNo, String date, String time) {
         String subject = "Booking Confirmed! - Your Booky E-Ticket";
-
         String htmlBody = "<html><body style='font-family: Arial, sans-serif; color: #333;'>" +
                 "<div style='width: 100%; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;'>" +
                 "<div style='background-color: #3A7B73; color: white; padding: 20px; text-align: center;'>" +
@@ -297,5 +376,32 @@ public class BookingSummaryActivity extends AppCompatActivity {
                 "</body></html>";
 
         new JavaMailAPI(recipientEmail, subject, htmlBody).execute();
+    }
+
+    private void setupLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+        loadingDialog = builder.create();
+        if (loadingDialog.getWindow() != null) {
+            Window window = loadingDialog.getWindow();
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = Gravity.BOTTOM;
+            params.y = 80;
+            window.setAttributes(params);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (connectivityManager != null && networkCallback != null) {
+            connectivityManager.unregisterNetworkCallback(networkCallback);
+        }
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 }

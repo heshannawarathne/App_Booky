@@ -109,7 +109,7 @@
 
         <ImageButton
             android:id="@+id/btncall"
-            android:layout_width="77dp"
+            android:layout_width="79dp"
             android:layout_height="52dp"
             android:layout_gravity="center"
             android:background="@drawable/call_btn_circle"

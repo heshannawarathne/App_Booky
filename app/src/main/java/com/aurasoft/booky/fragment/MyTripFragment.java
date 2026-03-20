@@ -1,24 +1,32 @@
 package com.aurasoft.booky.fragment;
 
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
-import com.aurasoft.booky.adpter.*; // Adapter එක තියෙන තැන බලන්න
-import com.aurasoft.booky.model.TripModel;    // Model එක තියෙන තැන බලන්න
+import com.aurasoft.booky.adpter.TripAdapter;
+import com.aurasoft.booky.model.TripModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +35,12 @@ public class MyTripFragment extends Fragment {
 
     private RecyclerView scheduleRecyclerView;
     private ImageView btnBack;
-
-    // Firestore සහ Adapter සඳහා Variables
     private TripAdapter adapter;
     private List<TripModel> tripList;
     private FirebaseFirestore db;
+
+    // Custom Loading Dialog
+    private AlertDialog loadingDialog;
 
     public MyTripFragment() {
         // Required empty public constructor
@@ -47,24 +56,46 @@ public class MyTripFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. UI Elements හඳුනා ගැනීම
+        // 1. Initialize UI Elements
         btnBack = view.findViewById(R.id.btnBack);
         scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView);
-
-        // 2. Firestore Initialize කිරීම
         db = FirebaseFirestore.getInstance();
 
-        // 3. Back Button එකට Click Listener එක දීම
-        btnBack.setOnClickListener(v -> {
-            BookingFragment bookingFragment = new BookingFragment();
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, bookingFragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .commit();
-        });
+        // 2. Setup Custom Loading Dialog
+        setupLoadingDialog();
 
-        // 4. RecyclerView සහ Firestore Data Setup කිරීම
+        // 3. Back Button Click Logic
+//        ImageView backBtn = view.findViewById(R.id.btnBack);
+//        backBtn.setOnClickListener(v -> {
+//            if (getParentFragmentManager() != null) {
+//                // මේකෙන් වෙන්නේ stack එකේ කලින් හිටපු fragment එකට පස්සට යන එක
+//                getParentFragmentManager().popBackStack();
+//            }
+//        });
+
+        // 4. Setup RecyclerView
         setupRecyclerView();
+    }
+
+    private void setupLoadingDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
+
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        loadingDialog = builder.create();
+
+        if (loadingDialog.getWindow() != null) {
+            Window window = loadingDialog.getWindow();
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.gravity = Gravity.BOTTOM;
+            params.y = 80;
+            window.setAttributes(params);
+        }
     }
 
     private void setupRecyclerView() {
@@ -72,31 +103,60 @@ public class MyTripFragment extends Fragment {
         adapter = new TripAdapter(tripList);
 
         scheduleRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        scheduleRecyclerView.setHasFixedSize(true);
         scheduleRecyclerView.setAdapter(adapter);
 
-        // Firestore එකෙන් Data Load කිරීම ආරම්භ කරන්න
         loadTripsFromFirestore();
     }
 
     private void loadTripsFromFirestore() {
-        // Firestore එකේ "Bookings" කියන collection එකටයි මම මෙතන access කරන්නේ
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+
+        if (currentUserId == null) {
+            Toast.makeText(getContext(), "Please login again to continue", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show loading
+        if (loadingDialog != null) loadingDialog.show();
+
+        // ඩේටාබේස් එකෙන් බුකින් හිස්ටරි එක ගන්නවා
         db.collection("Bookings")
+                .whereEqualTo("userId", currentUserId)
+                .orderBy("timestamp", Query.Direction.DESCENDING) // අලුත්ම බුකින් එක උඩට එනවා
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    // Dismiss loading
+                    if (loadingDialog != null) loadingDialog.dismiss();
+
+                    tripList.clear();
+
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        tripList.clear();
-                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        for (DocumentSnapshot document : queryDocumentSnapshots) {
                             TripModel trip = document.toObject(TripModel.class);
-                            tripList.add(trip);
+                            if (trip != null) {
+                                tripList.add(trip);
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     } else {
-                        // Data නැතිනම් පෙන්වන්න ඕන දේ මෙතනට දාන්න (Toast එකක් වගේ)
-                        Toast.makeText(getContext(), "No bookings found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No trips found in your history.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Dismiss loading
+                    if (loadingDialog != null) loadingDialog.dismiss();
+                    Log.e("FIRESTORE_ERROR", e.getMessage());
+                    Toast.makeText(getContext(), "Failed to load travel data!", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 }

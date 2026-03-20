@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/input_field_bg"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="80dp"
+        android:src="@drawable/vpn"
+        android:layout_marginBottom="15dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VPN Detected!"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#E91E63"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please disable your VPN to continue with the booking process."
+        android:textAlignment="center"
+        android:layout_marginTop="10dp"
+        android:textSize="14sp"
+        android:textColor="#555"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnOk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/call_btn_circle"
+        android:text="Got it"
+        android:textAllCaps="false"
+        android:textColor="@color/white"/>
+</LinearLayout>
