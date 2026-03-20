@@ -2,12 +2,37 @@ package com.aurasoft.booky.model;
 
 public class NotificationModel {
 
-    String title, message, time;
+    String title, message, userId;
 
-    public NotificationModel(String title, String message, String time) {
+    private long timestamp;
+
+    private boolean isRead;
+
+    public NotificationModel() {
+    }
+
+    public NotificationModel(String title, String message, String userId, long timestamp, boolean isRead) {
         this.title = title;
         this.message = message;
-        this.time = time;
+        this.userId = userId;
+        this.timestamp = timestamp;
+        this.isRead = isRead;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getTitle() {
@@ -26,11 +51,13 @@ public class NotificationModel {
         this.message = message;
     }
 
-    public String getTime() {
-        return time;
+
+
+    public String getUserId() {
+        return userId;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

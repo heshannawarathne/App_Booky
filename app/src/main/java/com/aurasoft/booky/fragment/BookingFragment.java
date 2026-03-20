@@ -59,6 +59,9 @@ public class BookingFragment extends Fragment {
     // Custom Loading Dialog
     private AlertDialog loadingDialog;
 
+    // Notification Badge variables
+    private TextView notiBadge;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_booking, container, false);
@@ -69,6 +72,7 @@ public class BookingFragment extends Fragment {
         dateValue = view.findViewById(R.id.dateValue);
         recyclerView = view.findViewById(R.id.busRecyclerView);
         button = view.findViewById(R.id.btnSearch);
+        notiBadge = view.findViewById(R.id.notiBadge); // Badge UI initialize
 
         db = FirebaseFirestore.getInstance();
         cityList = new ArrayList<>();
@@ -91,6 +95,7 @@ public class BookingFragment extends Fragment {
         loadCitiesFromFirestore();
         loadTodayAllBuses();
         setupDatePicker();
+        updateNotificationBadge(); // Listen to unseen notifications
 
         // Search Button Logic
         button.setOnClickListener(v -> {
@@ -131,6 +136,31 @@ public class BookingFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void updateNotificationBadge() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
+        if (uid == null) return;
+
+        db.collection("Notifications")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("isRead", false)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e("BADGE_ERROR", error.getMessage());
+                        return;
+                    }
+                    if (value != null) {
+                        int count = value.size();
+                        if (count > 0) {
+                            notiBadge.setText(String.valueOf(count));
+                            notiBadge.setVisibility(View.VISIBLE);
+                        } else {
+                            notiBadge.setVisibility(View.GONE);
+                        }
+                    }
+                });
     }
 
     private void setupLoadingDialog() {

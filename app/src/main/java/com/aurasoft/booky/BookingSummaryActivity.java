@@ -336,17 +336,94 @@ public class BookingSummaryActivity extends AppCompatActivity {
                     }
 
                     batch.commit().addOnCompleteListener(task -> {
-                        if (loadingDialog != null) loadingDialog.dismiss();
+                        // Activity එක තවමත් පණපිටින්ද කියලා බලන්න
+                        if (isDestroyed() || isFinishing()) return;
+
+                        if (loadingDialog != null && loadingDialog.isShowing()) {
+                            loadingDialog.dismiss();
+                        }
+
                         if (task.isSuccessful()) {
+                            // Notification එක Schedule කිරීම
+                            if (departureTimeObject instanceof com.google.firebase.Timestamp) {
+                                long departureMillis = ((com.google.firebase.Timestamp) departureTimeObject).toDate().getTime();
+                                scheduleNotification(departureMillis, finalBusNo);
+                            }
+
+                            // Email එක යැවීම (Background thread එකක වෙන්නේ)
                             sendTicketEmail(userEmail, finalBusNo, finalDate, finalTime);
-                            Toast.makeText(this, "Booking Successful! Ticket Sent 🎉", Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(this, MainActivity.class));
-                            finish();
+
+                            Toast.makeText(getApplicationContext(), "Booking Successful! 🎉", Toast.LENGTH_LONG).show();
+
+                            // කෙළින්ම Activity මාරු නොකර පොඩි Delay එකක් දෙන්න
+                            // එවිට System එකට 'Resumed state loss' එකෙන් බේරෙන්න පුළුවන්
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }, 2000); // තත්පර 1ක Delay එකක්
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Failed to save booking", Toast.LENGTH_SHORT).show();
                         }
                     });
                 });
             }
         });
+    }
+
+    private void scheduleNotification(long departureTimestamp, String busNo) {
+        long currentTime = System.currentTimeMillis();
+        long alertTime = departureTimestamp - (5 * 60 * 1000); // විනාඩි 5කට කලින්
+
+        // 1. කාලය මදි නම් (දැනටමත් විනාඩි 5කට වඩා අඩුයි නම්) තත්පර 10කින් නොටිෆිකේෂන් එක එවන්න
+        if (alertTime <= currentTime) {
+            if (departureTimestamp > currentTime) {
+                alertTime = currentTime + (10 * 1000); // දැන් සිට තත්පර 10කින්
+                android.util.Log.d("ALARM_CHECK", "Short time remaining! Scheduling in 10 seconds.");
+            } else {
+                android.util.Log.e("ALARM_CHECK", "Bus already departed! No alarm set.");
+                return;
+            }
+        }
+
+        Context appContext = getApplicationContext();
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+
+        // 2. Explicit Intent එකක් පාවිච්චි කරන්න (setClass එක අනිවාර්යයි)
+        Intent intent = new Intent();
+        intent.setClass(appContext, NotificationReceiver.class);
+        intent.putExtra("title", "Bus Departure Alert! 🚌");
+        intent.putExtra("message", "Your bus (" + busNo + ") is departing soon. Get ready!");
+        intent.putExtra("userId", uid);
+
+        // 3. ස්ථාවර Request Code එකක් (උදා: 123) පාවිච්චි කරන්න
+        android.app.PendingIntent pendingIntent = android.app.PendingIntent.getBroadcast(
+                appContext,
+                123,
+                intent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+
+        android.app.AlarmManager alarmManager = (android.app.AlarmManager) getSystemService(ALARM_SERVICE);
+
+        if (alarmManager != null) {
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+                    } else {
+                        alarmManager.set(android.app.AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+                    }
+                } else {
+                    alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+                }
+                android.util.Log.d("ALARM_CHECK", "Alarm successfully scheduled for: " + alertTime);
+            } catch (Exception e) {
+                android.util.Log.e("ALARM_CHECK", "Alarm failed: " + e.getMessage());
+                alarmManager.set(android.app.AlarmManager.RTC_WAKEUP, alertTime, pendingIntent);
+            }
+        }
     }
 
     private void sendTicketEmail(String recipientEmail, String busNo, String date, String time) {

@@ -1,6 +1,5 @@
 package com.aurasoft.booky.adpter;
 
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,24 +10,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.model.NotificationModel;
 
+import java.util.ArrayList;
 import java.util.List;
-
-// Import your model class
-// import com.example.yourapp.NotificationModel;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
     private List<NotificationModel> notificationList;
 
-    // Constructor එක
     public NotificationAdapter(List<NotificationModel> notificationList) {
-        this.notificationList = notificationList;
+        this.notificationList = notificationList != null ? notificationList : new ArrayList<>();
+    }
+
+    // අලුතින් ඩේටා ආවම ලිස්ට් එක Update කරන්න මේ මෙතඩ් එක පාවිච්චි කරන්න පුළුවන්
+    public void setNotifications(List<NotificationModel> newList) {
+        this.notificationList = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // අපි කලින් හදපු item_notification layout එක මෙතනට සම්බන්ධ කරනවා
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
         return new ViewHolder(view);
     }
@@ -37,26 +38,33 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         NotificationModel model = notificationList.get(position);
 
-        // Data ටික UI එකට දානවා
         holder.txtTitle.setText(model.getTitle());
         holder.txtMessage.setText(model.getMessage());
-        holder.txtTime.setText(model.getTime());
+
+        // Timestamp එක ආරක්ෂිතව check කරලා format කරනවා
+        if (model.getTimestamp() > 0) {
+            java.util.Date date = new java.util.Date(model.getTimestamp());
+            String formattedTime = android.text.format.DateFormat.format("dd MMM, hh:mm a", date).toString();
+            holder.txtTime.setText(formattedTime);
+        } else {
+            holder.txtTime.setText("");
+        }
     }
 
     @Override
     public int getItemCount() {
-        return notificationList.size();
+        return notificationList != null ? notificationList.size() : 0;
     }
 
-    // ViewHolder Class එක
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtTitle, txtMessage, txtTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            txtTitle = itemView.findViewById(R.id.txtTitle);
-            txtMessage = itemView.findViewById(R.id.txtMessage);
-            txtTime = itemView.findViewById(R.id.txtTime);
+            // item_notification.xml එකේ ID මේවට සමානද කියලා ආයෙත් චෙක් කරගන්න මචං
+            txtTitle = itemView.findViewById(R.id.notiTitle);
+            txtMessage = itemView.findViewById(R.id.notiMessage);
+            txtTime = itemView.findViewById(R.id.notiTime);
         }
     }
 }

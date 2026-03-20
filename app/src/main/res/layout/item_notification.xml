@@ -1,85 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    android:background="@color/white">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="@color/white">
-
-        <View
-            android:id="@+id/iconBg"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/imgNotification"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/img_16"
-            app:layout_constraintBottom_toBottomOf="@id/iconBg"
-            app:layout_constraintEnd_toEndOf="@id/iconBg"
-            app:layout_constraintStart_toStartOf="@id/iconBg"
-            app:layout_constraintTop_toTopOf="@id/iconBg" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
-            android:id="@+id/txtTitle"
-            android:layout_width="0dp"
+            android:id="@+id/notiTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            android:text="Booking Confirmed"
-            android:textColor="#1A1A1A"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/unreadDot"
-            app:layout_constraintStart_toEndOf="@id/iconBg"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:text="Notification Title"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtMessage"
-            android:layout_width="0dp"
+            android:id="@+id/notiMessage"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:lineSpacingExtra="2dp"
-            android:text="Your ticket for Colombo to Kandy has been reserved successfully."
-            android:textColor="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/txtTitle"
-            app:layout_constraintTop_toBottomOf="@id/txtTitle" />
+            android:text="This is the message body of the notification."
+            android:textColor="#555"
+            android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/txtTime"
+            android:id="@+id/notiTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Just now"
-            android:textColor="#BDBDBD"
-            android:textSize="11sp"
-            app:layout_constraintStart_toStartOf="@id/txtTitle"
-            app:layout_constraintTop_toBottomOf="@id/txtMessage" />
-
-        <View
-            android:id="@+id/unreadDot"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:background="@drawable/circle_dot"
-            android:backgroundTint="#3A7B73"
-            app:layout_constraintBottom_toBottomOf="@id/txtTitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/txtTitle" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:text="10:30 AM"
+            android:textColor="#999"
+            android:textSize="12sp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

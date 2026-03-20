@@ -2,10 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:id="@+id/action_notification"
+    >
 
     <LinearLayout
         android:id="@+id/topSection"
@@ -26,8 +27,8 @@
                 android:id="@+id/profileImg"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/img_15"
                 android:layout_marginTop="20dp"
+                android:src="@drawable/img_15"
                 app:civ_border_color="@color/white"
                 app:civ_border_width="2dp" />
 
@@ -43,13 +44,36 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/imgbell"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_alignParentEnd="true"
+            <FrameLayout
+                android:id="@+id/notification_container"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_alignTop="@id/profileImg"
-                android:src="@drawable/img_16"/>
+                android:layout_alignParentEnd="true"
+                >
+
+                <ImageView
+                    android:id="@+id/imgbell"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/img_16"
+                    android:layout_gravity="bottom"/>
+
+                <TextView
+                    android:id="@+id/notiBadge"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:background="@drawable/badge_circle"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@android:color/white"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -108,12 +132,12 @@
                         android:id="@+id/fromSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="top"
                         android:layout_below="@id/fLabel"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="10dp"
                         android:layout_toEndOf="@id/fIcon"
                         android:background="@android:color/transparent"
+                        android:gravity="top"
                         android:hint="Select Origin"
                         android:inputType="none"
                         android:paddingTop="5dp"
@@ -153,12 +177,12 @@
                         android:id="@+id/toSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="top"
                         android:layout_below="@id/tLabel"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="10dp"
                         android:layout_toEndOf="@id/tIcon"
                         android:background="@android:color/transparent"
+                        android:gravity="top"
                         android:hint="Select Destination"
                         android:inputType="none"
                         android:paddingTop="5dp"
@@ -215,6 +239,7 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="20dp"
             android:paddingBottom="10dp">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -222,6 +247,7 @@
                 android:textColor="@color/book_item_color"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/seeAll"
                 android:layout_width="wrap_content"
@@ -238,11 +264,11 @@
         android:id="@+id/busRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:paddingHorizontal="10dp"
         android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/topSection"
+        android:paddingHorizontal="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/topSection" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
