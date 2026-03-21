@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/gender_box"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:backgroundTint="@color/background">
 
     <TextView
         android:id="@+id/tvSheetTitle"
@@ -21,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="Your ticket will be sent to your email address"
-        android:textColor="#666"
+        android:textColor="@color/white_02"
         android:textSize="14sp" />
 
     <EditText

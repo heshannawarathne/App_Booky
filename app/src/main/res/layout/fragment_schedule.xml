@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F6"> <View
+    android:background="@color/background"> <View
     android:id="@+id/topBar"
     android:layout_width="match_parent"
     android:layout_height="180dp"
@@ -28,7 +28,7 @@
         android:id="@+id/headerTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="42dp"
+        android:layout_marginTop="75dp"
         android:text="Bus Schedules"
         android:textColor="#FFFFFF"
         android:textSize="26sp"
@@ -58,6 +58,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topBar"
         app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp"
         tools:listitem="@layout/schedule_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,87 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffff"> <RelativeLayout
-    android:id="@+id/topBar"
-    android:layout_width="match_parent"
-    android:layout_height="231dp"
-    android:background="@drawable/bg_login_header">
+    android:background="@color/background">
 
-    <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="31dp"
-        android:layout_marginTop="50dp"
-        android:src="@drawable/img_18" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="44dp"
-        android:text="Search Results"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="120dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
-
-        <TextView
-            android:id="@+id/fromCity"
-            android:layout_width="78dp"
-            android:layout_height="wrap_content"
-            android:text="Badul"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="43dp"
-            android:layout_height="5dp"
-            android:layout_marginHorizontal="8dp"
-            android:background="@drawable/line" />
+        android:layout_height="231dp"
+        android:background="@drawable/bg_login_header">
 
         <ImageView
-            android:layout_width="93dp"
-            android:layout_height="66dp"
-            android:src="@drawable/img_20" />
-
-        <View
-            android:layout_width="21dp"
-            android:layout_height="12dp"
-            android:layout_marginHorizontal="8dp"
-            android:background="@drawable/line" />
+            android:id="@+id/btnBack"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="31dp"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/img_18" />
 
         <TextView
-            android:id="@+id/tocity"
-            android:layout_width="115dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Makumbura"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="60dp"
+            android:text="Search Results"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/dateBus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="15dp"
-        android:text="10 May 2023"
-        android:textColor="#FFFBFB"
-        android:textSize="16sp" />
-</RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/fromCity"
+                android:layout_width="78dp"
+                android:layout_height="wrap_content"
+                android:text="Badul"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="43dp"
+                android:layout_height="5dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/line" />
+
+            <ImageView
+                android:layout_width="93dp"
+                android:layout_height="66dp"
+                android:src="@drawable/img_20" />
+
+            <View
+                android:layout_width="21dp"
+                android:layout_height="12dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/line" />
+
+            <TextView
+                android:id="@+id/tocity"
+                android:layout_width="115dp"
+                android:layout_height="wrap_content"
+                android:text="Makumbura"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/dateBus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:text="10 May 2023"
+            android:textColor="#FFFBFB"
+            android:textSize="16sp" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tvCount"
@@ -90,10 +91,10 @@
         android:layout_below="@id/topBar"
         android:layout_marginStart="33dp"
         android:layout_marginTop="20dp"
+        android:alpha="0.8"
         android:text="8 Available Buses"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:alpha="0.8" />
+        android:textColor="@color/white_02"
+        android:textSize="18sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvBusList"
@@ -101,7 +102,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/tvCount"
         android:layout_marginTop="10dp"
-        android:paddingHorizontal="20dp"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:paddingHorizontal="20dp" />
 
 </RelativeLayout>

@@ -15,15 +15,15 @@
         android:id="@+id/btnBack"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="55dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="75dp"
         android:src="@drawable/img_18" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="46dp"
+        android:layout_marginTop="60dp"
         android:text="Settings"
         android:textColor="#FFFFFF"
         android:textSize="26sp" />
@@ -52,7 +52,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Notifications"
-                    android:textColor="#141414"
+                    android:textColor="@color/setting_txt"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -60,7 +60,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    app:cardBackgroundColor="#CAD7D6"
+                    app:cardBackgroundColor="@color/setting_cart_bg"
                     app:cardCornerRadius="15dp"
                     app:cardElevation="0dp">
 
@@ -73,33 +73,105 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
-                            <LinearLayout android:layout_width="240dp" android:layout_height="wrap_content" android:orientation="vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Notifications" android:textColor="#141414" android:textStyle="bold" />
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Receive updates on flight changes, etc." android:textSize="12sp" />
+
+                            <LinearLayout
+                                android:layout_width="240dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Notifications"
+                                    android:textColor="@color/setting_txt"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Receive alerts for trip reminders and seat confirmations."
+                                    android:textSize="12sp" />
                             </LinearLayout>
-                            <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switchNotifications" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:checked="true" app:thumbTint="@color/white" app:trackTint="#3A7B73" />
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchNotifications"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:checked="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="#3A7B73" />
                         </RelativeLayout>
 
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="10dp" android:alpha="0.2" android:background="#666666" />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="10dp"
+                            android:alpha="0.2"
+                            android:background="#666666" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
-                            <LinearLayout android:layout_width="240dp" android:layout_height="wrap_content" android:orientation="vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Call Access" android:textColor="#141414" android:textStyle="bold" />
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Get booking confirmations, reminders, etc." android:textSize="12sp" />
+
+                            <LinearLayout
+                                android:layout_width="240dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Call Access"
+                                    android:textColor="@color/setting_txt"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Get booking confirmations, reminders, etc."
+                                    android:textSize="12sp" />
                             </LinearLayout>
-                            <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switchCallAccess" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" app:thumbTint="@color/white" app:trackTint="#3A7B73" />
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchCallAccess"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="#3A7B73" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
-                            <LinearLayout android:layout_width="240dp" android:layout_height="wrap_content" android:orientation="vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Location Access" android:textColor="#141414" android:textStyle="bold" />
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Get booking confirmations, reminders, etc." android:textSize="12sp" />
+
+                            <LinearLayout
+                                android:layout_width="240dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Location Access"
+                                    android:textColor="@color/setting_txt"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Help us show you the closest boarding points based on your location"
+                                    android:textSize="12sp" />
                             </LinearLayout>
-                            <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switchLocation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" app:thumbTint="@color/white" app:trackTint="#3A7B73" />
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchLocation"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="#3A7B73" />
                         </RelativeLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -109,7 +181,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="Preferences"
-                    android:textColor="#141414"
+                    android:textColor="@color/setting_txt"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -117,21 +189,111 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    app:cardBackgroundColor="#CAD7D6"
+                    app:cardBackgroundColor="@color/setting_cart_bg"
                     app:cardCornerRadius="15dp"
                     app:cardElevation="0dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Language" android:textColor="#141414" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="English" android:textColor="#141414" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Language"
+                                android:textColor="@color/setting_txt" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:text="English"
+                                android:textColor="@color/setting_txt" />
                         </RelativeLayout>
-                        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="10dp" android:alpha="0.2" android:background="#666666" />
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                            <LinearLayout android:layout_width="240dp" android:layout_height="wrap_content" android:orientation="vertical">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="dark Mode" android:textColor="#141414" android:textStyle="bold" />
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Receive updates on flight changes, etc." android:textSize="12sp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="10dp"
+                            android:alpha="0.2"
+                            android:background="#666666" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:layout_width="240dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Dark Mode"
+                                    android:textColor="@color/setting_txt"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Toggle dark or light theme manually."
+                                    android:textSize="12sp" />
                             </LinearLayout>
-                            <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/switchDarkMode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:checked="true" app:thumbTint="@color/white" app:trackTint="#3A7B73" />
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchDarkMode"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:checked="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="#3A7B73" />
+                        </RelativeLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="10dp"
+                            android:alpha="0.2"
+                            android:background="#666666" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <LinearLayout
+                                android:layout_width="240dp"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Auto Brightness"
+                                    android:textColor="@color/setting_txt"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Automatically adjust screen brightness."
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchAutoBrightness"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="#3A7B73" />
                         </RelativeLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -141,7 +303,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="Privacy &amp; Support"
-                    android:textColor="#141414"
+                    android:textColor="@color/setting_txt"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -153,7 +315,7 @@
                     android:drawableEnd="@drawable/arrow"
                     android:gravity="center_vertical"
                     android:text="Privacy Policy"
-                    android:textColor="#141414" />
+                    android:textColor="@color/setting_txt" />
 
                 <TextView
                     android:id="@+id/tvTerms"
@@ -163,16 +325,17 @@
                     android:drawableEnd="@drawable/arrow"
                     android:gravity="center_vertical"
                     android:text="Terms of Service"
-                    android:textColor="#141414" />
+                    android:textColor="@color/setting_txt" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cvProfile"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginTop="10dp"
-                    app:cardBackgroundColor="#CAD7D6"
+                    app:cardBackgroundColor="@color/setting_cart_bg"
                     app:cardCornerRadius="15dp"
                     app:cardElevation="0dp">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -181,7 +344,7 @@
                         android:gravity="center_vertical"
                         android:paddingHorizontal="10dp"
                         android:text="User Profile"
-                        android:textColor="#141414"
+                        android:textColor="@color/setting_txt"
                         android:textStyle="bold" />
                 </androidx.cardview.widget.CardView>
 
@@ -190,9 +353,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginTop="10dp"
-                    app:cardBackgroundColor="#CAD7D6"
+                    app:cardBackgroundColor="@color/setting_cart_bg"
                     app:cardCornerRadius="15dp"
                     app:cardElevation="0dp">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -201,7 +365,7 @@
                         android:gravity="center_vertical"
                         android:paddingHorizontal="10dp"
                         android:text="About Developer"
-                        android:textColor="#141414"
+                        android:textColor="@color/setting_txt"
                         android:textStyle="bold" />
                 </androidx.cardview.widget.CardView>
 
@@ -212,12 +376,12 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="30dp"
                     android:layout_marginBottom="10dp"
+                    android:background="?attr/selectableItemBackground"
                     android:padding="10dp"
                     android:text="Logout from Account"
                     android:textColor="#D32F2F"
                     android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:background="?attr/selectableItemBackground" />
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

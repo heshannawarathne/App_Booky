@@ -6,11 +6,49 @@
     <color name="primary_teal">#3A7B73</color>
     <color name="text_teal">#1B5B52</color>
     <color name="white">#FFFFFF</color>
+
+    <color name="white_alltime">#FFFFFF</color>
+
+    <color name="white_02">#353538</color>
+
     <color name="black">#000000</color>
+
+    <color name="bus_result">#ECE7E7</color>
+
+    <color name="bus_white_bg">#FFFFFF</color>
+
+
+    <color name="under_bg_book">#F0F4F4</color>
+
+    <color name="under_bg_btn">#008080</color>
+    <color name="under_bg_newww">#FFF0F0</color>
+
+
+
+    <color name="available_seat">#D6D6D6</color>
+
+
+    <color name="setting_bg">#E2E2E2</color>
+    <color name="setting_txt">#141414</color>
+    <color name="setting_cart_bg">#CAD7D6</color>
+
+
+    <color name="profile_txt">#555</color>
+
+
+    <color name="schedule_time">#777777</color>
+
+
+
+
+
+
+
+
 
     <color name="main_teal">#3A7B73</color>
     <color name="off_white">#EFEFEF</color>
-    <color name="call_red">#B76969</color>
+    <color name="call_red">#B86969</color>
     <color name="df_seat">#D6D6D6</color>
 
     <color name="background">#F5F7F8</color>

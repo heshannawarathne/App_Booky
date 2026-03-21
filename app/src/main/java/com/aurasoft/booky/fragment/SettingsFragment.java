@@ -2,6 +2,7 @@ package com.aurasoft.booky.fragment;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Paint;
@@ -19,12 +20,21 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.aurasoft.booky.LoginActivity;
 import com.aurasoft.booky.R;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.auth.FirebaseAuth;
 
+
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.view.WindowManager;
 public class SettingsFragment extends Fragment {
 
-    private SwitchMaterial switchNotifications, switchCallAccess, switchLocation, switchDarkMode;
+    private SwitchMaterial switchAutoBrightness, switchNotifications, switchCallAccess, switchLocation, switchDarkMode;
     private TextView tvPrivacyPolicy, tvTerms, tvLegalContent, btnLogout;
     private View cvProfile, cvDeveloper;
     private ImageView btnBack;
@@ -40,7 +50,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-
+        // --- 1. Initialize Views ---
         settingsMenuLayout = view.findViewById(R.id.settingsMenuLayout);
         tvLegalContent = view.findViewById(R.id.tvLegalContent);
         tvPrivacyPolicy = view.findViewById(R.id.tvPrivacyPolicy);
@@ -50,30 +60,26 @@ public class SettingsFragment extends Fragment {
         btnLogout = view.findViewById(R.id.btnLogout);
         btnBack = view.findViewById(R.id.btnBack);
 
-
         btnBack.setVisibility(View.GONE);
-
 
         switchNotifications = view.findViewById(R.id.switchNotifications);
         switchCallAccess = view.findViewById(R.id.switchCallAccess);
         switchLocation = view.findViewById(R.id.switchLocation);
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
 
-
+        // --- 2. Logout Logic with Confirmation ---
         if (btnLogout != null) {
             btnLogout.setPaintFlags(btnLogout.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             btnLogout.setOnClickListener(v -> {
-                Toast.makeText(getContext(), "Logging out...", Toast.LENGTH_SHORT).show();
+                showLogoutConfirmation(); // මෙතනින් Dialog එකට යනවා
             });
         }
 
-        // --- 2. Load Saved Settings ---
+        // --- 3. Load Saved Settings ---
         loadSettings();
 
-        // --- 3. Click Listeners ---
-
+        // --- 4. Click Listeners ---
         tvPrivacyPolicy.setOnClickListener(v -> showLegalContent(getPrivacyPolicyText()));
-
         tvTerms.setOnClickListener(v -> showLegalContent(getTermsOfServiceText()));
 
         if (cvDeveloper != null) {
@@ -94,53 +100,122 @@ public class SettingsFragment extends Fragment {
             if (tvLegalContent.getVisibility() == View.VISIBLE) {
                 tvLegalContent.setVisibility(View.GONE);
                 settingsMenuLayout.setVisibility(View.VISIBLE);
-                // Back වුණාම ආයෙත් Back Button එක Hide කරනවා
                 btnBack.setVisibility(View.GONE);
             }
         });
 
-        // --- 4. Switch Listeners ---
+        // --- 5. Switch Listeners (Permissions & Settings) ---
+        // Notification Switch
+        switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // මේ Check එක ඉතා වැදගත්! Listener එක trigger වුණේ ඇඟිල්ලෙන් එබුවම විතරද බලනවා
+            if (buttonView.isPressed()) {
+                saveSetting("notifications", isChecked);
+                Toast.makeText(getContext(), isChecked ? "Notifications Enabled" : "Notifications Disabled", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> saveSetting("notifications", isChecked));
-
+// Call Access Switch
         switchCallAccess.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, 101);
+            if (buttonView.isPressed()) {
+                if (isChecked) {
+                    // Active කරන්න හදද්දී Permission නැත්නම් ඉල්ලනවා
+                    if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                        // තාවකාලිකව Off කරමු Permission ලැබෙනකම්
+                        switchCallAccess.setChecked(false);
+                        requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, 101);
+                    } else {
+                        saveSetting("call_access", true);
+                    }
                 } else {
-                    saveSetting("call_access", true);
+                    // Deactive කරද්දී කෙලින්ම False විදිහට Save කරනවා
+                    saveSetting("call_access", false);
+                    Toast.makeText(getContext(), "Call Access Deactivated in App", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                saveSetting("call_access", false);
             }
         });
 
+// Location Switch
         switchLocation.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 102);
+            if (buttonView.isPressed()) {
+                if (isChecked) {
+                    if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        switchLocation.setChecked(false);
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 102);
+                    } else {
+                        saveSetting("location_access", true);
+                    }
                 } else {
-                    saveSetting("location_access", true);
+                    saveSetting("location_access", false);
+                    Toast.makeText(getContext(), "Location Access Deactivated in App", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                saveSetting("location_access", false);
             }
         });
 
+// Dark Mode Switch
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                saveSetting("dark_mode", true);
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                saveSetting("dark_mode", false);
+            if (buttonView.isPressed()) {
+                saveSetting("dark_mode", isChecked);
+                if (isChecked) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+            }
+        });
+
+        switchAutoBrightness = view.findViewById(R.id.switchAutoBrightness);
+
+// Auto Brightness Switch එකේ Listener එක
+        switchAutoBrightness.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (buttonView.isPressed()) { // යූසර් Click කරොත් විතරක් වැඩ කරන්න
+                saveSetting("auto_brightness", isChecked);
+
+                if (isChecked) {
+                    Toast.makeText(getContext(), "Auto Brightness Enabled", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Disable කරපු ගමන් Brightness එක සාමාන්‍ය තත්වයට පත් කරනවා
+                    if (getActivity() != null) {
+                        android.view.WindowManager.LayoutParams lp = getActivity().getWindow().getAttributes();
+                        lp.screenBrightness = -1f; // -1f කියන්නේ System Default අගය
+                        getActivity().getWindow().setAttributes(lp);
+                    }
+                    Toast.makeText(getContext(), "Auto Brightness Disabled", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         return view;
     }
 
-    // --- Data Methods (ඔයාගේ Content එක එලෙසම ඇත) ---
+    // onCreateView එකෙන් එළියට මේක දාන්න අමතක කරන්න එපා!
+    private void showLogoutConfirmation() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_logout_confirm, null);
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+        builder.setView(dialogView);
+        android.app.AlertDialog dialog = builder.create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        TextView btnCancel = dialogView.findViewById(R.id.btnCancel);
+        TextView btnConfirm = dialogView.findViewById(R.id.btnConfirmLogout);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            dialog.dismiss();
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            if (getActivity() != null) getActivity().finish();
+            Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+        });
+
+        dialog.show();
+    }
+
 
     private String getPrivacyPolicyText() {
         return "<b>Last Updated: March 2026</b><br><br>" +
@@ -193,8 +268,6 @@ public class SettingsFragment extends Fragment {
     private void showLegalContent(String content) {
         settingsMenuLayout.setVisibility(View.GONE);
         tvLegalContent.setVisibility(View.VISIBLE);
-
-        // Content එක පෙන්වන විට Back Button එක Enable කරනවා
         btnBack.setVisibility(View.VISIBLE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -202,6 +275,11 @@ public class SettingsFragment extends Fragment {
         } else {
             tvLegalContent.setText(android.text.Html.fromHtml(content));
         }
+
+        // *** මෙන්න මේ පේළිය අලුතින් එකතු කරන්න ***
+        // මේකෙන් 'setting_cart_bg' වල තියෙන පාට ඉබේම අකුරු වලට වැටෙනවා
+        tvLegalContent.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_02));
+
         tvLegalContent.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
     }
 
@@ -214,22 +292,51 @@ public class SettingsFragment extends Fragment {
 
     private void loadSettings() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        switchCallAccess.setChecked(sharedPreferences.getBoolean("call_access", false));
-        switchLocation.setChecked(sharedPreferences.getBoolean("location_access", false));
+
+        // 1. සිස්ටම් එකේ ඇත්තටම Permission තියෙනවද බලනවා (Null Safety සඳහා)
+        if (getContext() == null) return;
+        boolean hasCallPerm = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
+        boolean hasLocPerm = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        // 2. Switch එක Check වෙන්න නම් කරුණු දෙකක් සම්පූර්ණ වෙන්න ඕනේ:
+        //    a) යූසර් ඇප් එක ඇතුළේ Switch එක On කරලා තියෙන්න ඕනේ.
+        //    b) ඇන්ඩ්‍රොයිඩ් සිස්ටම් එකේ Permission එක Allowed වෙලා තියෙන්න ඕනේ.
+        switchCallAccess.setChecked(sharedPreferences.getBoolean("call_access", false) && hasCallPerm);
+        switchLocation.setChecked(sharedPreferences.getBoolean("location_access", false) && hasLocPerm);
+
+        // මේවාට System Permissions ඕනේ නැහැ
         switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
-        switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode",
-                AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES));
+
+        // Dark mode එකට SharedPreferences එක විතරක් බලමු
+        switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode", false));
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (requestCode == 101) saveSetting("call_access", true);
-            if (requestCode == 102) saveSetting("location_access", true);
-        } else {
-            if (requestCode == 101) switchCallAccess.setChecked(false);
-            if (requestCode == 102) switchLocation.setChecked(false);
+
+        boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+        if (requestCode == 101) {
+            if (granted) {
+                saveSetting("call_access", true);
+                switchCallAccess.setChecked(true); // දැන් Permission තියෙන නිසා On කරනවා
+                Toast.makeText(getContext(), "Call Access Activated", Toast.LENGTH_SHORT).show();
+            } else {
+                saveSetting("call_access", false);
+                switchCallAccess.setChecked(false);
+                Toast.makeText(getContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == 102) {
+            if (granted) {
+                saveSetting("location_access", true);
+                switchLocation.setChecked(true);
+                Toast.makeText(getContext(), "Location Access Activated", Toast.LENGTH_SHORT).show();
+            } else {
+                saveSetting("location_access", false);
+                switchLocation.setChecked(false);
+                Toast.makeText(getContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

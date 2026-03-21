@@ -121,16 +121,16 @@
 
             <View
                 android:layout_width="40dp"
-                android:layout_height="4dp"
+                android:layout_height="1dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="20dp"
-                android:background="#E0E0E0" />
+                android:background="@color/white_02" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pickup Details"
-                android:textColor="#2C3E50"
+                android:textColor="@color/white_02"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 

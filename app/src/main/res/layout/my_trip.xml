@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#ffffff">
+        android:background="@color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -77,7 +77,7 @@
                 android:layout_marginBottom="12dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="Badulla → Makumbura"
-                android:textColor="#333333"
+                android:textColor="@color/white_02"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -106,7 +106,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="20 March 2026"
-                        android:textColor="#222222"
+                        android:textColor="@color/white_02"
                         android:textSize="20sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -130,7 +130,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="05:04 AM"
-                        android:textColor="#222222"
+                        android:textColor="@color/white_02"
                         android:textSize="20sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -163,7 +163,7 @@
                     android:text="02 Seats Booked"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#C2185B"/>
+                    android:textColor="@color/call_red"/>
             </LinearLayout>
 
         </LinearLayout>

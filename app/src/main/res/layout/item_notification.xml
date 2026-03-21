@@ -11,14 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@color/white">
 
         <TextView
             android:id="@+id/notiTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Notification Title"
-            android:textColor="@color/black"
+            android:textColor="@color/white_02"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -28,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="This is the message body of the notification."
-            android:textColor="#555"
+            android:textColor="@color/profile_txt"
             android:textSize="14sp" />
 
         <TextView
@@ -38,7 +39,7 @@
             android:layout_gravity="end"
             android:layout_marginTop="8dp"
             android:text="10:30 AM"
-            android:textColor="#999"
+            android:textColor="@color/profile_txt"
             android:textSize="12sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

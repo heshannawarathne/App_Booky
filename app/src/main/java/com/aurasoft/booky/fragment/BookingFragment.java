@@ -42,6 +42,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class BookingFragment extends Fragment {
 
     private AutoCompleteTextView fromSpinner, toSpinner;
@@ -55,6 +57,9 @@ public class BookingFragment extends Fragment {
     private BusAdapter busAdapter;
     private List<ScheduleModel> busList;
     private Button button;
+
+    private CircleImageView profileImg;
+    private TextView userName;
 
     // Custom Loading Dialog
     private AlertDialog loadingDialog;
@@ -135,7 +140,21 @@ public class BookingFragment extends Fragment {
                     .commit();
         });
 
+
+        profileImg = view.findViewById(R.id.profileImg);
+        userName = view.findViewById(R.id.userName);
+
+        profileImg.setOnClickListener(v -> openProfileFragment());
+
+        userName.setOnClickListener(v -> openProfileFragment());
         return view;
+    }
+
+    private void openProfileFragment() {
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new ProfileFragment())
+                .addToBackStack(null)
+                .commit();
     }
 
     private void updateNotificationBadge() {
@@ -204,16 +223,41 @@ public class BookingFragment extends Fragment {
     private void performSearch(String from, String to, String selectedDateStr) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
         try {
-            Date date = sdf.parse(selectedDateStr);
+            Date selectedDate = sdf.parse(selectedDateStr);
             Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            Date dayStart = calendar.getTime();
-            calendar.set(Calendar.HOUR_OF_DAY, 23);
-            Date dayEnd = calendar.getTime();
+
+            // අද දිනය සහ වෙලාව ගන්නවා
+            Calendar now = Calendar.getInstance();
+
+            // සසඳන්න ලේසි වෙන්න දිනය විතරක් වෙන් කරගමු
+            Calendar selectedCal = Calendar.getInstance();
+            selectedCal.setTime(selectedDate);
+
+            Date dayStart;
+
+            // 1. යූසර් තෝරලා තියෙන්නේ අද දිනයද කියලා බලනවා
+            if (selectedCal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+                    selectedCal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+
+                // අද නම්: සර්ච් එක පටන් ගන්නේ දැන් වෙලාවෙන් (Current Time)
+                dayStart = now.getTime();
+            } else {
+                // වෙනත් දවසක් නම්: ඒ දවසේ උදේ 12:00 ඉඳන් පෙන්වනවා
+                selectedCal.set(Calendar.HOUR_OF_DAY, 0);
+                selectedCal.set(Calendar.MINUTE, 0);
+                selectedCal.set(Calendar.SECOND, 0);
+                dayStart = selectedCal.getTime();
+            }
+
+            // දවසේ අවසානය (රාත්‍රී 11:59)
+            selectedCal.set(Calendar.HOUR_OF_DAY, 23);
+            selectedCal.set(Calendar.MINUTE, 59);
+            selectedCal.set(Calendar.SECOND, 59);
+            Date dayEnd = selectedCal.getTime();
 
             if (loadingDialog != null) loadingDialog.show();
 
+            // Firestore Query එක
             db.collection("Schedules")
                     .whereEqualTo("from", from)
                     .whereEqualTo("to", to)
@@ -223,6 +267,7 @@ public class BookingFragment extends Fragment {
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (loadingDialog != null) loadingDialog.dismiss();
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            // ... කලින් තිබුණ Bundle සහ Fragment Transaction එක එහෙම්මම තියන්න ...
                             Bundle bundle = new Bundle();
                             bundle.putString("FROM", from);
                             bundle.putString("TO", to);
@@ -243,7 +288,6 @@ public class BookingFragment extends Fragment {
                     });
         } catch (ParseException e) { e.printStackTrace(); }
     }
-
     private void setupUserGreeting(View view) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -266,18 +310,18 @@ public class BookingFragment extends Fragment {
     }
 
     private void loadTodayAllBuses() {
-        Calendar calStart = Calendar.getInstance();
-        calStart.set(Calendar.HOUR_OF_DAY, 0);
-        calStart.set(Calendar.MINUTE, 0);
-        calStart.set(Calendar.SECOND, 0);
-        com.google.firebase.Timestamp startTimestamp = new com.google.firebase.Timestamp(calStart.getTime());
+        // 1. දැනට පවතින හරියටම වෙලාව ගන්නවා (Current Time)
+        Calendar calNow = Calendar.getInstance();
+        com.google.firebase.Timestamp startTimestamp = new com.google.firebase.Timestamp(calNow.getTime());
 
+        // 2. අද දවසේ අවසානය (11:59:59 PM) ගන්නවා
         Calendar calEnd = Calendar.getInstance();
         calEnd.set(Calendar.HOUR_OF_DAY, 23);
         calEnd.set(Calendar.MINUTE, 59);
         calEnd.set(Calendar.SECOND, 59);
         com.google.firebase.Timestamp endTimestamp = new com.google.firebase.Timestamp(calEnd.getTime());
 
+        // Firestore Query එක - දැන් වෙලාවට වඩා වැඩි සහ අද දවස ඇතුළත බස් පමණක් ගනියි
         db.collection("Schedules")
                 .whereGreaterThanOrEqualTo("departure_time", startTimestamp)
                 .whereLessThanOrEqualTo("departure_time", endTimestamp)
@@ -288,7 +332,11 @@ public class BookingFragment extends Fragment {
                         ScheduleModel bus = document.toObject(ScheduleModel.class);
                         busList.add(bus);
                     }
+                    // ඇඩැප්ටරයට දත්ත ලැබුණු බව දැනුම් දෙනවා
                     busAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FIRESTORE_ERROR", e.getMessage());
                 });
     }
 

@@ -1,10 +1,17 @@
 package com.aurasoft.booky;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,18 +26,22 @@ import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.shape.ShapeAppearanceModel;
 
-public class MainActivity extends AppCompatActivity {
+// 1. implements SensorEventListener එකතු කළා
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    // 2. සෙන්සර් වලට අදාළ Variables
+    private SensorManager sensorManager;
+    private Sensor lightSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
+
+        // 3. Sensor Manager එක Initialize කිරීම
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         ShapeAppearanceModel shapeAppearanceModel = new ShapeAppearanceModel()
@@ -59,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new ScheduleFragment();
             } else if (id == R.id.nav_trips) {
                 selectedFragment = new MyTripFragment();
-
-
             } else if (id == R.id.nav_settings) {
                 selectedFragment = new SettingsFragment();
             }
@@ -78,5 +87,50 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
             }
         }
+    }
+
+    // --- 4. සෙන්සර් එකේ අගය වෙනස් වෙනකොට ක්‍රියාත්මක වන කොටස ---
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // Settings වලින් Auto Brightness ON ද කියලා බලනවා
+        SharedPreferences sharedPreferences = getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE);
+        boolean isAutoEnabled = sharedPreferences.getBoolean("auto_brightness", false);
+
+        if (isAutoEnabled && event.sensor.getType() == Sensor.TYPE_LIGHT) {
+            float lux = event.values[0];
+            float brightness;
+
+            // Lux අගය අනුව Brightness එක තීරණය කිරීම
+            if (lux < 10) brightness = 0.1f;
+            else if (lux < 100) brightness = 0.4f;
+            else if (lux < 1000) brightness = 0.8f;
+            else brightness = 1.0f;
+
+            // Activity එකේ Brightness එක Apply කිරීම
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.screenBrightness = brightness;
+            getWindow().setAttributes(lp);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // මේක අවශ්‍ය නැහැ
+    }
+
+    // 5. ඇප් එක Resume වෙද්දී සෙන්සර් එක Listen කරන්න පටන් ගන්නවා
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (lightSensor != null) {
+            sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    // 6. ඇප් එක Pause වෙද්දී සෙන්සර් එක නවත්වනවා (Battery Save කිරීමට)
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this);
     }
 }

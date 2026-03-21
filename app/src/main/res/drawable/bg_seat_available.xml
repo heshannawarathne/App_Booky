@@ -8,7 +8,7 @@
                 android:bottomLeftRadius="12dp"
                 android:bottomRightRadius="12dp" />
 
-            <solid android:color="#D6D6D6" />
+            <solid android:color="@color/available_seat" />
             <stroke
                 android:width="1dp"
                 android:color="#B0B0B0" />
@@ -20,7 +20,7 @@
             <corners
                 android:bottomLeftRadius="12dp"
                 android:bottomRightRadius="12dp" />
-            <solid android:color="#D6D6D6" />
+            <solid android:color="@color/available_seat" />
             <stroke
                 android:width="1dp"
                 android:color="#B0B0B0" />

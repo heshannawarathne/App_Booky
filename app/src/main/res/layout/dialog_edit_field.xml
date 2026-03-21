@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="25dp"
+    android:background="@drawable/input_box_bg"
+    android:backgroundTint="@color/white">
+
+    <TextView
+        android:id="@+id/dialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Details"
+        android:textColor="@color/book_item_color"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="15dp"/>
+
+    <EditText
+        android:id="@+id/dialogEditText"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@drawable/input_box_bg"
+        android:hint="Enter here..."
+        android:paddingHorizontal="15dp"
+        android:textSize="16sp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDialogSave"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_teal_rounded"
+        android:text="Save Changes"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.App.ExposedDropdownMenu"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/Widget.App.ExposedDropdownMenu"  android:hint="From"
-    android:padding="16dp"
     android:ellipsize="end"
+    android:hint="From"
     android:maxLines="1"
+    android:padding="16dp"
     android:text="Location Name"
-    android:textColor="#333333"
-    android:textSize="16sp" />
+    android:textColor="@color/white_02"
+    android:textSize="16sp"
+    android:background="@color/white"/>

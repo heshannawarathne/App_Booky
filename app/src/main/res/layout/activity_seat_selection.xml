@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7F8"> <View
-    android:id="@+id/headerView"
-    android:layout_width="0dp"
-    android:layout_height="180dp"
-    android:background="@drawable/bg_login_header"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:background="@color/background">
+
+    <View
+        android:id="@+id/headerView"
+        android:layout_width="0dp"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_login_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="50dp"
         android:padding="5dp"
         android:src="@drawable/img_18"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvTitle"
@@ -147,16 +147,17 @@
                 app:layout_constraintBottom_toTopOf="@+id/tvTotalAmount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/bus_white_bg"/>
 
             <TextView
                 android:id="@+id/tvTotalAmount"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:background="#F0F4F4"
+                android:background="@color/under_bg_book"
                 android:gravity="center"
                 android:text="Total: LKR 0"
-                android:textColor="#008080"
+                android:textColor="@color/under_bg_btn"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent" />
@@ -171,12 +172,12 @@
         android:layout_marginHorizontal="30dp"
         android:layout_marginBottom="50dp"
         android:background="@drawable/button_teal_rounded"
+        android:elevation="4dp"
         android:text="Proceed"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:elevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
