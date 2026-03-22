@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +14,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.model.ScheduleModel;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     private List<ScheduleModel> scheduleList;
     private Context context;
     private OnItemClickListener listener;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public interface OnItemClickListener {
         void onItemClick(ScheduleModel model);
@@ -40,19 +44,15 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     }
 
     public ScheduleAdapter(List<ScheduleModel> scheduleList, Context context) {
-        // මෙතනදී අපි පරණ schedules අයින් කරලා අලුත් ලිස්ට් එකක් හදාගන්නවා
         this.scheduleList = filterUpcomingSchedules(scheduleList);
         this.context = context;
     }
 
-    // --- පරණ Schedules අයින් කරන Logic එක ---
     private List<ScheduleModel> filterUpcomingSchedules(List<ScheduleModel> fullList) {
         List<ScheduleModel> filteredList = new ArrayList<>();
-        Timestamp currentTime = Timestamp.now(); // දැනට තියෙන වෙලාව
-
+        Timestamp currentTime = Timestamp.now();
         for (ScheduleModel model : fullList) {
             if (model.getDeparture_time() != null) {
-                // වෙලාව දැනට වඩා වැඩි නම් විතරක් ලිස්ට් එකට එකතු කරනවා
                 if (model.getDeparture_time().compareTo(currentTime) > 0) {
                     filteredList.add(model);
                 }
@@ -61,7 +61,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         return filteredList;
     }
 
-    // දත්ත අලුතින් අප්ඩේට් කරනවා නම් මේ මෙතඩ් එක පාවිච්චි කරන්න පුළුවන්
     public void updateList(List<ScheduleModel> newList) {
         this.scheduleList = filterUpcomingSchedules(newList);
         notifyDataSetChanged();
@@ -77,6 +76,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     @Override
     public void onBindViewHolder(@NonNull ScheduleViewHolder holder, int position) {
         ScheduleModel model = scheduleList.get(position);
+        String scheduleId = model.getSchedule_id();
 
         holder.busNumber.setText("no - " + model.getBus_no());
         holder.busRoute.setText(model.getFrom() + " - " + model.getTo());
@@ -84,13 +84,50 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         if (model.getDeparture_time() != null) {
             SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
             holder.busTime.setText(timeFormat.format(model.getDeparture_time().toDate()));
-
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             holder.busDate.setText(dateFormat.format(model.getDeparture_time().toDate()));
         } else {
             holder.busTime.setText("N/A");
             holder.busDate.setText("N/A");
         }
+
+        // --- අලුතින් එකතු කළ Seat Status Logic එක ---
+        db.collection("Schedules")
+                .document(scheduleId)
+                .collection("BookedSeats")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        int bookedCount = task.getResult().size();
+                        int totalSeats = 49; // ඔයා කිව්ව ගණන
+
+                        if (bookedCount >= totalSeats) {
+                            // 1. Status Text එක පෙන්වීම
+                            holder.statusText.setText("SOLD OUT");
+                            holder.statusText.setTextColor(Color.RED);
+                            holder.statusText.setVisibility(View.VISIBLE);
+
+                            // 2. Card එක Disable කිරීම (ක්ලික් කරන්න බැරි වෙන්න)
+                            holder.itemView.setAlpha(0.6f); // අඳුරු කර පෙන්වීමට
+                            holder.callBtn.setAlpha(1.0f);
+                            holder.itemView.setOnClickListener(null); // Click එක නැති කිරීම
+
+                        } else {
+                            // සීට් තිබේ නම්
+                            holder.statusText.setText("Available");
+                            holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title)); // ඔයාගේ color එකක් මෙතනට දෙන්න
+                            holder.statusText.setVisibility(View.VISIBLE);
+
+                            holder.itemView.setAlpha(1.0f);
+                            // සාමාන්‍ය Click Listener එක නැවත ලබාදීම
+                            holder.itemView.setOnClickListener(v -> {
+                                if (listener != null) {
+                                    listener.onItemClick(model);
+                                }
+                            });
+                        }
+                    }
+                });
 
         holder.callBtn.setOnClickListener(v -> {
             String phoneNumber = model.getPhone_number();
@@ -110,12 +147,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                 Toast.makeText(context, "Phone number not available", Toast.LENGTH_SHORT).show();
             }
         });
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(model);
-            }
-        });
     }
 
     @Override
@@ -124,7 +155,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     }
 
     public static class ScheduleViewHolder extends RecyclerView.ViewHolder {
-        TextView busNumber, busRoute, busTime, busDate;
+        TextView busNumber, busRoute, busTime, busDate, statusText;
         View callBtn;
 
         public ScheduleViewHolder(@NonNull View itemView) {
@@ -133,6 +164,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             busRoute = itemView.findViewById(R.id.busRoute);
             busTime = itemView.findViewById(R.id.busTime);
             busDate = itemView.findViewById(R.id.busDate);
+            statusText = itemView.findViewById(R.id.statusText); // XML එකේ දීපු ID එක
             callBtn = itemView.findViewById(R.id.callBtnBg);
         }
     }

@@ -105,4 +105,8 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.google.firebase:firebase-storage'
 
+    implementation 'com.mapbox.plugin:maps-annotation:10.16.1'
+
+
+
 }
