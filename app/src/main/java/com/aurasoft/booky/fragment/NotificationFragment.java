@@ -1,6 +1,7 @@
 package com.aurasoft.booky.fragment;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,17 +66,36 @@ public class NotificationFragment extends Fragment {
 
         loadNotifications();
 
-        btnClearAll.setOnClickListener(v -> {
-            new AlertDialog.Builder(getContext())
-                    .setTitle("Clear All")
-                    .setMessage("Are you sure you want to delete all notifications?")
-                    .setPositiveButton("Yes", (dialog, which) -> clearAllNotifications())
-                    .setNegativeButton("No", null)
-                    .show();
-        });
+        // මෙතන තමයි අර Custom Confirmation Dialog එක එන්නේ
+        btnClearAll.setOnClickListener(v -> showCustomClearDialog());
 
         return view;
     }
+
+    // --- පටන් ගැන්ම: Custom Dialog Logic ---
+    private void showCustomClearDialog() {
+        if (getContext() == null) return;
+
+        Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_clear_confirm); // උඹ හදපු XML එක
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        Button btnYes = dialog.findViewById(R.id.btnYes);
+        Button btnNo = dialog.findViewById(R.id.btnNo);
+
+        btnYes.setOnClickListener(v -> {
+            clearAllNotifications(); // Firestore එකෙන් මකන logic එක
+            dialog.dismiss();
+        });
+
+        btnNo.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+    // --- අවසානය: Custom Dialog Logic ---
 
     private void setupLoadingDialog() {
         if (getContext() == null) return;
@@ -129,7 +150,6 @@ public class NotificationFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                         updateUI();
 
-                        // මේක තමයි අලුත් කොටස: බලපු නැති ඒවා තිබේ නම් ඒවා Read කළා කියලා mark කරන්න
                         if (!value.isEmpty()) {
                             markAllAsRead(value.getDocuments());
                         }
@@ -137,14 +157,12 @@ public class NotificationFragment extends Fragment {
                 });
     }
 
-    // බලපු නැති notifications, 'Read' (True) ලෙස update කිරීමට
     private void markAllAsRead(List<DocumentSnapshot> documents) {
         WriteBatch batch = db.batch();
         boolean hasUpdates = false;
 
         for (DocumentSnapshot doc : documents) {
             NotificationModel model = doc.toObject(NotificationModel.class);
-            // isRead false නම් විතරක් true කරන්න
             if (model != null && !model.isRead()) {
                 batch.update(doc.getReference(), "isRead", true);
                 hasUpdates = true;

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/card_bg_white"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="25dp">
+
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@android:drawable/ic_dialog_alert"
+        android:contentDescription="Alert"
+        app:tint="@color/call_red" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="Clear All Notifications?"
+        android:textColor="@color/white_02"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="This action cannot be undone. Do you want to proceed?"
+        android:textColor="@color/profile_txt"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnNo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#F5F5F5"
+            android:text="Cancel"
+            android:textColor="#333333" />
+
+        <Button
+            android:id="@+id/btnYes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/call_red"
+            android:text="Yes, Clear"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</LinearLayout>

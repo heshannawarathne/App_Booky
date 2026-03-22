@@ -61,7 +61,7 @@
                         android:text="PICKUP POINT"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="#4A7C6D"
+                        android:textColor="@color/main_teal"
                         android:letterSpacing="0.15"/>
 
                     <LinearLayout
@@ -98,7 +98,7 @@
                         android:text="SELECTED SEATS"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="#4A7C6D"
+                        android:textColor="@color/main_teal"
                         android:letterSpacing="0.15"/>
 
                     <TextView
@@ -124,7 +124,7 @@
                         android:text="FARE DETAILS"
                         android:textSize="11sp"
                         android:textStyle="bold"
-                        android:textColor="#4A7C6D"
+                        android:textColor="@color/main_teal"
                         android:layout_marginBottom="14dp"
                         android:letterSpacing="0.15"/>
 
@@ -181,7 +181,7 @@
                             android:text="LKR 2,450.00"
                             android:textSize="22sp"
                             android:textStyle="bold"
-                            android:textColor="@color/under_bg_btn"/>
+                            android:textColor="@color/main_teal"/>
                     </RelativeLayout>
 
                 </LinearLayout>
