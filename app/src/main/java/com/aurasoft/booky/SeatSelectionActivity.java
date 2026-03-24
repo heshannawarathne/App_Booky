@@ -10,7 +10,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -129,10 +128,7 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     }
 
     private void goToMapActivity() {
-        Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
-        intent.putExtra("SCHEDULE_ID", currentScheduleId);
-        intent.putExtra("TOTAL_PRICE", totalAmount);
-
+        // 1. කලින් වගේම ලිස්ට් දෙක හදාගන්නවා (Content අයින් කරන්න එපා)
         ArrayList<String> selectedSeats = new ArrayList<>();
         ArrayList<String> selectedGenders = new ArrayList<>();
 
@@ -143,9 +139,46 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             }
         }
 
-        intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
-        intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
-        startActivity(intent);
+        // 2. Firestore එකෙන් coordinates ටික ගන්නවා (මේක තමයි අලුත් කොටස)
+        // Firestore instance එක (db) උඩින් define කරලා ඇති කියලා හිතනවා
+        db.collection("Schedules").document(currentScheduleId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+
+                        // Firestore එකෙන් අගයන් ටික ගන්නවා
+                        double fromLat = documentSnapshot.getDouble("from_lat") != null ? documentSnapshot.getDouble("from_lat") : 0.0;
+                        double fromLng = documentSnapshot.getDouble("from_lng") != null ? documentSnapshot.getDouble("from_lng") : 0.0;
+                        double toLat = documentSnapshot.getDouble("to_lat") != null ? documentSnapshot.getDouble("to_lat") : 0.0;
+                        double toLng = documentSnapshot.getDouble("to_lng") != null ? documentSnapshot.getDouble("to_lng") : 0.0;
+                        String fromCity = documentSnapshot.getString("from");
+                        String toCity = documentSnapshot.getString("to");
+
+                        // 3. දැන් Intent එක හදලා ඔක්කොම දත්ත ටික එකට යවනවා
+                        Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
+
+                        // ඔයාගේ පරණ දත්ත
+                        intent.putExtra("SCHEDULE_ID", currentScheduleId);
+                        intent.putExtra("TOTAL_PRICE", totalAmount);
+                        intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
+                        intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
+
+                        // මැප් එකට අලුතින් අවශ්‍ය ලොකේෂන් දත්ත
+                        intent.putExtra("FROM_LAT", fromLat);
+                        intent.putExtra("FROM_LNG", fromLng);
+                        intent.putExtra("TO_LAT", toLat);
+                        intent.putExtra("TO_LNG", toLng);
+                        intent.putExtra("FROM_CITY", fromCity);
+                        intent.putExtra("TO_CITY", toCity);
+
+                        startActivity(intent);
+
+                    } else {
+                        Toast.makeText(this, "Schedule coordinates not found in Firestore!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error fetching map data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     // --- පරණ විදිහටම තියෙන අනිත් methods ටික ---
