@@ -242,16 +242,17 @@ public class ProfileFragment extends Fragment {
     }
 
     private void uploadImageToImgBB(Uri uri) {
-        // Loading එක පෙන්වන්න පටන් ගන්නවා
         if (loadingDialog != null) loadingDialog.show();
 
         try {
             InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
             byte[] bytes = getBytes(inputStream);
-            String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
+
+            // මෙතන Base64.NO_WRAP අනිවාර්යයෙන්ම දාන්න
+            String base64Image = Base64.encodeToString(bytes, Base64.NO_WRAP);
 
             OkHttpClient client = new OkHttpClient();
-            String apiKey = "12f649e459e26d27ebb7bc3b7b053353";
+            String apiKey = "8625ab9894cfa71abff199fea140673d";
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -264,44 +265,39 @@ public class ProfileFragment extends Fragment {
                     .build();
 
             client.newCall(request).enqueue(new Callback() {
-
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    // මෙන්න මෙතන තමයි වැදගත්ම දේ. e.getMessage() එකෙන් තමයි කියන්නේ ඇයි fail වුණේ කියලා.
                     Log.e("UPLOAD_ERROR", "Network Failure: " + e.getMessage());
-
-                    if (getActivity() == null) return;
-                    getActivity().runOnUiThread(() -> {
-                        if (loadingDialog != null) loadingDialog.dismiss();
-                        Toast.makeText(getContext(), "Network Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (loadingDialog != null) loadingDialog.dismiss();
+                            Toast.makeText(getContext(), "Network Error!", Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 }
 
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                     if (response.isSuccessful() && response.body() != null) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            String responseData = response.body().string();
+                            JSONObject jsonResponse = new JSONObject(responseData);
                             String uploadedUrl = jsonResponse.getJSONObject("data").getString("url");
-                            updateProfileImageUrl(uploadedUrl);
+
+                            // මෙතන runOnUiThread දාන්න Firestore update එක සඳහා
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> updateProfileImageUrl(uploadedUrl));
+                            }
                         } catch (Exception e) {
-                            Log.e("UPLOAD_ERROR", "JSON Parsing Error: " + e.getMessage());
-                            getActivity().runOnUiThread(() -> { if (loadingDialog != null) loadingDialog.dismiss(); });
+                            Log.e("UPLOAD_ERROR", "JSON Error: " + e.getMessage());
+                            if (getActivity() != null) getActivity().runOnUiThread(() -> { if (loadingDialog != null) loadingDialog.dismiss(); });
                         }
                     } else {
-                        // මෙතනින් තමයි ImgBB එකෙන් එවන error එක අල්ලගන්නේ (උදා: Invalid API Key)
-                        String errorBody = response.body() != null ? response.body().string() : "Unknown error";
-                        Log.e("UPLOAD_ERROR", "Response Failed: " + errorBody);
-
-                        getActivity().runOnUiThread(() -> {
-                            if (loadingDialog != null) loadingDialog.dismiss();
-                            Toast.makeText(getContext(), "Server Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                        });
+                        if (getActivity() != null) getActivity().runOnUiThread(() -> { if (loadingDialog != null) loadingDialog.dismiss(); });
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
             if (loadingDialog != null) loadingDialog.dismiss();
         }
     }

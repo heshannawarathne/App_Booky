@@ -16,8 +16,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class OtpActivity extends AppCompatActivity {
@@ -134,34 +136,47 @@ public class OtpActivity extends AppCompatActivity {
 
 
     private void verifyOtp(String code, String verificationId, FirebaseAuth auth) {
-
         loadingDialog.show();
 
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
 
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
-
-
-                    if (loadingDialog != null) loadingDialog.dismiss();
-
                     if (task.isSuccessful()) {
-                        boolean isNewUser = task.getResult().getAdditionalUserInfo().isNewUser();
+                        FirebaseUser user = task.getResult().getUser();
 
-                        Intent intent;
-                        if (isNewUser) {
-                            intent = new Intent(OtpActivity.this, NameEntryActivity.class);
-                        } else {
-                            intent = new Intent(OtpActivity.this, MainActivity.class);
+                        if (user != null) {
+                            // ක්‍රමය: Firestore එකේ මේ User ගේ UID එකෙන් record එකක් තියෙනවද කියලා බලනවා
+                            FirebaseFirestore.getInstance().collection("Users")
+                                    .document(user.getUid())
+                                    .get()
+                                    .addOnCompleteListener(dbTask -> {
+                                        if (loadingDialog != null) loadingDialog.dismiss();
+
+                                        if (dbTask.isSuccessful()) {
+                                            com.google.firebase.firestore.DocumentSnapshot document = dbTask.getResult();
+
+                                            Intent intent;
+                                            // Document එකක් නැත්නම් (exists == false), ඒ කියන්නේ අලුත් කෙනෙක්
+                                            if (document == null || !document.exists()) {
+                                                intent = new Intent(OtpActivity.this, NameEntryActivity.class);
+                                            } else {
+                                                // කලින් record එකක් තියෙනවා නම් කෙලින්ම Home (MainActivity) යනවා
+                                                intent = new Intent(OtpActivity.this, MainActivity.class);
+                                            }
+
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+
+                                        } else {
+                                            // Database එක check කරන්න බැරි වුණොත් (උදා: Internet slow)
+                                            Toast.makeText(this, "Error checking user profile", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         }
-
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-                        startActivity(intent);
-
-                        finish();
-
                     } else {
+                        if (loadingDialog != null) loadingDialog.dismiss();
                         Toast.makeText(OtpActivity.this, "Wrong OTP, please try again", Toast.LENGTH_SHORT).show();
                     }
                 });
