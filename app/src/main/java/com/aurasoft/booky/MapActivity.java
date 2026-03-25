@@ -3,6 +3,8 @@ package com.aurasoft.booky;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
@@ -27,38 +29,58 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.maps.CameraOptions;
-import com.mapbox.maps.MapView;
-import com.mapbox.maps.Style;
-import com.mapbox.maps.plugin.gestures.GesturesUtils;
-import com.mapbox.maps.plugin.gestures.OnMoveListener;
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentUtils;
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.mapbox.core.constants.Constants.PRECISION_6;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
+
 public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
+    private MapboxMap mapboxMap;
     private TextView tvSelectedLocation;
     private ImageView imgCenterMarker;
-    private Point selectedPoint;
+    private LatLng selectedLatLng;
 
     private String scheduleId;
+    private double fromLat, fromLng, toLat, toLng;
     private int totalPrice;
-    private ArrayList<String> selectedSeats;
-    private ArrayList<String> selectedGenders;
+    private ArrayList<String> selectedSeats, selectedGenders;
 
-    private AlertDialog loadingDialog;
-    private AlertDialog noInternetDialog;
-    private final Handler connectionHandler = new Handler(Looper.getMainLooper());
-
-    // නිතරම කනෙක්ෂන් එක බලන්න අවශ්‍ය Variables
+    private AlertDialog loadingDialog, noInternetDialog;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private boolean isStyleLoaded = false;
@@ -66,126 +88,111 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        com.mapbox.common.MapboxOptions.setAccessToken(getString(R.string.mapbox_access_token));
+        Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_map);
 
         setupLoadingDialog();
-
         mapView = findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+
         tvSelectedLocation = findViewById(R.id.tvSelectedLocation);
         imgCenterMarker = findViewById(R.id.img_center_marker);
         FloatingActionButton fabCurrentLocation = findViewById(R.id.fabCurrentLocation);
         MaterialButton btnConfirm = findViewById(R.id.btnConfirm);
         MaterialCardView btnBack = findViewById(R.id.btnBack);
 
+        // Intent Data
         scheduleId = getIntent().getStringExtra("SCHEDULE_ID");
         totalPrice = getIntent().getIntExtra("TOTAL_PRICE", 0);
         selectedSeats = getIntent().getStringArrayListExtra("SELECTED_SEATS");
         selectedGenders = getIntent().getStringArrayListExtra("SELECTED_GENDERS");
+        fromLat = getIntent().getDoubleExtra("FROM_LAT", 6.9271);
+        fromLng = getIntent().getDoubleExtra("FROM_LNG", 79.8612);
+        toLat = getIntent().getDoubleExtra("TO_LAT", 7.2906);
+        toLng = getIntent().getDoubleExtra("TO_LNG", 80.6337);
 
-        // 1. Connectivity Manager එක පටන් ගන්නවා
+        // --- Network Monitoring ---
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         startNetworkMonitoring();
 
-        // 2. මුලින්ම කනෙක්ෂන් චෙක් කරලා මැප් එක ලෝඩ් කරනවා
-        checkInitialConnection();
+        mapView.getMapAsync(mapboxMap -> {
+            this.mapboxMap = mapboxMap;
+            mapboxMap.getUiSettings().setZoomGesturesEnabled(true);
+            mapboxMap.setMinZoomPreference(10);
+            mapboxMap.setMaxZoomPreference(18);
+
+            mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+                isStyleLoaded = true;
+                initRouteAndMarkers(style);
+                setupCameraListener();
+            });
+        });
 
         btnBack.setOnClickListener(v -> onBackPressed());
         fabCurrentLocation.setOnClickListener(v -> focusLocation());
 
         btnConfirm.setOnClickListener(v -> {
-            if (selectedPoint != null) {
-                Intent summaryIntent = new Intent(MapActivity.this, BookingSummaryActivity.class);
-                summaryIntent.putExtra("SCHEDULE_ID", scheduleId);
-                summaryIntent.putExtra("TOTAL_PRICE", totalPrice);
-                summaryIntent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
-                summaryIntent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
-                summaryIntent.putExtra("PICKUP_ADDRESS", tvSelectedLocation.getText().toString());
-                summaryIntent.putExtra("PICKUP_LAT", selectedPoint.latitude());
-                summaryIntent.putExtra("PICKUP_LNG", selectedPoint.longitude());
-                startActivity(summaryIntent);
+            if (selectedLatLng != null) {
+                showConfirmDialog(); // Custom Popup එක පෙන්වනවා
             } else {
-                Toast.makeText(this, "Please select a pickup location first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show();
             }
         });
-
-        requestLocationPermission();
     }
 
-    // --- Real-time Network Monitoring ---
+    // --- Custom Confirmation Dialog ---
+    private void showConfirmDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_location, null);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        TextView tvAddress = dialogView.findViewById(R.id.tvConfirmAddress);
+        tvAddress.setText(tvSelectedLocation.getText().toString());
+
+        dialogView.findViewById(R.id.btnYes).setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(this, BookingSummaryActivity.class);
+            intent.putExtra("SCHEDULE_ID", scheduleId);
+            intent.putExtra("TOTAL_PRICE", totalPrice);
+            intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
+            intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
+            intent.putExtra("PICKUP_ADDRESS", tvSelectedLocation.getText().toString());
+            intent.putExtra("PICKUP_LAT", selectedLatLng.getLatitude());
+            intent.putExtra("PICKUP_LNG", selectedLatLng.getLongitude());
+            startActivity(intent);
+        });
+
+        dialogView.findViewById(R.id.btnNo).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    // --- Real-time Network Monitoring (v11 logic) ---
     private void startNetworkMonitoring() {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                // ඉන්ටර්නෙට් ආපු ගමන් dialog එක වහනවා
-                runOnUiThread(() -> {
-                    if (noInternetDialog != null && noInternetDialog.isShowing()) {
-                        noInternetDialog.dismiss();
-                    }
-                });
+                runOnUiThread(() -> { if (noInternetDialog != null) noInternetDialog.dismiss(); });
             }
-
             @Override
             public void onLost(@NonNull Network network) {
-                // ඉන්ටර්නෙට් ඕනෑම වෙලාවක නැතිවුණොත් Dialog එක පෙන්වනවා
                 runOnUiThread(() -> showNoInternetDialog());
             }
         };
-
-        NetworkRequest networkRequest = new NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .build();
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback);
-    }
-
-    private void checkInitialConnection() {
-        if (loadingDialog != null) loadingDialog.show();
-
-        // තත්පර 5ක ටයිමර් එක
-        connectionHandler.postDelayed(() -> {
-            if (!isStyleLoaded) {
-                if (loadingDialog != null) loadingDialog.dismiss();
-                showNoInternetDialog();
-            }
-        }, 5000);
-
-        mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
-            isStyleLoaded = true;
-            connectionHandler.removeCallbacksAndMessages(null);
-            if (loadingDialog != null) loadingDialog.dismiss();
-
-            mapView.getMapboxMap().setCamera(new CameraOptions.Builder()
-                    .center(Point.fromLngLat(79.8612, 6.9271))
-                    .zoom(14.0)
-                    .build());
-
-            setupMapListeners();
-        });
+        connectivityManager.registerNetworkCallback(new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(), networkCallback);
     }
 
     private void showNoInternetDialog() {
         if (noInternetDialog != null && noInternetDialog.isShowing()) return;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View layoutView = getLayoutInflater().inflate(R.layout.dialog_no_internet, null);
-        builder.setView(layoutView);
-        builder.setCancelable(false);
-
-        noInternetDialog = builder.create();
-        if (noInternetDialog.getWindow() != null) {
-            noInternetDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        layoutView.findViewById(R.id.btnRefresh).setOnClickListener(v -> {
-            if (isNetworkAvailable()) {
-                noInternetDialog.dismiss();
-                if (!isStyleLoaded) checkInitialConnection();
-            } else {
-                Toast.makeText(this, "Still no connection. Please check again.", Toast.LENGTH_SHORT).show();
-            }
+        View layout = getLayoutInflater().inflate(R.layout.dialog_no_internet, null);
+        noInternetDialog = new AlertDialog.Builder(this).setView(layout).setCancelable(false).create();
+        noInternetDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        layout.findViewById(R.id.btnRefresh).setOnClickListener(v -> {
+            if (isNetworkAvailable()) noInternetDialog.dismiss();
         });
-
         noInternetDialog.show();
     }
 
@@ -194,115 +201,101 @@ public class MapActivity extends AppCompatActivity {
         return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
     }
 
-    // --- Helper UI Methods ---
+    private void drawRoute(Style style, DirectionsRoute route) {
+        LineString lineString = LineString.fromPolyline(route.geometry(), PRECISION_6);
+        style.addSource(new GeoJsonSource("route-source", lineString));
+        style.addLayer(new LineLayer("route-layer", "route-source")
+                .withProperties(lineColor(Color.BLACK), lineWidth(4f)));
 
-    private void setupLoadingDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
-        builder.setView(dialogView);
-        builder.setCancelable(false);
-        loadingDialog = builder.create();
-        if (loadingDialog.getWindow() != null) {
-            loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            WindowManager.LayoutParams params = loadingDialog.getWindow().getAttributes();
-            params.gravity = Gravity.BOTTOM;
-            params.y = 80;
-            loadingDialog.getWindow().setAttributes(params);
-        }
+        // 1. Route එකේ Bounds (මුලින්ම Zoom වෙන්න)
+        LatLngBounds routeBounds = new LatLngBounds.Builder()
+                .include(new LatLng(fromLat, fromLng))
+                .include(new LatLng(toLat, toLng))
+                .build();
+
+        // මැප් එක ලෝඩ් වෙද්දී මුළු පාරම පේන්න Zoom වෙනවා
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds, 150));
+
+        // 2. ශ්‍රී ලංකාවට අදාළ දළ සීමාවන් (Sri Lanka Bounds)
+        // මේ Coordinates වලින් මුළු ලංකාවම ආවරණය වෙනවා
+        LatLngBounds sriLankaBounds = new LatLngBounds.Builder()
+                .include(new LatLng(5.9, 79.5))  // දකුණ/බටහිර කෙළවර
+                .include(new LatLng(9.9, 81.9))  // උතුර/නැගෙනහිර කෙළවර
+                .build();
+
+        // 3. මැප් එක ශ්‍රී ලංකාවට විතරක් Lock කරනවා
+        // දැන් User ට ලංකාව ඇතුළේ ඕනෑම විදිහකට Zoom Out/Move කරන්න පුළුවන්
+        mapboxMap.setLatLngBoundsForCameraTarget(sriLankaBounds);
+
+        // 4. Zoom සීමාවන් (පොඩි Zoom එකකදී මුළු ලංකාවම පේනවා)
+        mapboxMap.setMinZoomPreference(6.5); // ලංකාවට වඩා ඈතට Zoom out වීම වැළැක්වීමට
     }
 
-    private void setupMapListeners() {
-        GesturesUtils.getGestures(mapView).addOnMoveListener(new OnMoveListener() {
-            @Override
-            public void onMoveBegin(@NonNull com.mapbox.android.gestures.MoveGestureDetector detector) {
-                imgCenterMarker.animate().translationY(-60f).setDuration(250).start();
-            }
+    private void initRouteAndMarkers(Style style) {
+        Point origin = Point.fromLngLat(fromLng, fromLat);
+        Point destination = Point.fromLngLat(toLng, toLat);
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.dot);
+        style.addImage("marker-icon", b);
+        style.addSource(new GeoJsonSource("marker-source", FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(origin), Feature.fromGeometry(destination)})));
+        style.addLayer(new SymbolLayer("marker-layer", "marker-source").withProperties(iconImage("marker-icon"), iconAllowOverlap(true)));
+        getRoute(style, origin, destination);
+    }
 
-            @Override
-            public boolean onMove(@NonNull com.mapbox.android.gestures.MoveGestureDetector detector) {
-                return false;
-            }
+    private void getRoute(Style style, Point origin, Point destination) {
+        MapboxDirections.builder().origin(origin).destination(destination).accessToken(getString(R.string.mapbox_access_token)).profile(DirectionsCriteria.PROFILE_DRIVING).build()
+                .enqueueCall(new Callback<DirectionsResponse>() {
+                    @Override public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                        if (response.body() != null && !response.body().routes().isEmpty()) drawRoute(style, response.body().routes().get(0));
+                    }
+                    @Override public void onFailure(Call<DirectionsResponse> call, Throwable t) {}
+                });
+    }
 
-            @Override
-            public void onMoveEnd(@NonNull com.mapbox.android.gestures.MoveGestureDetector detector) {
-                imgCenterMarker.animate().translationY(0f).setDuration(250).start();
-                selectedPoint = mapView.getMapboxMap().getCameraState().getCenter();
-                updateAddressText(selectedPoint);
-            }
+    private void setupCameraListener() {
+        mapboxMap.addOnCameraMoveStartedListener(reason -> imgCenterMarker.animate().translationY(-50f).start());
+        mapboxMap.addOnCameraIdleListener(() -> {
+            imgCenterMarker.animate().translationY(0f).start();
+            selectedLatLng = mapboxMap.getCameraPosition().target;
+            updateAddressText(selectedLatLng);
         });
     }
 
-    private void updateAddressText(Point point) {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        runOnUiThread(() -> tvSelectedLocation.setText("Finding your location..."));
+    private void updateAddressText(LatLng latLng) {
         new Thread(() -> {
             try {
-                List<Address> addresses = geocoder.getFromLocation(point.latitude(), point.longitude(), 1);
-                runOnUiThread(() -> {
-                    if (addresses != null && !addresses.isEmpty()) {
-                        tvSelectedLocation.setText(addresses.get(0).getAddressLine(0));
-                    } else {
-                        tvSelectedLocation.setText("Location details not found");
-                    }
-                });
-            } catch (IOException e) {
-                runOnUiThread(() -> tvSelectedLocation.setText("Network error, try moving the map"));
-            }
+                List<Address> addresses = new Geocoder(this, Locale.getDefault()).getFromLocation(latLng.getLatitude(), latLng.getLongitude(), 1);
+                if (!addresses.isEmpty()) runOnUiThread(() -> tvSelectedLocation.setText(addresses.get(0).getAddressLine(0)));
+            } catch (IOException e) { e.printStackTrace(); }
         }).start();
     }
 
     private void focusLocation() {
-        if (!isNetworkAvailable()) {
-            showNoInternetDialog();
-            return;
-        }
-        if (loadingDialog != null) loadingDialog.show();
-        LocationComponentPlugin locationPlugin = LocationComponentUtils.getLocationComponent(mapView);
-        locationPlugin.setEnabled(true);
-        locationPlugin.updateSettings(settings -> {
-            settings.setEnabled(true);
-            settings.setPulsingEnabled(true);
-            return null;
-        });
-        locationPlugin.addOnIndicatorPositionChangedListener(new OnIndicatorPositionChangedListener() {
-            @Override
-            public void onIndicatorPositionChanged(@NonNull Point point) {
-                if (loadingDialog != null) loadingDialog.dismiss();
-                mapView.getMapboxMap().setCamera(new CameraOptions.Builder().center(point).zoom(15.0).build());
-                locationPlugin.removeOnIndicatorPositionChangedListener(this);
-            }
-        });
+        if (mapboxMap == null || mapboxMap.getStyle() == null) return;
+        LocationComponent lc = mapboxMap.getLocationComponent();
+        lc.activateLocationComponent(LocationComponentActivationOptions.builder(this, mapboxMap.getStyle()).build());
+        if (androidx.core.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            lc.setLocationComponentEnabled(true);
+            lc.setCameraMode(CameraMode.TRACKING);
+            lc.setRenderMode(RenderMode.COMPASS);
+        } else { requestLocationPermission(); }
     }
 
     private void requestLocationPermission() {
-        if (androidx.core.app.ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            androidx.core.app.ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
+        androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mapView != null) mapView.onStart();
+    private void setupLoadingDialog() {
+        loadingDialog = new AlertDialog.Builder(this).setView(getLayoutInflater().inflate(R.layout.dialog_loading, null)).create();
+        loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mapView != null) mapView.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
+    @Override protected void onStart() { super.onStart(); mapView.onStart(); }
+    @Override protected void onResume() { super.onResume(); mapView.onResume(); }
+    @Override protected void onPause() { super.onPause(); mapView.onPause(); }
+    @Override protected void onStop() { super.onStop(); mapView.onStop(); }
+    @Override protected void onDestroy() {
         super.onDestroy();
-        // Memory leak නොවෙන්න callback එක අයින් කරනවා
-        if (connectivityManager != null && networkCallback != null) {
-            connectivityManager.unregisterNetworkCallback(networkCallback);
-        }
-        connectionHandler.removeCallbacksAndMessages(null);
-        if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
-        if (mapView != null) mapView.onDestroy();
+        if (connectivityManager != null && networkCallback != null) connectivityManager.unregisterNetworkCallback(networkCallback);
+        mapView.onDestroy();
     }
 }

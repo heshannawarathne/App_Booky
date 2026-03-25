@@ -57,7 +57,6 @@ dependencies {
 
     implementation libs.firebase.bom
     implementation libs.firebase.analytics
-    implementation "com.mapbox.search:mapbox-search-android-ui:2.0.0"
 
 
 
@@ -88,9 +87,16 @@ dependencies {
     // පරණ Google Sign-In පාවිච්චි කරන්න මේක අනිවාර්යයි
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-    implementation 'com.mapbox.maps:android:11.10.0'
+//    implementation 'com.mapbox.maps:android:11.10.0'
+//
+//    // Directions සහ Java SDK services සඳහා නිවැරදි dependency එක:
+//    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:6.15.0'
+//    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:6.15.0'
 
-    implementation "com.mapbox.search:mapbox-search-android-ui:2.0.0"
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
+    // Services (Directions, GeoJSON)
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.8.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.8.0'
 
     implementation 'com.github.PayHereDevs:payhere-android-sdk:v3.0.18'
     implementation 'com.google.code.gson:gson:2.8.0'
@@ -105,12 +111,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     implementation 'com.google.firebase:firebase-storage'
 
-    implementation 'com.mapbox.plugin:maps-annotation:10.16.1'
 
-
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:6.9.0'
-
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:6.12.0'
 
 
 
