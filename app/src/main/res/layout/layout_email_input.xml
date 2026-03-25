@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/gender_box"
     android:orientation="vertical"
     android:padding="24dp"
@@ -39,6 +40,7 @@
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        app:cornerRadius="20dp"
         android:layout_marginTop="20dp"
         android:backgroundTint="@color/main_teal"
         android:text="Confirm" />

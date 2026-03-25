@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.adpter.BusAdapter;
 import com.aurasoft.booky.model.ScheduleModel;
+import com.bumptech.glide.Glide;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -121,7 +122,11 @@ public class BookingFragment extends Fragment {
             performSearch(from, to, selectedDateStr);
         });
 
-        // User Greeting Section
+        // Initialize Profile Views before setup
+        profileImg = view.findViewById(R.id.profileImg);
+        userName = view.findViewById(R.id.userName);
+
+        // User Greeting Section & Profile Image loading
         setupUserGreeting(view);
 
         view.findViewById(R.id.seeAll).setOnClickListener(v -> {
@@ -140,13 +145,9 @@ public class BookingFragment extends Fragment {
                     .commit();
         });
 
-
-        profileImg = view.findViewById(R.id.profileImg);
-        userName = view.findViewById(R.id.userName);
-
         profileImg.setOnClickListener(v -> openProfileFragment());
-
         userName.setOnClickListener(v -> openProfileFragment());
+
         return view;
     }
 
@@ -267,7 +268,6 @@ public class BookingFragment extends Fragment {
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (loadingDialog != null) loadingDialog.dismiss();
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            // ... කලින් තිබුණ Bundle සහ Fragment Transaction එක එහෙම්මම තියන්න ...
                             Bundle bundle = new Bundle();
                             bundle.putString("FROM", from);
                             bundle.putString("TO", to);
@@ -288,40 +288,48 @@ public class BookingFragment extends Fragment {
                     });
         } catch (ParseException e) { e.printStackTrace(); }
     }
+
     private void setupUserGreeting(View view) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        TextView userNameTv = view.findViewById(R.id.userName);
+        if (currentUser == null) return;
 
-        if (currentUser != null) {
-            String name = currentUser.getDisplayName();
-            if (name != null && !name.isEmpty()) {
-                userNameTv.setText("Hello, " + name.split(" ")[0] + "!");
-            } else {
-                db.collection("Users").document(currentUser.getUid()).get()
-                        .addOnSuccessListener(doc -> {
-                            if (doc.exists()) {
-                                String dbName = doc.getString("name");
-                                if (dbName != null) userNameTv.setText("Hello, " + dbName.split(" ")[0] + "!");
-                            }
-                        });
+        // "Users" collection එකට real-time සවන් දෙනවා
+        db.collection("Users").document(currentUser.getUid()).addSnapshotListener((doc, error) -> {
+            if (error != null) return;
+
+            if (doc != null && doc.exists()) {
+                // නම සෙට් කිරීම
+                String dbName = doc.getString("name");
+                if (dbName != null && !dbName.isEmpty()) {
+                    userName.setText("Hello, " + dbName.split(" ")[0] + "!");
+                } else if (currentUser.getDisplayName() != null) {
+                    userName.setText("Hello, " + currentUser.getDisplayName().split(" ")[0] + "!");
+                }
+
+                // ප්‍රොෆයිල් පින්තූරය Glide හරහා ලෝඩ් කිරීම
+                String imageUrl = doc.getString("profileImageUrl");
+                if (imageUrl != null && !imageUrl.isEmpty() && isAdded()) {
+                    Glide.with(this)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.img_15) // placeholder image නම චෙක් කරගන්න
+                            .error(R.drawable.img_15)
+                            .into(profileImg);
+                }
             }
-        }
+        });
     }
 
     private void loadTodayAllBuses() {
-        // 1. දැනට පවතින හරියටම වෙලාව ගන්නවා (Current Time)
         Calendar calNow = Calendar.getInstance();
         com.google.firebase.Timestamp startTimestamp = new com.google.firebase.Timestamp(calNow.getTime());
 
-        // 2. අද දවසේ අවසානය (11:59:59 PM) ගන්නවා
         Calendar calEnd = Calendar.getInstance();
         calEnd.set(Calendar.HOUR_OF_DAY, 23);
         calEnd.set(Calendar.MINUTE, 59);
         calEnd.set(Calendar.SECOND, 59);
         com.google.firebase.Timestamp endTimestamp = new com.google.firebase.Timestamp(calEnd.getTime());
 
-        // Firestore Query එක - දැන් වෙලාවට වඩා වැඩි සහ අද දවස ඇතුළත බස් පමණක් ගනියි
         db.collection("Schedules")
                 .whereGreaterThanOrEqualTo("departure_time", startTimestamp)
                 .whereLessThanOrEqualTo("departure_time", endTimestamp)
@@ -332,7 +340,6 @@ public class BookingFragment extends Fragment {
                         ScheduleModel bus = document.toObject(ScheduleModel.class);
                         busList.add(bus);
                     }
-                    // ඇඩැප්ටරයට දත්ත ලැබුණු බව දැනුම් දෙනවා
                     busAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {

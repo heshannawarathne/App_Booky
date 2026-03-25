@@ -169,7 +169,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="#4A7C6D"
-                app:cornerRadius="15dp" />
+                app:cornerRadius="20dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

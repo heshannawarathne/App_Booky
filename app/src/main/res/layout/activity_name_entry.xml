@@ -110,7 +110,7 @@
                 android:textAllCaps="false"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:cornerRadius="18dp"
+                app:cornerRadius="20dp"
                 android:backgroundTint="#3A7B73"
                 app:iconGravity="textEnd"
                 app:elevation="4dp" />

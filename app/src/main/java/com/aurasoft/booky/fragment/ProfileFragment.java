@@ -1,6 +1,10 @@
 package com.aurasoft.booky.fragment;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,18 +13,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import com.aurasoft.booky.R;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ProfileFragment extends Fragment {
 
@@ -29,10 +49,19 @@ public class ProfileFragment extends Fragment {
     private View rowName, rowEmail, rowPhone;
     private ImageView btnBack;
 
+    // ImgBB upload සඳහා අලුතින් එක් කළ Variables
+    private FloatingActionButton btnEditPhoto;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private Uri imageUri;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
     private boolean isGoogleUser = false;
+
+
+
+    private android.app.AlertDialog loadingDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,24 +78,43 @@ public class ProfileFragment extends Fragment {
         tvPhone = view.findViewById(R.id.tvPhone);
         btnBack = view.findViewById(R.id.btnBack);
 
+        // ImgBB upload සඳහා අලුතින් Initialize කළ UI
+        btnEditPhoto = view.findViewById(R.id.btnEditPhoto);
+
         rowName = view.findViewById(R.id.rowName);
         rowEmail = view.findViewById(R.id.rowEmail);
         rowPhone = view.findViewById(R.id.rowPhone);
 
-        // ලොග් වෙලා ඉන්න ක්‍රමය චෙක් කරමු
-        checkLoginProvider();
+        // Image Picker එක Initialize කිරීම
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                        imageUri = result.getData().getData();
+                        // පින්තූරය තෝරපු ගමන් තාවකාලිකව screen එකේ පෙන්වන්න
+                        profileImage.setImageURI(imageUri);
+                        // ImgBB එකට upload කරන්න පටන් ගන්නවා
+                        uploadImageToImgBB(imageUri);
+                    }
+                }
+        );
 
-        // දත්ත ලෝඩ් කරමු (UI එකත් එක්කම)
+        checkLoginProvider();
         loadUserData(view);
 
-        // Back Button
         btnBack.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().onBackPressed();
+            if (getActivity() != null) getActivity().onBackPressed();
+        });
+
+        // Edit Photo Button Click
+        btnEditPhoto.setOnClickListener(v -> {
+            if (isGoogleUser) {
+                Toast.makeText(getContext(), "Google profile photo cannot be changed", Toast.LENGTH_SHORT).show();
+            } else {
+                openGallery();
             }
         });
 
-        // Name Row Click
         rowName.setOnClickListener(v -> {
             if (isGoogleUser) {
                 Toast.makeText(getContext(), "Google account details cannot be changed", Toast.LENGTH_SHORT).show();
@@ -75,7 +123,6 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Email Row Click
         rowEmail.setOnClickListener(v -> {
             if (isGoogleUser) {
                 Toast.makeText(getContext(), "Google account details cannot be changed", Toast.LENGTH_SHORT).show();
@@ -84,10 +131,19 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Phone Row Click (දෙගොල්ලන්ටම Edit කරන්න බෑ)
         rowPhone.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Phone number cannot be changed", Toast.LENGTH_SHORT).show()
         );
+
+        // Custom Loading Dialog එක හදමු
+        View loadingView = getLayoutInflater().inflate(R.layout.dialog_loading, null); // ඔයාගේ loading xml එකේ නම මෙතනට දෙන්න
+        loadingDialog = new android.app.AlertDialog.Builder(requireContext())
+                .setView(loadingView)
+                .setCancelable(false)
+                .create();
+        if (loadingDialog.getWindow() != null) {
+            loadingDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
 
         return view;
     }
@@ -108,7 +164,6 @@ public class ProfileFragment extends Fragment {
         String uid = mAuth.getUid();
         if (uid == null) return;
 
-        // Google User නම් Edit Icons හංගමු
         if (isGoogleUser) {
             View editName = view.findViewById(R.id.editIconName);
             View editEmail = view.findViewById(R.id.editIconEmail);
@@ -116,12 +171,11 @@ public class ProfileFragment extends Fragment {
             if (editEmail != null) editEmail.setVisibility(View.GONE);
         }
 
-        // Firestore එකෙන් Real-time දත්ත ගනිමු
+        // Firestore එකෙන් Real-time දත්ත ගනිමු (ඔයාගේ screenshot එකේ විදියට collection එක "Users")
         db.collection("Users").document(uid).addSnapshotListener((documentSnapshot, error) -> {
             if (error != null || !isAdded()) return;
 
             if (documentSnapshot != null && documentSnapshot.exists()) {
-                // දත්ත null ද කියා චෙක් කර ලෝඩ් කිරීම (Crash නොවෙන්න ප්‍රධානම හේතුව මේකයි)
                 String name = documentSnapshot.getString("name");
                 String email = documentSnapshot.getString("email");
                 String phone = documentSnapshot.getString("phone");
@@ -131,7 +185,7 @@ public class ProfileFragment extends Fragment {
                 tvEmail.setText(email != null && !email.isEmpty() ? email : "Enter Email");
                 tvPhone.setText(phone != null && !phone.isEmpty() ? phone : "Not Provided");
 
-                // පින්තූරය තිබේ නම් පමණක් පෙන්වන්න
+                // Firestore එකට URL එක save වුණ ගමන් මෙතනින් ඒක පෙන්වනවා
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(this).load(imageUrl).placeholder(R.drawable.img_15).into(profileImage);
                 }
@@ -150,7 +204,6 @@ public class ProfileFragment extends Fragment {
 
         tvDialogTitle.setText("Edit " + title);
 
-        // දැනට තියෙන value එක placeholder එකක් නම් ඒක EditText එකට දාන්න එපා
         if (!currentValue.equals("Enter Name") && !currentValue.equals("Enter Email")) {
             etValue.setText(currentValue);
         }
@@ -178,5 +231,109 @@ public class ProfileFragment extends Fragment {
                 .update(key, value)
                 .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Updated!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Update failed!", Toast.LENGTH_SHORT).show());
+    }
+
+    // --- ImgBB Image Upload Methods ---
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        imagePickerLauncher.launch(intent);
+    }
+
+    private void uploadImageToImgBB(Uri uri) {
+        // Loading එක පෙන්වන්න පටන් ගන්නවා
+        if (loadingDialog != null) loadingDialog.show();
+
+        try {
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+            byte[] bytes = getBytes(inputStream);
+            String base64Image = Base64.encodeToString(bytes, Base64.DEFAULT);
+
+            OkHttpClient client = new OkHttpClient();
+            String apiKey = "12f649e459e26d27ebb7bc3b7b053353";
+
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("image", base64Image)
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url("https://api.imgbb.com/1/upload?key=" + apiKey)
+                    .post(requestBody)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    // මෙන්න මෙතන තමයි වැදගත්ම දේ. e.getMessage() එකෙන් තමයි කියන්නේ ඇයි fail වුණේ කියලා.
+                    Log.e("UPLOAD_ERROR", "Network Failure: " + e.getMessage());
+
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        if (loadingDialog != null) loadingDialog.dismiss();
+                        Toast.makeText(getContext(), "Network Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            String uploadedUrl = jsonResponse.getJSONObject("data").getString("url");
+                            updateProfileImageUrl(uploadedUrl);
+                        } catch (Exception e) {
+                            Log.e("UPLOAD_ERROR", "JSON Parsing Error: " + e.getMessage());
+                            getActivity().runOnUiThread(() -> { if (loadingDialog != null) loadingDialog.dismiss(); });
+                        }
+                    } else {
+                        // මෙතනින් තමයි ImgBB එකෙන් එවන error එක අල්ලගන්නේ (උදා: Invalid API Key)
+                        String errorBody = response.body() != null ? response.body().string() : "Unknown error";
+                        Log.e("UPLOAD_ERROR", "Response Failed: " + errorBody);
+
+                        getActivity().runOnUiThread(() -> {
+                            if (loadingDialog != null) loadingDialog.dismiss();
+                            Toast.makeText(getContext(), "Server Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (loadingDialog != null) loadingDialog.dismiss();
+        }
+    }
+
+    private void updateProfileImageUrl(String url) {
+        String uid = mAuth.getUid();
+        if (uid == null) return;
+
+        db.collection("Users").document(uid)
+                .update("profileImageUrl", url)
+                .addOnSuccessListener(aVoid -> {
+                    if (isAdded()) {
+                        if (loadingDialog != null) loadingDialog.dismiss(); // සාර්ථකව update වුණාම හංගනවා
+                        Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (isAdded()) {
+                        if (loadingDialog != null) loadingDialog.dismiss();
+                        Toast.makeText(getContext(), "Firestore update failed!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public byte[] getBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+        int len;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+        return byteBuffer.toByteArray();
     }
 }

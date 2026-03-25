@@ -89,7 +89,7 @@
         android:layout_width="262dp"
         android:layout_height="49dp"
         android:layout_marginStart="10dp"
-        android:background="@drawable/button_teal_rounded"
+        android:background="@drawable/button_backup_btn"
         android:text="Book Now"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"

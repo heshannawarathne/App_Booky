@@ -207,34 +207,28 @@ public class MapActivity extends AppCompatActivity {
         style.addLayer(new LineLayer("route-layer", "route-source")
                 .withProperties(lineColor(Color.BLACK), lineWidth(4f)));
 
-        // 1. Route එකේ Bounds (මුලින්ම Zoom වෙන්න)
         LatLngBounds routeBounds = new LatLngBounds.Builder()
                 .include(new LatLng(fromLat, fromLng))
                 .include(new LatLng(toLat, toLng))
                 .build();
 
-        // මැප් එක ලෝඩ් වෙද්දී මුළු පාරම පේන්න Zoom වෙනවා
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(routeBounds, 150));
 
-        // 2. ශ්‍රී ලංකාවට අදාළ දළ සීමාවන් (Sri Lanka Bounds)
-        // මේ Coordinates වලින් මුළු ලංකාවම ආවරණය වෙනවා
+
         LatLngBounds sriLankaBounds = new LatLngBounds.Builder()
-                .include(new LatLng(5.9, 79.5))  // දකුණ/බටහිර කෙළවර
-                .include(new LatLng(9.9, 81.9))  // උතුර/නැගෙනහිර කෙළවර
+                .include(new LatLng(5.9, 79.5))
+                .include(new LatLng(9.9, 81.9))
                 .build();
 
-        // 3. මැප් එක ශ්‍රී ලංකාවට විතරක් Lock කරනවා
-        // දැන් User ට ලංකාව ඇතුළේ ඕනෑම විදිහකට Zoom Out/Move කරන්න පුළුවන්
         mapboxMap.setLatLngBoundsForCameraTarget(sriLankaBounds);
 
-        // 4. Zoom සීමාවන් (පොඩි Zoom එකකදී මුළු ලංකාවම පේනවා)
-        mapboxMap.setMinZoomPreference(6.5); // ලංකාවට වඩා ඈතට Zoom out වීම වැළැක්වීමට
+        mapboxMap.setMinZoomPreference(6.5);
     }
 
     private void initRouteAndMarkers(Style style) {
         Point origin = Point.fromLngLat(fromLng, fromLat);
         Point destination = Point.fromLngLat(toLng, toLat);
-        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.dot);
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.dot2);
         style.addImage("marker-icon", b);
         style.addSource(new GeoJsonSource("marker-source", FeatureCollection.fromFeatures(new Feature[]{Feature.fromGeometry(origin), Feature.fromGeometry(destination)})));
         style.addLayer(new SymbolLayer("marker-layer", "marker-source").withProperties(iconImage("marker-icon"), iconAllowOverlap(true)));
