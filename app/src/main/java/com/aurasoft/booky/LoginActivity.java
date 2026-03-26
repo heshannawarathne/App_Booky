@@ -106,28 +106,44 @@ public class LoginActivity extends AppCompatActivity {
                         String uid = mAuth.getCurrentUser().getUid();
                         String email = mAuth.getCurrentUser().getEmail();
 
-                        com.google.firebase.firestore.FirebaseFirestore db =
-                                com.google.firebase.firestore.FirebaseFirestore.getInstance();
+                        // --- 1. මුලින්ම FCM Token එක ලබාගන්නවා ---
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                                .addOnCompleteListener(tokenTask -> {
+                                    String fcmToken = "";
+                                    if (tokenTask.isSuccessful() && tokenTask.getResult() != null) {
+                                        fcmToken = tokenTask.getResult();
+                                    }
 
-                        java.util.Map<String, Object> userMap = new java.util.HashMap<>();
-                        userMap.put("name", name);
-                        userMap.put("email", email);
-                        userMap.put("uid", uid);
-                        userMap.put("method", "google");
+                                    com.google.firebase.firestore.FirebaseFirestore db =
+                                            com.google.firebase.firestore.FirebaseFirestore.getInstance();
 
-                        db.collection("Users").document(uid)
-                                .set(userMap, com.google.firebase.firestore.SetOptions.merge())
-                                .addOnSuccessListener(aVoid -> {
-                                    loadingDialog.dismiss();
-                                    Toast.makeText(LoginActivity.this, "Welcome " + name, Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                    finish();
-                                })
-                                .addOnFailureListener(e -> {
-                                    loadingDialog.dismiss();
-                                    Log.e("FirestoreError", e.getMessage());
-                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                    finish();
+                                    java.util.Map<String, Object> userMap = new java.util.HashMap<>();
+                                    userMap.put("name", name);
+                                    userMap.put("email", email);
+                                    userMap.put("uid", uid);
+                                    userMap.put("fcmToken", fcmToken); // මෙන්න Token එක ඇඩ් කළා
+                                    userMap.put("method", "google");
+                                    userMap.put("lastLogin", System.currentTimeMillis());
+
+                                    // --- 2. හැමෝටම යවන notifications ලැබෙන්න topic එකට subscribe කරනවා ---
+                                    com.google.firebase.messaging.FirebaseMessaging.getInstance().subscribeToTopic("all_users");
+
+                                    // --- 3. Firestore එකට Data Save කරනවා ---
+                                    db.collection("Users").document(uid)
+                                            .set(userMap, com.google.firebase.firestore.SetOptions.merge())
+                                            .addOnSuccessListener(aVoid -> {
+                                                loadingDialog.dismiss();
+                                                Toast.makeText(LoginActivity.this, "Welcome " + name, Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                                finish();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                loadingDialog.dismiss();
+                                                Log.e("FirestoreError", e.getMessage());
+                                                // Error එකක් ආවත් සාමාන්‍යයෙන් MainActivity එකට යවන එක හොඳයි
+                                                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                                finish();
+                                            });
                                 });
 
                     } else {

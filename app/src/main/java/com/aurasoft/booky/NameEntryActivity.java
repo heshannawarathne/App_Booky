@@ -68,36 +68,46 @@ public class NameEntryActivity extends AppCompatActivity {
             return;
         }
 
-        // දැනට Login වී සිටින පරිශීලකයාගේ UID එක සහ Phone Number එක ගැනීම
         if (mAuth.getCurrentUser() != null) {
+            loadingDialog.show(); // මුලින්ම loading එක පෙන්වන්න
+
             String uid = mAuth.getCurrentUser().getUid();
             String phone = mAuth.getCurrentUser().getPhoneNumber();
 
+            // --- FCM Token එක ලබා ගැනීම ---
+            com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(task -> {
+                        String fcmToken = "";
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            fcmToken = task.getResult();
+                        }
 
-            Map<String, Object> user = new HashMap<>();
-            user.put("name", name);
-            user.put("phone", phone);
-            user.put("uid", uid);
-            user.put("joinedAt", System.currentTimeMillis());
+                        // Firestore එකට යවන දත්ත map එක හදනවා
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("name", name);
+                        user.put("phone", phone);
+                        user.put("uid", uid);
+                        user.put("fcmToken", fcmToken); // මෙන්න Token එක ඇඩ් කළා
+                        user.put("joinedAt", System.currentTimeMillis());
 
+                        // Firestore එකේ දත්ත Save කිරීම
+                        db.collection("Users").document(uid)
+                                .set(user)
+                                .addOnSuccessListener(aVoid -> {
+                                    loadingDialog.dismiss();
+                                    Toast.makeText(NameEntryActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
 
-            db.collection("Users").document(uid)
-                    .set(user)
-                    .addOnSuccessListener(aVoid -> {
-                        loadingDialog.dismiss();
+                                    com.google.firebase.messaging.FirebaseMessaging.getInstance().subscribeToTopic("all_users");
 
-                        Toast.makeText(NameEntryActivity.this, "Registration Successfull!", Toast.LENGTH_SHORT).show();
-
-
-                        Intent intent = new Intent(NameEntryActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        loadingDialog.dismiss();
-
-                        Toast.makeText(NameEntryActivity.this, "something Wrong: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(NameEntryActivity.this, MainActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    loadingDialog.dismiss();
+                                    Toast.makeText(NameEntryActivity.this, "Something Wrong: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                     });
         }
     }

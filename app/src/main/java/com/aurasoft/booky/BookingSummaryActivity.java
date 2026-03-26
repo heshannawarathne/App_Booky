@@ -344,6 +344,19 @@ public class BookingSummaryActivity extends AppCompatActivity {
                         }
 
                         if (task.isSuccessful()) {
+
+                            String cleanTopic = scheduleId.replaceAll("[^a-zA-Z0-9-_.~%]", "");
+
+                            // 2. අදාළ Schedule ID එකට යූසර්ව Subscribe කරවනවා
+                            com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                                    .subscribeToTopic("schedule_" + cleanTopic)
+                                    .addOnCompleteListener(subTask -> {
+                                        if (subTask.isSuccessful()) {
+                                            Log.d("FCM_SUBSCRIBE", "Successfully subscribed to trip: schedule_" + cleanTopic);
+                                        } else {
+                                            Log.e("FCM_SUBSCRIBE", "Subscription failed for topic: schedule_" + cleanTopic);
+                                        }
+                                    });
                             // Notification එක Schedule කිරීම
                             if (departureTimeObject instanceof com.google.firebase.Timestamp) {
                                 long departureMillis = ((com.google.firebase.Timestamp) departureTimeObject).toDate().getTime();
