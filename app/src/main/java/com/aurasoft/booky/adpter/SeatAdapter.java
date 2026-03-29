@@ -19,12 +19,10 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
     private Context context;
     private OnSeatClickListener listener; // Click Listener එක
 
-    // Interface එක අනිවාර්යයෙන්ම මෙතන තියෙන්න ඕනේ
     public interface OnSeatClickListener {
         void onSeatClick(int position);
     }
 
-    // Constructor එක Arguments 3ක් ගන්න විදිහට හැදුවා
     public SeatAdapter(List<SeatModel> seatList, Context context, OnSeatClickListener listener) {
         this.seatList = seatList;
         this.context = context;
@@ -48,10 +46,8 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
             holder.tvSeat.setVisibility(View.VISIBLE);
             holder.tvSeat.setText(model.getSeatName());
 
-            // Status අනුව UI එක Update කිරීම
             updateSeatUI(holder.tvSeat, model.getStatus());
 
-            // Click Event එක Listener එකට යැවීම
             holder.itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onSeatClick(position);

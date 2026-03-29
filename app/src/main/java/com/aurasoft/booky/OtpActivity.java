@@ -146,7 +146,6 @@ public class OtpActivity extends AppCompatActivity {
                         FirebaseUser user = task.getResult().getUser();
 
                         if (user != null) {
-                            // ක්‍රමය: Firestore එකේ මේ User ගේ UID එකෙන් record එකක් තියෙනවද කියලා බලනවා
                             FirebaseFirestore.getInstance().collection("Users")
                                     .document(user.getUid())
                                     .get()
@@ -157,11 +156,9 @@ public class OtpActivity extends AppCompatActivity {
                                             com.google.firebase.firestore.DocumentSnapshot document = dbTask.getResult();
 
                                             Intent intent;
-                                            // Document එකක් නැත්නම් (exists == false), ඒ කියන්නේ අලුත් කෙනෙක්
                                             if (document == null || !document.exists()) {
                                                 intent = new Intent(OtpActivity.this, NameEntryActivity.class);
                                             } else {
-                                                // කලින් record එකක් තියෙනවා නම් කෙලින්ම Home (MainActivity) යනවා
                                                 intent = new Intent(OtpActivity.this, MainActivity.class);
                                             }
 
@@ -170,7 +167,6 @@ public class OtpActivity extends AppCompatActivity {
                                             finish();
 
                                         } else {
-                                            // Database එක check කරන්න බැරි වුණොත් (උදා: Internet slow)
                                             Toast.makeText(this, "Error checking user profile", Toast.LENGTH_SHORT).show();
                                         }
                                     });

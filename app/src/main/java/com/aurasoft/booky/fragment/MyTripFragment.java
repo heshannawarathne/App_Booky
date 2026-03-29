@@ -64,14 +64,7 @@ public class MyTripFragment extends Fragment {
         // 2. Setup Custom Loading Dialog
         setupLoadingDialog();
 
-        // 3. Back Button Click Logic
-//        ImageView backBtn = view.findViewById(R.id.btnBack);
-//        backBtn.setOnClickListener(v -> {
-//            if (getParentFragmentManager() != null) {
-//                // මේකෙන් වෙන්නේ stack එකේ කලින් හිටපු fragment එකට පස්සට යන එක
-//                getParentFragmentManager().popBackStack();
-//            }
-//        });
+
 
         // 4. Setup RecyclerView
         setupRecyclerView();
@@ -120,7 +113,6 @@ public class MyTripFragment extends Fragment {
         // Show loading
         if (loadingDialog != null) loadingDialog.show();
 
-        // ඩේටාබේස් එකෙන් බුකින් හිස්ටරි එක ගන්නවා
         db.collection("Bookings")
                 .whereEqualTo("userId", currentUserId)
                 .orderBy("timestamp", Query.Direction.DESCENDING) // අලුත්ම බුකින් එක උඩට එනවා

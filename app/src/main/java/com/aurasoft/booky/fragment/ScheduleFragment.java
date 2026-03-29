@@ -49,7 +49,6 @@ public class ScheduleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // UI Initialization
         recyclerView = view.findViewById(R.id.scheduleRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -57,22 +56,18 @@ public class ScheduleFragment extends Fragment {
         setupLoadingDialog();
 
         scheduleList = new ArrayList<>();
-        // මෙතනදී filter වුණු ලිස්ට් එකක් ඇඩැප්ටර් එකට යනවා
         adapter = new ScheduleAdapter(scheduleList, getContext());
         recyclerView.setAdapter(adapter);
 
-        // Load Data
         loadSchedules();
 
 
-        // Click listener for seat selection
         adapter.setOnItemClickListener(model -> {
             Intent intent = new Intent(getContext(), SeatSelectionActivity.class);
             intent.putExtra("SCHEDULE_ID", model.getSchedule_id());
 
             int priceValue = 0;
             try {
-                // Number එකක් String කරලා ආයේ Int කරනවාට වඩා direct casting එක හොඳයි
                 priceValue = Integer.parseInt(String.valueOf(model.getPrice()));
             } catch (Exception e) {
                 priceValue = 0;
@@ -80,13 +75,7 @@ public class ScheduleFragment extends Fragment {
             intent.putExtra("TICKET_PRICE", priceValue);
             startActivity(intent);
         });
-//        ImageView backBtn = view.findViewById(R.id.btnBack);
-//        backBtn.setOnClickListener(v -> {
-//            if (getParentFragmentManager() != null) {
-//                // මේකෙන් වෙන්නේ stack එකේ කලින් හිටපු fragment එකට පස්සට යන එක
-//                getParentFragmentManager().popBackStack();
-//            }
-//        });
+
 
     }
 
@@ -114,11 +103,8 @@ public class ScheduleFragment extends Fragment {
     private void loadSchedules() {
         if (loadingDialog != null) loadingDialog.show();
 
-        // දැනට තියෙන වෙලාව ගමු
         Timestamp now = Timestamp.now();
 
-        // --- මෙතන තමයි වැදගත්ම වෙනස ---
-        // අපි Query එකෙන්ම කියනවා Departure Time එක දැනට වඩා වැඩි ඒව විතරක් දෙන්න කියලා.
         db.collection("Schedules")
                 .whereGreaterThan("departure_time", now)
                 .orderBy("departure_time", Query.Direction.ASCENDING)
@@ -135,7 +121,6 @@ public class ScheduleFragment extends Fragment {
                         }
                     }
 
-                    // ඇඩැප්ටර් එකට අලුත් ඩේටා ටික දැනුම් දෙනවා
                     adapter.updateList(scheduleList);
 
                     if (scheduleList.isEmpty()) {

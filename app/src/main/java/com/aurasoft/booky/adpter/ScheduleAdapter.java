@@ -91,7 +91,6 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             holder.busDate.setText("N/A");
         }
 
-        // --- අලුතින් එකතු කළ Seat Status Logic එක ---
         db.collection("Schedules")
                 .document(scheduleId)
                 .collection("BookedSeats")
@@ -99,27 +98,24 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         int bookedCount = task.getResult().size();
-                        int totalSeats = 49; // ඔයා කිව්ව ගණන
+                        int totalSeats = 49;
 
                         if (bookedCount >= totalSeats) {
-                            // 1. Status Text එක පෙන්වීම
                             holder.statusText.setText("SOLD OUT");
                             holder.statusText.setTextColor(Color.RED);
                             holder.statusText.setVisibility(View.VISIBLE);
 
-                            // 2. Card එක Disable කිරීම (ක්ලික් කරන්න බැරි වෙන්න)
-                            holder.itemView.setAlpha(0.6f); // අඳුරු කර පෙන්වීමට
+                            holder.itemView.setAlpha(0.6f);
                             holder.callBtn.setAlpha(1.0f);
-                            holder.itemView.setOnClickListener(null); // Click එක නැති කිරීම
+                            holder.itemView.setOnClickListener(null);
 
                         } else {
                             // සීට් තිබේ නම්
                             holder.statusText.setText("Available");
-                            holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title)); // ඔයාගේ color එකක් මෙතනට දෙන්න
+                            holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title));
                             holder.statusText.setVisibility(View.VISIBLE);
 
                             holder.itemView.setAlpha(1.0f);
-                            // සාමාන්‍ය Click Listener එක නැවත ලබාදීම
                             holder.itemView.setOnClickListener(v -> {
                                 if (listener != null) {
                                     listener.onItemClick(model);

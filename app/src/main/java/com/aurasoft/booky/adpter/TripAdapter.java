@@ -30,34 +30,27 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
     public void onBindViewHolder(@NonNull TripViewHolder holder, int position) {
         TripModel trip = tripList.get(position);
 
-        // 1. බස් එකේ අංකය
         holder.tvBusName.setText(trip.getBusNo() != null ? trip.getBusNo() : "N/A");
 
-        // 2. Route එක (From ➝ To)
         String from = (trip.getFromLocation() != null) ? trip.getFromLocation() : "N/A";
         String to = (trip.getToLocation() != null) ? trip.getToLocation() : "N/A";
         holder.tvRoute.setText(from + " ➝ " + to);
 
-        // 3. දිනය සහ වෙලාව
         holder.tvDate.setText(trip.getDate());
         holder.tvTime.setText(trip.getTime());
 
-        // 4. සීට් ගණන සහ සීට් අංක (Seats List එක පාවිච්චි කරමින්)
         if (trip.getSeats() != null && !trip.getSeats().isEmpty()) {
             int count = trip.getSeats().size();
 
-            // ලිස්ට් එක [A1, A2] වගේ තියෙන එක "A1, A2" විදිහට සකස් කරනවා
             String seatNumbers = trip.getSeats().toString()
                     .replace("[", "")
                     .replace("]", "");
 
-            // අවසාන ප්‍රතිඵලය: "2 Seats (A1, A2)"
             holder.tvSeatCount.setText(count + " Seats (" + seatNumbers + ")");
         } else {
             holder.tvSeatCount.setText("0 Seats");
         }
 
-        // 5. Status එක (කලින් වගේමයි)
         if (trip.getTimestamp() != null) {
             long currentTime = System.currentTimeMillis();
             long departureTime = trip.getTimestamp().toDate().getTime();

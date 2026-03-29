@@ -45,7 +45,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         ScheduleModel bus = busList.get(position);
         String scheduleId = bus.getSchedule_id();
 
-        // --- පරණ Basic Data (Price, Time) ---
         holder.tvPrice.setText("Rs. " + bus.getPrice());
 
         if (bus.getDeparture_time() != null) {
@@ -53,8 +52,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             holder.tvTime.setText(sdf.format(bus.getDeparture_time().toDate()));
         }
 
-        // --- Firebase Seat Status Check Logic ---
-        // BookedSeats sub-collection එකේ ලේඛන ගණන ගන්නවා
         db.collection("Schedules")
                 .document(scheduleId)
                 .collection("BookedSeats")
@@ -62,21 +59,17 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         int bookedCount = task.getResult().size();
-                        int totalSeats = 49; // ඔයා සඳහන් කළ මුළු සීට් ගණන
+                        int totalSeats = 49;
 
                         if (bookedCount >= totalSeats) {
-                            // බස් එකේ සියලුම සීට් බුක් වී ඇත්නම්
                             holder.sheatBookStatus.setText("Fully Booked");
                             holder.sheatBookStatus.setTextColor(Color.RED);
 
-                            // Button එක Disable කර පෙනුම වෙනස් කිරීම
                             holder.btnBookNow.setEnabled(false);
                             holder.btnBookNow.setText("FULL");
 
-                            // මුළු Item එකම click වෙන එක නතර කිරීම
                             holder.itemView.setOnClickListener(null);
                         } else {
-                            // සීට් ඉතිරිව ඇත්නම්
                             int available = totalSeats - bookedCount;
                             holder.sheatBookStatus.setText("Available: " + available + " Seats");
                             holder.sheatBookStatus.setTextColor(
@@ -86,7 +79,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                             holder.btnBookNow.setText("Book Now");
                             holder.btnBookNow.setAlpha(1.0f);
 
-                            // සාමාන්‍ය Click Listeners
                             holder.itemView.setOnClickListener(v -> {
                                 Toast.makeText(v.getContext(), "Opening seat selection for " + bus.getSchedule_id(), Toast.LENGTH_SHORT).show();
                             });

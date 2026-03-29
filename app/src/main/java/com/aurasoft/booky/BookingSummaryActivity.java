@@ -336,7 +336,7 @@ public class BookingSummaryActivity extends AppCompatActivity {
                     }
 
                     batch.commit().addOnCompleteListener(task -> {
-                        // Activity එක තවමත් පණපිටින්ද කියලා බලන්න
+
                         if (isDestroyed() || isFinishing()) return;
 
                         if (loadingDialog != null && loadingDialog.isShowing()) {
@@ -347,7 +347,7 @@ public class BookingSummaryActivity extends AppCompatActivity {
 
                             String cleanTopic = scheduleId.replaceAll("[^a-zA-Z0-9-_.~%]", "");
 
-                            // 2. අදාළ Schedule ID එකට යූසර්ව Subscribe කරවනවා
+
                             com.google.firebase.messaging.FirebaseMessaging.getInstance()
                                     .subscribeToTopic("schedule_" + cleanTopic)
                                     .addOnCompleteListener(subTask -> {
@@ -357,25 +357,22 @@ public class BookingSummaryActivity extends AppCompatActivity {
                                             Log.e("FCM_SUBSCRIBE", "Subscription failed for topic: schedule_" + cleanTopic);
                                         }
                                     });
-                            // Notification එක Schedule කිරීම
+
                             if (departureTimeObject instanceof com.google.firebase.Timestamp) {
                                 long departureMillis = ((com.google.firebase.Timestamp) departureTimeObject).toDate().getTime();
                                 scheduleNotification(departureMillis, finalBusNo);
                             }
 
-                            // Email එක යැවීම (Background thread එකක වෙන්නේ)
                             sendTicketEmail(userEmail, finalBusNo, finalDate, finalTime);
 
                             Toast.makeText(getApplicationContext(), "Booking Successful! 🎉", Toast.LENGTH_LONG).show();
 
-                            // කෙළින්ම Activity මාරු නොකර පොඩි Delay එකක් දෙන්න
-                            // එවිට System එකට 'Resumed state loss' එකෙන් බේරෙන්න පුළුවන්
                             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
-                            }, 2000); // තත්පර 1ක Delay එකක්
+                            }, 2000);
 
                         } else {
                             Toast.makeText(getApplicationContext(), "Failed to save booking", Toast.LENGTH_SHORT).show();

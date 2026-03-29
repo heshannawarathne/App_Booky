@@ -66,18 +66,16 @@ public class NotificationFragment extends Fragment {
 
         loadNotifications();
 
-        // මෙතන තමයි අර Custom Confirmation Dialog එක එන්නේ
         btnClearAll.setOnClickListener(v -> showCustomClearDialog());
 
         return view;
     }
 
-    // --- පටන් ගැන්ම: Custom Dialog Logic ---
     private void showCustomClearDialog() {
         if (getContext() == null) return;
 
         Dialog dialog = new Dialog(getContext());
-        dialog.setContentView(R.layout.dialog_clear_confirm); // උඹ හදපු XML එක
+        dialog.setContentView(R.layout.dialog_clear_confirm);
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -87,7 +85,7 @@ public class NotificationFragment extends Fragment {
         Button btnNo = dialog.findViewById(R.id.btnNo);
 
         btnYes.setOnClickListener(v -> {
-            clearAllNotifications(); // Firestore එකෙන් මකන logic එක
+            clearAllNotifications();
             dialog.dismiss();
         });
 
@@ -95,7 +93,6 @@ public class NotificationFragment extends Fragment {
 
         dialog.show();
     }
-    // --- අවසානය: Custom Dialog Logic ---
 
     private void setupLoadingDialog() {
         if (getContext() == null) return;

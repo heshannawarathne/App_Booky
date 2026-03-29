@@ -37,7 +37,6 @@ public class NotificationReceiver extends BroadcastReceiver {
         String CHANNEL_ID = "bus_alerts_channel";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // 1. Channel එකේ Importance එක High ම දාන්න
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Bus Trip Alerts",
@@ -52,27 +51,24 @@ public class NotificationReceiver extends BroadcastReceiver {
             }
         }
 
-        // 2. Notification එක Click කරාම MainActivity එකට යන එක
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context, (int) System.currentTimeMillis(), intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        // 3. Notification Builder (Heads-up notification සඳහා)
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info) // ටෙස්ට් කරන්න Android අයිකන් එකක්ම දෙමු
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH) // Android 7.1 සහ අඩු සඳහා
-                .setDefaults(NotificationCompat.DEFAULT_ALL) // සද්දය සහ වයිබ්‍රේෂන්
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         if (notificationManager != null) {
-            // ID එකට අහඹු අංකයක් දෙන්න
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         }
     }
@@ -90,7 +86,6 @@ public class NotificationReceiver extends BroadcastReceiver {
         notification.put("message", message);
         notification.put("timestamp", System.currentTimeMillis());
 
-        // වැදගත්: මේක add කරන්න කලින් Map එකට දාන්න ඕනේ
         notification.put("isRead", false);
 
         db.collection("Notifications")

@@ -69,12 +69,11 @@ public class NameEntryActivity extends AppCompatActivity {
         }
 
         if (mAuth.getCurrentUser() != null) {
-            loadingDialog.show(); // මුලින්ම loading එක පෙන්වන්න
+            loadingDialog.show();
 
             String uid = mAuth.getCurrentUser().getUid();
             String phone = mAuth.getCurrentUser().getPhoneNumber();
 
-            // --- FCM Token එක ලබා ගැනීම ---
             com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
                     .addOnCompleteListener(task -> {
                         String fcmToken = "";
@@ -82,15 +81,13 @@ public class NameEntryActivity extends AppCompatActivity {
                             fcmToken = task.getResult();
                         }
 
-                        // Firestore එකට යවන දත්ත map එක හදනවා
                         Map<String, Object> user = new HashMap<>();
                         user.put("name", name);
                         user.put("phone", phone);
                         user.put("uid", uid);
-                        user.put("fcmToken", fcmToken); // මෙන්න Token එක ඇඩ් කළා
+                        user.put("fcmToken", fcmToken);
                         user.put("joinedAt", System.currentTimeMillis());
 
-                        // Firestore එකේ දත්ත Save කිරීම
                         db.collection("Users").document(uid)
                                 .set(user)
                                 .addOnSuccessListener(aVoid -> {
@@ -114,7 +111,6 @@ public class NameEntryActivity extends AppCompatActivity {
 
     private void initLoadingDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // ඔබේ dialog_loading.xml එක inflate කරනවා
         View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
         builder.setView(view);
         builder.setCancelable(false);
@@ -123,7 +119,6 @@ public class NameEntryActivity extends AppCompatActivity {
 
         if (loadingDialog.getWindow() != null) {
             loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-//            loadingDialog.getWindow().setGravity(Gravity.BOTTOM); // යටටම ගැනීමට
 
             WindowManager.LayoutParams layoutParams = loadingDialog.getWindow().getAttributes();
             layoutParams.y = 50;

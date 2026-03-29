@@ -49,7 +49,6 @@ public class ProfileFragment extends Fragment {
     private View rowName, rowEmail, rowPhone;
     private ImageView btnBack;
 
-    // ImgBB upload සඳහා අලුතින් එක් කළ Variables
     private FloatingActionButton btnEditPhoto;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private Uri imageUri;
@@ -67,33 +66,27 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Initialize UI
         profileImage = view.findViewById(R.id.profileImage);
         tvName = view.findViewById(R.id.tvName);
         tvEmail = view.findViewById(R.id.tvEmail);
         tvPhone = view.findViewById(R.id.tvPhone);
         btnBack = view.findViewById(R.id.btnBack);
 
-        // ImgBB upload සඳහා අලුතින් Initialize කළ UI
         btnEditPhoto = view.findViewById(R.id.btnEditPhoto);
 
         rowName = view.findViewById(R.id.rowName);
         rowEmail = view.findViewById(R.id.rowEmail);
         rowPhone = view.findViewById(R.id.rowPhone);
 
-        // Image Picker එක Initialize කිරීම
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
                         imageUri = result.getData().getData();
-                        // පින්තූරය තෝරපු ගමන් තාවකාලිකව screen එකේ පෙන්වන්න
                         profileImage.setImageURI(imageUri);
-                        // ImgBB එකට upload කරන්න පටන් ගන්නවා
                         uploadImageToImgBB(imageUri);
                     }
                 }
@@ -135,7 +128,6 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "Phone number cannot be changed", Toast.LENGTH_SHORT).show()
         );
 
-        // Custom Loading Dialog එක හදමු
         View loadingView = getLayoutInflater().inflate(R.layout.dialog_loading, null); // ඔයාගේ loading xml එකේ නම මෙතනට දෙන්න
         loadingDialog = new android.app.AlertDialog.Builder(requireContext())
                 .setView(loadingView)
@@ -171,7 +163,6 @@ public class ProfileFragment extends Fragment {
             if (editEmail != null) editEmail.setVisibility(View.GONE);
         }
 
-        // Firestore එකෙන් Real-time දත්ත ගනිමු (ඔයාගේ screenshot එකේ විදියට collection එක "Users")
         db.collection("Users").document(uid).addSnapshotListener((documentSnapshot, error) -> {
             if (error != null || !isAdded()) return;
 
@@ -185,7 +176,6 @@ public class ProfileFragment extends Fragment {
                 tvEmail.setText(email != null && !email.isEmpty() ? email : "Enter Email");
                 tvPhone.setText(phone != null && !phone.isEmpty() ? phone : "Not Provided");
 
-                // Firestore එකට URL එක save වුණ ගමන් මෙතනින් ඒක පෙන්වනවා
                 if (imageUrl != null && !imageUrl.isEmpty()) {
                     Glide.with(this).load(imageUrl).placeholder(R.drawable.img_15).into(profileImage);
                 }
@@ -248,7 +238,6 @@ public class ProfileFragment extends Fragment {
             InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
             byte[] bytes = getBytes(inputStream);
 
-            // මෙතන Base64.NO_WRAP අනිවාර්යයෙන්ම දාන්න
             String base64Image = Base64.encodeToString(bytes, Base64.NO_WRAP);
 
             OkHttpClient client = new OkHttpClient();
@@ -284,7 +273,6 @@ public class ProfileFragment extends Fragment {
                             JSONObject jsonResponse = new JSONObject(responseData);
                             String uploadedUrl = jsonResponse.getJSONObject("data").getString("url");
 
-                            // මෙතන runOnUiThread දාන්න Firestore update එක සඳහා
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(() -> updateProfileImageUrl(uploadedUrl));
                             }

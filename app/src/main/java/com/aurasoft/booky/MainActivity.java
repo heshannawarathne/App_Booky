@@ -26,10 +26,10 @@ import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.MaterialShapeDrawable;
 import com.google.android.material.shape.ShapeAppearanceModel;
 
-// 1. implements SensorEventListener එකතු කළා
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    // 2. සෙන්සර් වලට අදාළ Variables
+
     private SensorManager sensorManager;
     private Sensor lightSensor;
 
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // 3. Sensor Manager එක Initialize කිරීම
+
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
@@ -89,10 +89,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    // --- 4. සෙන්සර් එකේ අගය වෙනස් වෙනකොට ක්‍රියාත්මක වන කොටස ---
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // Settings වලින් Auto Brightness ON ද කියලා බලනවා
         SharedPreferences sharedPreferences = getSharedPreferences("SettingsPrefs", Context.MODE_PRIVATE);
         boolean isAutoEnabled = sharedPreferences.getBoolean("auto_brightness", false);
 
@@ -100,13 +98,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float lux = event.values[0];
             float brightness;
 
-            // Lux අගය අනුව Brightness එක තීරණය කිරීම
             if (lux < 10) brightness = 0.1f;
             else if (lux < 100) brightness = 0.4f;
             else if (lux < 1000) brightness = 0.8f;
             else brightness = 1.0f;
 
-            // Activity එකේ Brightness එක Apply කිරීම
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.screenBrightness = brightness;
             getWindow().setAttributes(lp);
@@ -115,10 +111,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // මේක අවශ්‍ය නැහැ
     }
 
-    // 5. ඇප් එක Resume වෙද්දී සෙන්සර් එක Listen කරන්න පටන් ගන්නවා
     @Override
     protected void onResume() {
         super.onResume();
@@ -127,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    // 6. ඇප් එක Pause වෙද්දී සෙන්සර් එක නවත්වනවා (Battery Save කිරීමට)
     @Override
     protected void onPause() {
         super.onPause();

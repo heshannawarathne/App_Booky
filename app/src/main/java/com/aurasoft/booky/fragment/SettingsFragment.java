@@ -50,7 +50,6 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // --- 1. Initialize Views ---
         settingsMenuLayout = view.findViewById(R.id.settingsMenuLayout);
         tvLegalContent = view.findViewById(R.id.tvLegalContent);
         tvPrivacyPolicy = view.findViewById(R.id.tvPrivacyPolicy);
@@ -67,18 +66,15 @@ public class SettingsFragment extends Fragment {
         switchLocation = view.findViewById(R.id.switchLocation);
         switchDarkMode = view.findViewById(R.id.switchDarkMode);
 
-        // --- 2. Logout Logic with Confirmation ---
         if (btnLogout != null) {
             btnLogout.setPaintFlags(btnLogout.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             btnLogout.setOnClickListener(v -> {
-                showLogoutConfirmation(); // මෙතනින් Dialog එකට යනවා
+                showLogoutConfirmation();
             });
         }
 
-        // --- 3. Load Saved Settings ---
         loadSettings();
 
-        // --- 4. Click Listeners ---
         tvPrivacyPolicy.setOnClickListener(v -> showLegalContent(getPrivacyPolicyText()));
         tvTerms.setOnClickListener(v -> showLegalContent(getTermsOfServiceText()));
 
@@ -95,7 +91,6 @@ public class SettingsFragment extends Fragment {
             });
         }
 
-        // Back Button Logic
         btnBack.setOnClickListener(v -> {
             if (tvLegalContent.getVisibility() == View.VISIBLE) {
                 tvLegalContent.setVisibility(View.GONE);
@@ -104,10 +99,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        // --- 5. Switch Listeners (Permissions & Settings) ---
-        // Notification Switch
         switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // මේ Check එක ඉතා වැදගත්! Listener එක trigger වුණේ ඇඟිල්ලෙන් එබුවම විතරද බලනවා
             if (buttonView.isPressed()) {
                 saveSetting("notifications", isChecked);
                 Toast.makeText(getContext(), isChecked ? "Notifications Enabled" : "Notifications Disabled", Toast.LENGTH_SHORT).show();
@@ -118,23 +110,19 @@ public class SettingsFragment extends Fragment {
         switchCallAccess.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (buttonView.isPressed()) {
                 if (isChecked) {
-                    // Active කරන්න හදද්දී Permission නැත්නම් ඉල්ලනවා
                     if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                        // තාවකාලිකව Off කරමු Permission ලැබෙනකම්
                         switchCallAccess.setChecked(false);
                         requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, 101);
                     } else {
                         saveSetting("call_access", true);
                     }
                 } else {
-                    // Deactive කරද්දී කෙලින්ම False විදිහට Save කරනවා
                     saveSetting("call_access", false);
                     Toast.makeText(getContext(), "Call Access Deactivated in App", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-// Location Switch
         switchLocation.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (buttonView.isPressed()) {
                 if (isChecked) {
@@ -151,7 +139,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-// Dark Mode Switch
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (buttonView.isPressed()) {
                 saveSetting("dark_mode", isChecked);
@@ -165,18 +152,16 @@ public class SettingsFragment extends Fragment {
 
         switchAutoBrightness = view.findViewById(R.id.switchAutoBrightness);
 
-// Auto Brightness Switch එකේ Listener එක
         switchAutoBrightness.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (buttonView.isPressed()) { // යූසර් Click කරොත් විතරක් වැඩ කරන්න
+            if (buttonView.isPressed()) {
                 saveSetting("auto_brightness", isChecked);
 
                 if (isChecked) {
                     Toast.makeText(getContext(), "Auto Brightness Enabled", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Disable කරපු ගමන් Brightness එක සාමාන්‍ය තත්වයට පත් කරනවා
                     if (getActivity() != null) {
                         android.view.WindowManager.LayoutParams lp = getActivity().getWindow().getAttributes();
-                        lp.screenBrightness = -1f; // -1f කියන්නේ System Default අගය
+                        lp.screenBrightness = -1f;
                         getActivity().getWindow().setAttributes(lp);
                     }
                     Toast.makeText(getContext(), "Auto Brightness Disabled", Toast.LENGTH_SHORT).show();
@@ -187,7 +172,6 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    // onCreateView එකෙන් එළියට මේක දාන්න අමතක කරන්න එපා!
     private void showLogoutConfirmation() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_logout_confirm, null);
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
@@ -276,8 +260,7 @@ public class SettingsFragment extends Fragment {
             tvLegalContent.setText(android.text.Html.fromHtml(content));
         }
 
-        // *** මෙන්න මේ පේළිය අලුතින් එකතු කරන්න ***
-        // මේකෙන් 'setting_cart_bg' වල තියෙන පාට ඉබේම අකුරු වලට වැටෙනවා
+
         tvLegalContent.setTextColor(ContextCompat.getColor(requireContext(), R.color.white_02));
 
         tvLegalContent.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
@@ -293,21 +276,16 @@ public class SettingsFragment extends Fragment {
     private void loadSettings() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // 1. සිස්ටම් එකේ ඇත්තටම Permission තියෙනවද බලනවා (Null Safety සඳහා)
         if (getContext() == null) return;
         boolean hasCallPerm = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
         boolean hasLocPerm = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-        // 2. Switch එක Check වෙන්න නම් කරුණු දෙකක් සම්පූර්ණ වෙන්න ඕනේ:
-        //    a) යූසර් ඇප් එක ඇතුළේ Switch එක On කරලා තියෙන්න ඕනේ.
-        //    b) ඇන්ඩ්‍රොයිඩ් සිස්ටම් එකේ Permission එක Allowed වෙලා තියෙන්න ඕනේ.
+
         switchCallAccess.setChecked(sharedPreferences.getBoolean("call_access", false) && hasCallPerm);
         switchLocation.setChecked(sharedPreferences.getBoolean("location_access", false) && hasLocPerm);
 
-        // මේවාට System Permissions ඕනේ නැහැ
         switchNotifications.setChecked(sharedPreferences.getBoolean("notifications", true));
 
-        // Dark mode එකට SharedPreferences එක විතරක් බලමු
         switchDarkMode.setChecked(sharedPreferences.getBoolean("dark_mode", false));
     }
 
@@ -320,7 +298,7 @@ public class SettingsFragment extends Fragment {
         if (requestCode == 101) {
             if (granted) {
                 saveSetting("call_access", true);
-                switchCallAccess.setChecked(true); // දැන් Permission තියෙන නිසා On කරනවා
+                switchCallAccess.setChecked(true);
                 Toast.makeText(getContext(), "Call Access Activated", Toast.LENGTH_SHORT).show();
             } else {
                 saveSetting("call_access", false);

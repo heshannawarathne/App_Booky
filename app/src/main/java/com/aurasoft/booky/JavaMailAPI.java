@@ -17,7 +17,6 @@ import javax.mail.internet.MimeMessage;
         private String subject;
         private String message;
 
-        // ⚠️ මෙතනට ඔයාගේ විස්තර දාන්න
         private final String MY_EMAIL = "pramodnawarathna0@gmail.com";
         private final String MY_PASSWORD = "asla ahlw zphy dosy";
 
@@ -38,7 +37,7 @@ import javax.mail.internet.MimeMessage;
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.starttls.required", "true");
             props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-            props.put("mail.smtp.ssl.trust", "smtp.gmail.com"); // 👈 මේක අනිවාර්යයෙන්ම දාන්න
+            props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
 
             Session session = Session.getInstance(props, new javax.mail.Authenticator() {
                 @Override
@@ -47,7 +46,6 @@ import javax.mail.internet.MimeMessage;
                 }
             });
 
-            // Debugging ON කරනවා ලොග් එකේ සම්පූර්ණ විස්තර බලන්න
             session.setDebug(true);
 
             try {

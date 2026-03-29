@@ -101,7 +101,6 @@ public class MapActivity extends AppCompatActivity {
         MaterialButton btnConfirm = findViewById(R.id.btnConfirm);
         MaterialCardView btnBack = findViewById(R.id.btnBack);
 
-        // Intent Data
         scheduleId = getIntent().getStringExtra("SCHEDULE_ID");
         totalPrice = getIntent().getIntExtra("TOTAL_PRICE", 0);
         selectedSeats = getIntent().getStringArrayListExtra("SELECTED_SEATS");
@@ -111,7 +110,6 @@ public class MapActivity extends AppCompatActivity {
         toLat = getIntent().getDoubleExtra("TO_LAT", 7.2906);
         toLng = getIntent().getDoubleExtra("TO_LNG", 80.6337);
 
-        // --- Network Monitoring ---
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         startNetworkMonitoring();
 
@@ -140,7 +138,6 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-    // --- Custom Confirmation Dialog ---
     private void showConfirmDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_location, null);
@@ -169,7 +166,6 @@ public class MapActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // --- Real-time Network Monitoring (v11 logic) ---
     private void startNetworkMonitoring() {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override

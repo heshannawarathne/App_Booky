@@ -18,10 +18,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             String title = remoteMessage.getNotification().getTitle();
             String body = remoteMessage.getNotification().getBody();
 
-            // 1. Notification එක ෆෝන් එකේ පෙන්වනවා
             showNotification(title, body);
 
-            // 2. Firestore එකේ "Notifications" collection එකට save කරනවා
             saveToFirestore(title, body);
         }
     }
@@ -30,18 +28,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
         com.google.firebase.auth.FirebaseAuth auth = com.google.firebase.auth.FirebaseAuth.getInstance();
 
-        // ලොග් වෙලා ඉන්න යූසර්ගේ ID එක ගන්නවා
         String currentUserId = (auth.getCurrentUser() != null) ? auth.getCurrentUser().getUid() : "unknown_user";
 
-        // ඔයාගේ Screenshot එකේ තියෙන fields ටික මෙතන හදනවා
         java.util.Map<String, Object> notificationData = new java.util.HashMap<>();
         notificationData.put("title", title);
         notificationData.put("message", message);
-        notificationData.put("timestamp", System.currentTimeMillis()); // Milliseconds වලින් යන්නේ
+        notificationData.put("timestamp", System.currentTimeMillis());
         notificationData.put("userId", currentUserId);
-        notificationData.put("isRead", false); // අලුත් මැසේජ් එකක් නිසා false දානවා
+        notificationData.put("isRead", false);
 
-        // "Notifications" collection එකට add කරනවා
         db.collection("Notifications")
                 .add(notificationData)
                 .addOnSuccessListener(documentReference -> {
@@ -68,7 +63,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher) // Default icon එක දැනට පාවිච්චි කරමු
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)

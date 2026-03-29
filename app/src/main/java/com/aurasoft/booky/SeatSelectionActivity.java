@@ -74,14 +74,11 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             loadBookedSeats(currentScheduleId);
         }
 
-        // --- Modified Proceed Button with VPN Check ---
         btnProceed.setOnClickListener(v -> {
             if (totalAmount > 0) {
-                // VPN එකක් තියෙනවද කියලා චෙක් කරනවා
                 if (isVpnConnection(this)) {
                     showVpnDialog();
                 } else {
-                    // VPN නැත්නම් ඊළඟ Activity එකට (Map) යනවා
                     goToMapActivity();
                 }
             } else {
@@ -93,7 +90,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         backBtn.setOnClickListener(v -> finish());
     }
 
-    // --- VPN Check Logic ---
     private boolean isVpnConnection(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm != null) {
@@ -106,7 +102,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         return false;
     }
 
-    // --- Custom VPN Warning Dialog ---
     private void showVpnDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View layoutView = getLayoutInflater().inflate(R.layout.dialog_vpn_warning, null);
@@ -119,7 +114,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
 
         layoutView.findViewById(R.id.btnOk).setOnClickListener(v -> {
             dialog.dismiss();
-            // VPN නිසා Booking එක නවත්තලා පස්සට (Back) යවනවා
             finish();
             Toast.makeText(this, "Booking cancelled due to VPN usage.", Toast.LENGTH_SHORT).show();
         });
@@ -128,7 +122,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     }
 
     private void goToMapActivity() {
-        // 1. කලින් වගේම ලිස්ට් දෙක හදාගන්නවා (Content අයින් කරන්න එපා)
         ArrayList<String> selectedSeats = new ArrayList<>();
         ArrayList<String> selectedGenders = new ArrayList<>();
 
@@ -139,13 +132,11 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             }
         }
 
-        // 2. Firestore එකෙන් coordinates ටික ගන්නවා (මේක තමයි අලුත් කොටස)
-        // Firestore instance එක (db) උඩින් define කරලා ඇති කියලා හිතනවා
+
         db.collection("Schedules").document(currentScheduleId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
 
-                        // Firestore එකෙන් අගයන් ටික ගන්නවා
                         double fromLat = documentSnapshot.getDouble("from_lat") != null ? documentSnapshot.getDouble("from_lat") : 0.0;
                         double fromLng = documentSnapshot.getDouble("from_lng") != null ? documentSnapshot.getDouble("from_lng") : 0.0;
                         double toLat = documentSnapshot.getDouble("to_lat") != null ? documentSnapshot.getDouble("to_lat") : 0.0;
@@ -153,16 +144,13 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                         String fromCity = documentSnapshot.getString("from");
                         String toCity = documentSnapshot.getString("to");
 
-                        // 3. දැන් Intent එක හදලා ඔක්කොම දත්ත ටික එකට යවනවා
                         Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
 
-                        // ඔයාගේ පරණ දත්ත
                         intent.putExtra("SCHEDULE_ID", currentScheduleId);
                         intent.putExtra("TOTAL_PRICE", totalAmount);
                         intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
                         intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
 
-                        // මැප් එකට අලුතින් අවශ්‍ය ලොකේෂන් දත්ත
                         intent.putExtra("FROM_LAT", fromLat);
                         intent.putExtra("FROM_LNG", fromLng);
                         intent.putExtra("TO_LAT", toLat);
@@ -181,7 +169,6 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                 });
     }
 
-    // --- පරණ විදිහටම තියෙන අනිත් methods ටික ---
 
     private void setupLoadingDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

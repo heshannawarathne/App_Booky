@@ -36,7 +36,6 @@ public class LoginActivity extends AppCompatActivity {
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private AlertDialog loadingDialog;
 
-    // Google Sign-In Variables
     private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN = 100;
 
@@ -106,7 +105,6 @@ public class LoginActivity extends AppCompatActivity {
                         String uid = mAuth.getCurrentUser().getUid();
                         String email = mAuth.getCurrentUser().getEmail();
 
-                        // --- 1. මුලින්ම FCM Token එක ලබාගන්නවා ---
                         com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
                                 .addOnCompleteListener(tokenTask -> {
                                     String fcmToken = "";
@@ -121,14 +119,12 @@ public class LoginActivity extends AppCompatActivity {
                                     userMap.put("name", name);
                                     userMap.put("email", email);
                                     userMap.put("uid", uid);
-                                    userMap.put("fcmToken", fcmToken); // මෙන්න Token එක ඇඩ් කළා
+                                    userMap.put("fcmToken", fcmToken);
                                     userMap.put("method", "google");
                                     userMap.put("lastLogin", System.currentTimeMillis());
 
-                                    // --- 2. හැමෝටම යවන notifications ලැබෙන්න topic එකට subscribe කරනවා ---
                                     com.google.firebase.messaging.FirebaseMessaging.getInstance().subscribeToTopic("all_users");
 
-                                    // --- 3. Firestore එකට Data Save කරනවා ---
                                     db.collection("Users").document(uid)
                                             .set(userMap, com.google.firebase.firestore.SetOptions.merge())
                                             .addOnSuccessListener(aVoid -> {
@@ -140,7 +136,6 @@ public class LoginActivity extends AppCompatActivity {
                                             .addOnFailureListener(e -> {
                                                 loadingDialog.dismiss();
                                                 Log.e("FirestoreError", e.getMessage());
-                                                // Error එකක් ආවත් සාමාන්‍යයෙන් MainActivity එකට යවන එක හොඳයි
                                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                                 finish();
                                             });
