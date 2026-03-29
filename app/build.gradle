@@ -79,22 +79,14 @@ dependencies {
     implementation "androidx.credentials:credentials-play-services-auth:1.2.2"
     implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
 
-    // Firebase Auth
     implementation "com.google.firebase:firebase-auth:22.3.1"
 
     implementation "androidx.credentials:credentials:1.2.2"
 
-    // පරණ Google Sign-In පාවිච්චි කරන්න මේක අනිවාර්යයි
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-//    implementation 'com.mapbox.maps:android:11.10.0'
-//
-//    // Directions සහ Java SDK services සඳහා නිවැරදි dependency එක:
-//    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:6.15.0'
-//    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:6.15.0'
 
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
-    // Services (Directions, GeoJSON)
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.8.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.8.0'
 
