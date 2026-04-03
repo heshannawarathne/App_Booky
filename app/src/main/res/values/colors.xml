@@ -44,8 +44,9 @@
 
 
 
-
-
+    <color name="fade_start_color">#F5F7F8</color>
+    <color name="fade_center_color">#80F5F7F8</color>
+    <color name="fade_end_color">#00F5F7F8</color>
 
 
 
@@ -56,10 +57,24 @@
     <color name="df_seat">#D6D6D6</color>
 
     <color name="background">#F5F7F8</color>
-    <color name="selection_root">#B1C8C6</color>
+    <color name="selection_root">#F5F7F8</color>
     <color name="book_item_color">#333333</color>
 
     <color name="others_boxes_field">#F0F4F4</color>
+
+
+    <color name="others_bg_txt">#1A1A1A</color>
+
+
+
+
+    //login
+    <color name="main_bg">#F5F7F8</color>
+    <color name="content_bg">#FFFFFF</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#666666</color>
+    <color name="divider_color">#DDDDDD</color>
+    <color name="google_card_bg">#FFFFFF</color>
 
 
 </resources>

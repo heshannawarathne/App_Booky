@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7F8"
+    android:background="?attr/colorSurface"
     tools:context=".NameEntryActivity">
 
     <ImageView
@@ -28,6 +28,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="-30dp"
         android:background="@drawable/login_content_bg"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/illustrationImg">
 
@@ -45,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-black"
                 android:text="One Last Step!"
-                android:textColor="#1A1A1A"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -55,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="What should we call you? Your journey is almost ready to begin."
-                android:textColor="#666666"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="15sp"
                 android:lineHeight="22sp"/>
 
@@ -74,8 +75,9 @@
                     android:layout_height="wrap_content"
                     android:text="YOUR FULL NAME"
                     android:textSize="10sp"
-                    android:textColor="#9E9E9E"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textStyle="bold"
+                    android:alpha="0.7"
                     android:letterSpacing="0.05" />
 
                 <EditText
@@ -84,9 +86,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:background="@android:color/transparent"
-                    android:hint="e.g. Kasun Perera"
+                    android:hint="e.g. Heshan Nawarathna"
                     android:inputType="textPersonName"
-                    android:textColor="#1A1A1A"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?android:attr/textColorHint"
                     android:textSize="17sp"
                     android:paddingVertical="4dp"/>
             </LinearLayout>
@@ -112,6 +115,7 @@
                 android:textStyle="bold"
                 app:cornerRadius="20dp"
                 android:backgroundTint="#3A7B73"
+                android:textColor="#ffff"
                 app:iconGravity="textEnd"
                 app:elevation="4dp" />
 

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://tools.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7F8"
+    android:background="?attr/colorSurface"
     tools:context=".OtpActivity">
 
     <ImageView
@@ -28,6 +28,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="-30dp"
         android:background="@drawable/login_content_bg"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/otpImg">
 
@@ -46,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-black"
                 android:text="Verify OTP"
-                android:textColor="#1A1A1A"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
@@ -57,7 +58,7 @@
                 android:layout_marginTop="12dp"
                 android:gravity="center"
                 android:text="Security first! Enter the 6-digit code \nsent to your phone"
-                android:textColor="#666666"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="15sp"
                 android:lineHeight="22sp"/>
 
@@ -87,6 +88,7 @@
                 android:textAllCaps="false"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:textColor="#ffff"
                 app:cornerRadius="20dp"
                 android:backgroundTint="#3A7B73"
                 app:elevation="4dp" />
@@ -103,7 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Didn’t receive the code?"
-                    android:textColor="#999999"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp" />
 
                 <TextView

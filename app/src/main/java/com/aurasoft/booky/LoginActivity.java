@@ -1,13 +1,16 @@
 package com.aurasoft.booky;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -42,8 +45,10 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_login);
+
+        applyFullScreenMode();
 
         initLoadingDialog();
         mAuth = FirebaseAuth.getInstance();
@@ -67,6 +72,30 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void applyFullScreenMode() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                getWindow().setDecorFitsSystemWindows(false);
+                WindowInsetsController controller = getWindow().getInsetsController();
+                if (controller != null) {
+                    controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                    controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                }
+            } else {
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            }
+        } catch (Exception e) {
+            Log.e("FullScreenBinding", "Error setting immersive mode: " + e.getMessage());
+        }
+    }
+
+
     private void signInWithGoogle() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -82,15 +111,11 @@ public class LoginActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 if (account != null) {
                     String userName = account.getDisplayName();
-                    String userEmail = account.getEmail();
-
-                    Log.d("GoogleData", "Name: " + userName);
-
                     firebaseAuthWithGoogle(account.getIdToken(), userName);
                 }
             } catch (ApiException e) {
                 Log.e("GoogleAuth", "Sign in failed: " + e.getStatusCode());
-                Toast.makeText(this, "Sign in failed: " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Sign in failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -107,10 +132,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
                                 .addOnCompleteListener(tokenTask -> {
-                                    String fcmToken = "";
-                                    if (tokenTask.isSuccessful() && tokenTask.getResult() != null) {
-                                        fcmToken = tokenTask.getResult();
-                                    }
+                                    String fcmToken = tokenTask.isSuccessful() ? tokenTask.getResult() : "";
 
                                     com.google.firebase.firestore.FirebaseFirestore db =
                                             com.google.firebase.firestore.FirebaseFirestore.getInstance();
@@ -129,18 +151,15 @@ public class LoginActivity extends AppCompatActivity {
                                             .set(userMap, com.google.firebase.firestore.SetOptions.merge())
                                             .addOnSuccessListener(aVoid -> {
                                                 loadingDialog.dismiss();
-                                                Toast.makeText(LoginActivity.this, "Welcome " + name, Toast.LENGTH_SHORT).show();
                                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                                 finish();
                                             })
                                             .addOnFailureListener(e -> {
                                                 loadingDialog.dismiss();
-                                                Log.e("FirestoreError", e.getMessage());
                                                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                                 finish();
                                             });
                                 });
-
                     } else {
                         loadingDialog.dismiss();
                         Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show();
@@ -151,27 +170,21 @@ public class LoginActivity extends AppCompatActivity {
     private void setupVerificationCallbacks() {
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
-            public void onVerificationCompleted(@NonNull PhoneAuthCredential credential) {
-            }
+            public void onVerificationCompleted(@NonNull PhoneAuthCredential credential) {}
 
             @Override
             public void onVerificationFailed(@NonNull FirebaseException e) {
+                if (loadingDialog != null) loadingDialog.dismiss();
                 Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("Test", e.getMessage());
-                if (loadingDialog != null) {
-                    loadingDialog.dismiss();
-                }
             }
 
             @Override
             public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken token) {
                 mVerificationId = verificationId;
+                if (loadingDialog != null) loadingDialog.dismiss();
                 Intent intent = new Intent(LoginActivity.this, OtpActivity.class);
                 intent.putExtra("verificationId", verificationId);
                 startActivity(intent);
-                if (loadingDialog != null) {
-                    loadingDialog.dismiss();
-                }
             }
         };
     }
@@ -180,17 +193,9 @@ public class LoginActivity extends AppCompatActivity {
         EditText etMobile = findViewById(R.id.login_tf_mobile);
         String mobileNo = etMobile.getText().toString().trim();
 
-        if (mobileNo.isEmpty()) {
-            loadingDialog.dismiss();
-            etMobile.setError("Please enter your mobile number");
-            etMobile.requestFocus();
-            return;
-        }
-
-        // mobile validation
-        if (mobileNo.length() != 9) {
-            loadingDialog.dismiss();
-            etMobile.setError("Enter 9 digits");
+        if (mobileNo.isEmpty() || mobileNo.length() != 9) {
+            if (loadingDialog != null) loadingDialog.dismiss();
+            etMobile.setError(mobileNo.isEmpty() ? "Enter number" : "Enter 9 digits");
             return;
         }
 
