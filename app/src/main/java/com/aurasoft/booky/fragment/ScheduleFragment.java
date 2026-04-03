@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class ScheduleFragment extends Fragment {
@@ -39,7 +40,6 @@ public class ScheduleFragment extends Fragment {
     private List<ScheduleModel> scheduleList;
     private FirebaseFirestore db;
     private AlertDialog loadingDialog;
-
     private long lastClickTime = 0;
 
     @Override
@@ -63,14 +63,13 @@ public class ScheduleFragment extends Fragment {
 
         loadSchedules();
 
-
         adapter.setOnItemClickListener(model -> {
-
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastClickTime < 1000) {
                 return;
             }
             lastClickTime = currentTime;
+
             Intent intent = new Intent(getContext(), SeatSelectionActivity.class);
             intent.putExtra("SCHEDULE_ID", model.getSchedule_id());
 
@@ -83,8 +82,6 @@ public class ScheduleFragment extends Fragment {
             intent.putExtra("TICKET_PRICE", priceValue);
             startActivity(intent);
         });
-
-
     }
 
     private void setupLoadingDialog() {
@@ -111,10 +108,14 @@ public class ScheduleFragment extends Fragment {
     private void loadSchedules() {
         if (loadingDialog != null) loadingDialog.show();
 
-        Timestamp now = Timestamp.now();
+        Calendar cal = Calendar.getInstance();
+
+        cal.add(Calendar.HOUR_OF_DAY, -8);
+
+        Timestamp thresholdTime = new Timestamp(cal.getTime());
 
         db.collection("Schedules")
-                .whereGreaterThan("departure_time", now)
+                .whereGreaterThan("departure_time", thresholdTime)
                 .orderBy("departure_time", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -132,12 +133,12 @@ public class ScheduleFragment extends Fragment {
                     adapter.updateList(scheduleList);
 
                     if (scheduleList.isEmpty()) {
-                        Toast.makeText(getContext(), "No upcoming schedules found.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No schedules found within the last 8 hours.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     if (loadingDialog != null) loadingDialog.dismiss();
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("FIRESTORE_ERROR", e.getMessage());
                 });
     }
 

@@ -62,10 +62,8 @@ public class BookingFragment extends Fragment {
     private CircleImageView profileImg;
     private TextView userName;
 
-    // Custom Loading Dialog
     private AlertDialog loadingDialog;
 
-    // Notification Badge variables
     private TextView notiBadge;
 
     @Override
@@ -78,13 +76,13 @@ public class BookingFragment extends Fragment {
         dateValue = view.findViewById(R.id.dateValue);
         recyclerView = view.findViewById(R.id.busRecyclerView);
         button = view.findViewById(R.id.btnSearch);
-        notiBadge = view.findViewById(R.id.notiBadge); // Badge UI initialize
+        notiBadge = view.findViewById(R.id.notiBadge);
 
         db = FirebaseFirestore.getInstance();
         cityList = new ArrayList<>();
         busList = new ArrayList<>();
 
-        // Setup Custom Loading Dialog
+
         setupLoadingDialog();
 
         cityAdapter = new ArrayAdapter<>(getContext(), R.layout.list_item_dropdown, cityList);
@@ -101,9 +99,7 @@ public class BookingFragment extends Fragment {
         loadCitiesFromFirestore();
         loadTodayAllBuses();
         setupDatePicker();
-        updateNotificationBadge(); // Listen to unseen notifications
-
-        // Search Button Logic
+        updateNotificationBadge();
         button.setOnClickListener(v -> {
             String from = fromSpinner.getText().toString();
             String to = toSpinner.getText().toString();
@@ -122,11 +118,9 @@ public class BookingFragment extends Fragment {
             performSearch(from, to, selectedDateStr);
         });
 
-        // Initialize Profile Views before setup
         profileImg = view.findViewById(R.id.profileImg);
         userName = view.findViewById(R.id.userName);
 
-        // User Greeting Section & Profile Image loading
         setupUserGreeting(view);
 
         view.findViewById(R.id.seeAll).setOnClickListener(v -> {
@@ -209,7 +203,7 @@ public class BookingFragment extends Fragment {
                     if (loadingDialog != null) loadingDialog.dismiss();
                     if (task.isSuccessful()) {
                         cityList.clear();
-                        cityList.add("Select");
+                        cityList.add("Select city");
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             cityList.add(document.getId());
                         }
@@ -302,7 +296,7 @@ public class BookingFragment extends Fragment {
                 if (imageUrl != null && !imageUrl.isEmpty() && isAdded()) {
                     Glide.with(this)
                             .load(imageUrl)
-                            .placeholder(R.drawable.img_15) // placeholder image නම චෙක් කරගන්න
+                            .placeholder(R.drawable.img_15)
                             .error(R.drawable.img_15)
                             .into(profileImg);
                 }

@@ -11,6 +11,8 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -61,11 +63,15 @@ public class BookingSummaryActivity extends AppCompatActivity {
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
 
+    private Handler timerHandler = new Handler(Looper.getMainLooper());
+    private Runnable timerRunnable;
+    private boolean isPaymentSuccessful = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_summary);
-
+        startExpiryExtension();
         setupLoadingDialog();
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -94,6 +100,43 @@ public class BookingSummaryActivity extends AppCompatActivity {
                 startPayHerePayment();
             }
         });
+    }
+
+    private void startExpiryExtension() {
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!isPaymentSuccessful) {
+                    extendSeatLock();
+                    timerHandler.postDelayed(this, 5 * 60 * 1000);
+                }
+            }
+        };
+        timerHandler.post(timerRunnable);
+    }
+
+    private void extendSeatLock() {
+        if (scheduleId == null || selectedSeats == null) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+        long newExpiry = System.currentTimeMillis() + (10 * 60 * 1000);
+
+        for (String seat : selectedSeats) {
+            batch.update(db.collection("Schedules").document(scheduleId)
+                    .collection("BookedSeats").document(seat), "expiryTime", newExpiry);
+        }
+        batch.commit();
+    }
+
+    private void clearPendingSeats() {
+        if (scheduleId == null || selectedSeats == null || isPaymentSuccessful) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+        for (String seat : selectedSeats) {
+            batch.delete(db.collection("Schedules").document(scheduleId)
+                    .collection("BookedSeats").document(seat));
+        }
+        batch.commit();
     }
 
     private void startNetworkMonitoring() {
@@ -282,6 +325,12 @@ public class BookingSummaryActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
 
+    @Override
+    public void onBackPressed() {
+
+        super.onBackPressed();
+    }
+
     private void saveBookingToFirestore(String userEmail) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String uid = FirebaseAuth.getInstance().getUid();
@@ -344,7 +393,7 @@ public class BookingSummaryActivity extends AppCompatActivity {
                         }
 
                         if (task.isSuccessful()) {
-
+                            isPaymentSuccessful = true;
                             String cleanTopic = scheduleId.replaceAll("[^a-zA-Z0-9-_.~%]", "");
 
 
@@ -385,12 +434,11 @@ public class BookingSummaryActivity extends AppCompatActivity {
 
     private void scheduleNotification(long departureTimestamp, String busNo) {
         long currentTime = System.currentTimeMillis();
-        long alertTime = departureTimestamp - (5 * 60 * 1000); // විනාඩි 5කට කලින්
+        long alertTime = departureTimestamp - (5 * 60 * 1000);
 
-        // 1. කාලය මදි නම් (දැනටමත් විනාඩි 5කට වඩා අඩුයි නම්) තත්පර 10කින් නොටිෆිකේෂන් එක එවන්න
         if (alertTime <= currentTime) {
             if (departureTimestamp > currentTime) {
-                alertTime = currentTime + (10 * 1000); // දැන් සිට තත්පර 10කින්
+                alertTime = currentTime + (10 * 1000);
                 android.util.Log.d("ALARM_CHECK", "Short time remaining! Scheduling in 10 seconds.");
             } else {
                 android.util.Log.e("ALARM_CHECK", "Bus already departed! No alarm set.");
@@ -401,14 +449,12 @@ public class BookingSummaryActivity extends AppCompatActivity {
         Context appContext = getApplicationContext();
         String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
 
-        // 2. Explicit Intent එකක් පාවිච්චි කරන්න (setClass එක අනිවාර්යයි)
         Intent intent = new Intent();
         intent.setClass(appContext, NotificationReceiver.class);
         intent.putExtra("title", "Bus Departure Alert! 🚌");
         intent.putExtra("message", "Your bus (" + busNo + ") is departing soon. Get ready!");
         intent.putExtra("userId", uid);
 
-        // 3. ස්ථාවර Request Code එකක් (උදා: 123) පාවිච්චි කරන්න
         android.app.PendingIntent pendingIntent = android.app.PendingIntent.getBroadcast(
                 appContext,
                 123,
@@ -489,6 +535,13 @@ public class BookingSummaryActivity extends AppCompatActivity {
         }
         if (loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.dismiss();
+        }
+
+        if (timerHandler != null && timerRunnable != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
+        if (!isPaymentSuccessful) {
+
         }
     }
 }

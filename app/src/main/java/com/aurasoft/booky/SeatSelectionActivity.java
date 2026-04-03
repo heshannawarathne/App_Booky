@@ -28,12 +28,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.aurasoft.booky.adpter.SeatAdapter;
 import com.aurasoft.booky.model.SeatModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SeatSelectionActivity extends AppCompatActivity implements SeatAdapter.OnSeatClickListener {
 
@@ -132,11 +138,9 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
             }
         }
 
-
         db.collection("Schedules").document(currentScheduleId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-
                         double fromLat = documentSnapshot.getDouble("from_lat") != null ? documentSnapshot.getDouble("from_lat") : 0.0;
                         double fromLng = documentSnapshot.getDouble("from_lng") != null ? documentSnapshot.getDouble("from_lng") : 0.0;
                         double toLat = documentSnapshot.getDouble("to_lat") != null ? documentSnapshot.getDouble("to_lat") : 0.0;
@@ -145,12 +149,10 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                         String toCity = documentSnapshot.getString("to");
 
                         Intent intent = new Intent(SeatSelectionActivity.this, MapActivity.class);
-
                         intent.putExtra("SCHEDULE_ID", currentScheduleId);
                         intent.putExtra("TOTAL_PRICE", totalAmount);
                         intent.putStringArrayListExtra("SELECTED_SEATS", selectedSeats);
                         intent.putStringArrayListExtra("SELECTED_GENDERS", selectedGenders);
-
                         intent.putExtra("FROM_LAT", fromLat);
                         intent.putExtra("FROM_LNG", fromLng);
                         intent.putExtra("TO_LAT", toLat);
@@ -159,21 +161,16 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                         intent.putExtra("TO_CITY", toCity);
 
                         startActivity(intent);
-
                     } else {
-                        Toast.makeText(this, "Schedule coordinates not found in Firestore!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Schedule coordinates not found!", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error fetching map data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
 
     private void setupLoadingDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_loading, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
         builder.setView(dialogView);
         builder.setCancelable(false);
         loadingDialog = builder.create();
@@ -189,12 +186,9 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     }
 
     private void updateTotalPrice() {
-        if (tvTotalAmount == null) return;
         int selectedCount = 0;
         for (SeatModel seat : seatList) {
-            if (seat.getStatus() == 1) {
-                selectedCount++;
-            }
+            if (seat.getStatus() == 1) selectedCount++;
         }
         totalAmount = selectedCount * ticketPrice;
         tvTotalAmount.setText("Total: LKR " + totalAmount + ".00");
@@ -214,7 +208,7 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         int seatCounter = 1;
         for (int i = 1; i <= 60; i++) {
             if (i % 5 == 3 && i < 58) {
-                seatList.add(new SeatModel("", 4)); // Aisle
+                seatList.add(new SeatModel("", 4));
             } else {
                 if (seatCounter <= 49) {
                     seatList.add(new SeatModel(String.valueOf(seatCounter), 0));
@@ -233,12 +227,9 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         if (clickedSeat.getStatus() == 0) {
             showGenderSelectionDialog(position);
         } else if (clickedSeat.getStatus() == 1) {
-            clickedSeat.setStatus(0);
-            clickedSeat.setSelectedGender("");
-            adapter.notifyItemChanged(position);
-            updateTotalPrice();
-        } else if (clickedSeat.getStatus() == 2 || clickedSeat.getStatus() == 3) {
-            Toast.makeText(this, "Seat already booked!", Toast.LENGTH_SHORT).show();
+            removeSeatLock(position);
+        } else {
+            Toast.makeText(this, "Seat already reserved!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -247,15 +238,12 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
         View sheetView = getLayoutInflater().inflate(R.layout.layout_gender_selection, null);
         bottomSheetDialog.setContentView(sheetView);
 
-        LinearLayout btnMale = sheetView.findViewById(R.id.btnMale);
-        LinearLayout btnFemale = sheetView.findViewById(R.id.btnFemale);
-
-        btnMale.setOnClickListener(v -> {
+        sheetView.findViewById(R.id.btnMale).setOnClickListener(v -> {
             applyGenderSelection(position, "male");
             bottomSheetDialog.dismiss();
         });
 
-        btnFemale.setOnClickListener(v -> {
+        sheetView.findViewById(R.id.btnFemale).setOnClickListener(v -> {
             applyGenderSelection(position, "female");
             bottomSheetDialog.dismiss();
         });
@@ -264,35 +252,109 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
     }
 
     private void applyGenderSelection(int position, String gender) {
+        if (currentScheduleId == null) return;
+        loadingDialog.show();
+
         SeatModel seat = seatList.get(position);
-        seat.setStatus(1);
-        seat.setSelectedGender(gender);
-        adapter.notifyItemChanged(position);
-        updateTotalPrice();
+        String userId = FirebaseAuth.getInstance().getUid();
+        DocumentReference seatRef = db.collection("Schedules").document(currentScheduleId)
+                .collection("BookedSeats").document(seat.getSeatName());
+
+        long expiryTime = System.currentTimeMillis() + (10 * 60 * 1000);
+
+        db.runTransaction((Transaction.Function<Void>) transaction -> {
+            DocumentSnapshot snapshot = transaction.get(seatRef);
+
+            if (snapshot.exists()) {
+                Long existingExpiry = snapshot.getLong("expiryTime");
+                String status = snapshot.getString("status");
+
+                if ("pending".equals(status) && existingExpiry != null && System.currentTimeMillis() < existingExpiry) {
+                    throw new FirebaseFirestoreException("Taken", FirebaseFirestoreException.Code.ABORTED);
+                }
+                if ("Booked".equals(status)) {
+                    throw new FirebaseFirestoreException("Taken", FirebaseFirestoreException.Code.ABORTED);
+                }
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("gender", gender);
+            data.put("status", "pending");
+            data.put("userId", userId);
+            data.put("expiryTime", expiryTime);
+            data.put("timestamp", System.currentTimeMillis());
+
+            transaction.set(seatRef, data);
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            loadingDialog.dismiss();
+            seat.setStatus(1);
+            seat.setSelectedGender(gender);
+            adapter.notifyItemChanged(position);
+            updateTotalPrice();
+        }).addOnFailureListener(e -> {
+            loadingDialog.dismiss();
+            Toast.makeText(this, "Seat is already taken or reserved!", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void removeSeatLock(int position) {
+        loadingDialog.show();
+        SeatModel seat = seatList.get(position);
+        db.collection("Schedules").document(currentScheduleId)
+                .collection("BookedSeats").document(seat.getSeatName())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    loadingDialog.dismiss();
+                    seat.setStatus(0);
+                    seat.setSelectedGender("");
+                    adapter.notifyItemChanged(position);
+                    updateTotalPrice();
+                })
+                .addOnFailureListener(e -> loadingDialog.dismiss());
     }
 
     private void loadBookedSeats(String scheduleId) {
         if (loadingDialog != null) loadingDialog.show();
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+
         seatListener = db.collection("Schedules").document(scheduleId).collection("BookedSeats")
                 .addSnapshotListener((value, error) -> {
                     if (loadingDialog != null) loadingDialog.dismiss();
-                    if (error != null) return;
-                    if (value != null) {
+                    if (error != null || value == null) return;
+
+                    for (SeatModel seat : seatList) {
+                        if (seat.getStatus() != 4) seat.setStatus(0);
+                    }
+
+                    for (DocumentSnapshot doc : value.getDocuments()) {
+                        String seatNo = doc.getId();
+                        String gender = doc.getString("gender");
+                        String userId = doc.getString("userId");
+                        String status = doc.getString("status");
+                        Long expiry = doc.getLong("expiryTime");
+
+                        long currentTime = System.currentTimeMillis();
+
                         for (SeatModel seat : seatList) {
-                            if (seat.getStatus() == 2 || seat.getStatus() == 3) seat.setStatus(0);
-                        }
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            String seatNo = doc.getId();
-                            String gender = doc.getString("gender");
-                            for (SeatModel seat : seatList) {
-                                if (seat.getSeatName().trim().equals(seatNo.trim())) {
-                                    seat.setStatus("female".equalsIgnoreCase(gender) ? 3 : 2);
-                                    break;
+                            if (seat.getSeatName().trim().equals(seatNo.trim())) {
+
+                                if ("pending".equals(status) && expiry != null && currentTime > expiry) {
+                                    seat.setStatus(0);
+                                } else {
+                                    if (currentUserId != null && currentUserId.equals(userId)) {
+                                        seat.setStatus(1);
+                                        seat.setSelectedGender(gender);
+                                    } else {
+                                        seat.setStatus("female".equalsIgnoreCase(gender) ? 3 : 2);
+                                    }
                                 }
+                                break;
                             }
                         }
-                        adapter.notifyDataSetChanged();
                     }
+                    adapter.notifyDataSetChanged();
+                    updateTotalPrice();
                 });
     }
 

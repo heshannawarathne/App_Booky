@@ -106,7 +106,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-// Call Access Switch
         switchCallAccess.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (buttonView.isPressed()) {
                 if (isChecked) {

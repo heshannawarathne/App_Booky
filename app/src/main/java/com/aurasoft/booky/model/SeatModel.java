@@ -3,9 +3,8 @@ package com.aurasoft.booky.model;
 public class SeatModel {
 
     private String seatName;
-    private int status; // 0: Available, 1: Selected, 2: Booked Male, 3: Booked Female, 4: Aisle
-    private String selectedGender = ""; // "male" "female"
-
+    private int status;
+    private String selectedGender = "";
 
     public SeatModel(String seatName, int status) {
         this.seatName = seatName;

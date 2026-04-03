@@ -85,11 +85,19 @@ public class MapActivity extends AppCompatActivity {
     private ConnectivityManager.NetworkCallback networkCallback;
     private boolean isStyleLoaded = false;
 
+    private Handler timerHandler = new Handler(Looper.getMainLooper());
+    private Runnable timerRunnable;
+    private com.google.firebase.firestore.FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_map);
+
+        db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+
+        startExpiryExtension();
 
         setupLoadingDialog();
         mapView = findViewById(R.id.mapView);
@@ -131,10 +139,38 @@ public class MapActivity extends AppCompatActivity {
 
         btnConfirm.setOnClickListener(v -> {
             if (selectedLatLng != null) {
-                showConfirmDialog(); // Custom Popup එක පෙන්වනවා
+                showConfirmDialog();
             } else {
                 Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    private void startExpiryExtension() {
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                extendSeatLock();
+                timerHandler.postDelayed(this, 5 * 60 * 1000);
+            }
+        };
+        timerHandler.post(timerRunnable);
+    }
+
+    private void extendSeatLock() {
+        if (scheduleId == null || selectedSeats == null || selectedSeats.isEmpty()) return;
+
+        com.google.firebase.firestore.WriteBatch batch = db.batch();
+        long newExpiry = System.currentTimeMillis() + (10 * 60 * 1000);
+
+        for (String seat : selectedSeats) {
+            com.google.firebase.firestore.DocumentReference seatRef = db.collection("Schedules")
+                    .document(scheduleId).collection("BookedSeats").document(seat);
+            batch.update(seatRef, "expiryTime", newExpiry);
+        }
+
+        batch.commit().addOnSuccessListener(aVoid -> {
+            android.util.Log.d("MAP_DEBUG", "Seat lock extended.");
         });
     }
 
@@ -279,12 +315,17 @@ public class MapActivity extends AppCompatActivity {
         loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
+
+
     @Override protected void onStart() { super.onStart(); mapView.onStart(); }
     @Override protected void onResume() { super.onResume(); mapView.onResume(); }
     @Override protected void onPause() { super.onPause(); mapView.onPause(); }
     @Override protected void onStop() { super.onStop(); mapView.onStop(); }
     @Override protected void onDestroy() {
         super.onDestroy();
+        if (timerHandler != null && timerRunnable != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
         if (connectivityManager != null && networkCallback != null) connectivityManager.unregisterNetworkCallback(networkCallback);
         mapView.onDestroy();
     }

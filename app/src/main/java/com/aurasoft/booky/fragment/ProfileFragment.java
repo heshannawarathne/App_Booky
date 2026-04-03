@@ -99,7 +99,6 @@ public class ProfileFragment extends Fragment {
             if (getActivity() != null) getActivity().onBackPressed();
         });
 
-        // Edit Photo Button Click
         btnEditPhoto.setOnClickListener(v -> {
             if (isGoogleUser) {
                 Toast.makeText(getContext(), "Google profile photo cannot be changed", Toast.LENGTH_SHORT).show();
@@ -128,7 +127,7 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "Phone number cannot be changed", Toast.LENGTH_SHORT).show()
         );
 
-        View loadingView = getLayoutInflater().inflate(R.layout.dialog_loading, null); // ඔයාගේ loading xml එකේ නම මෙතනට දෙන්න
+        View loadingView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
         loadingDialog = new android.app.AlertDialog.Builder(requireContext())
                 .setView(loadingView)
                 .setCancelable(false)
@@ -298,7 +297,7 @@ public class ProfileFragment extends Fragment {
                 .update("profileImageUrl", url)
                 .addOnSuccessListener(aVoid -> {
                     if (isAdded()) {
-                        if (loadingDialog != null) loadingDialog.dismiss(); // සාර්ථකව update වුණාම හංගනවා
+                        if (loadingDialog != null) loadingDialog.dismiss();
                         Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                     }
                 })

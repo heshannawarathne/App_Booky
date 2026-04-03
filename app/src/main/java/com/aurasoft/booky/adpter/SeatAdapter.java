@@ -17,7 +17,7 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
 
     private List<SeatModel> seatList;
     private Context context;
-    private OnSeatClickListener listener; // Click Listener එක
+    private OnSeatClickListener listener;
 
     public interface OnSeatClickListener {
         void onSeatClick(int position);

@@ -20,11 +20,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.aurasoft.booky.R;
 import com.aurasoft.booky.model.ScheduleModel;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,25 +42,12 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
     }
 
     public ScheduleAdapter(List<ScheduleModel> scheduleList, Context context) {
-        this.scheduleList = filterUpcomingSchedules(scheduleList);
+        this.scheduleList = scheduleList;
         this.context = context;
     }
 
-    private List<ScheduleModel> filterUpcomingSchedules(List<ScheduleModel> fullList) {
-        List<ScheduleModel> filteredList = new ArrayList<>();
-        Timestamp currentTime = Timestamp.now();
-        for (ScheduleModel model : fullList) {
-            if (model.getDeparture_time() != null) {
-                if (model.getDeparture_time().compareTo(currentTime) > 0) {
-                    filteredList.add(model);
-                }
-            }
-        }
-        return filteredList;
-    }
-
     public void updateList(List<ScheduleModel> newList) {
-        this.scheduleList = filterUpcomingSchedules(newList);
+        this.scheduleList = newList;
         notifyDataSetChanged();
     }
 
@@ -82,10 +67,21 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         holder.busRoute.setText(model.getFrom() + " - " + model.getTo());
 
         if (model.getDeparture_time() != null) {
+            long departureMillis = model.getDeparture_time().toDate().getTime();
+            long currentTime = System.currentTimeMillis();
+
             SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
             holder.busTime.setText(timeFormat.format(model.getDeparture_time().toDate()));
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             holder.busDate.setText(dateFormat.format(model.getDeparture_time().toDate()));
+
+            if (currentTime > departureMillis) {
+                holder.statusText.setText("IN PROGRESS");
+                holder.statusText.setTextColor(Color.parseColor("#FF9800"));
+            } else {
+                holder.statusText.setText("UPCOMING");
+                holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title));
+            }
         } else {
             holder.busTime.setText("N/A");
             holder.busDate.setText("N/A");
@@ -99,21 +95,22 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                     if (task.isSuccessful() && task.getResult() != null) {
                         int bookedCount = task.getResult().size();
                         int totalSeats = 49;
+                        int availableSeats = totalSeats - bookedCount;
 
                         if (bookedCount >= totalSeats) {
                             holder.statusText.setText("SOLD OUT");
                             holder.statusText.setTextColor(Color.RED);
-                            holder.statusText.setVisibility(View.VISIBLE);
-
                             holder.itemView.setAlpha(0.6f);
-                            holder.callBtn.setAlpha(1.0f);
                             holder.itemView.setOnClickListener(null);
-
                         } else {
-                            // සීට් තිබේ නම්
-                            holder.statusText.setText("Available");
-                            holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title));
-                            holder.statusText.setVisibility(View.VISIBLE);
+                            holder.statusText.setText(String.format(Locale.getDefault(), "%02d Seats Available", availableSeats));
+
+                            long departureMillis = (model.getDeparture_time() != null) ? model.getDeparture_time().toDate().getTime() : 0;
+                            if (System.currentTimeMillis() > departureMillis && departureMillis != 0) {
+                                holder.statusText.setTextColor(Color.parseColor("#FF9800"));
+                            } else {
+                                holder.statusText.setTextColor(ContextCompat.getColor(context, R.color.ap_title));
+                            }
 
                             holder.itemView.setAlpha(1.0f);
                             holder.itemView.setOnClickListener(v -> {
@@ -122,6 +119,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
                                 }
                             });
                         }
+                        holder.statusText.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -160,7 +158,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             busRoute = itemView.findViewById(R.id.busRoute);
             busTime = itemView.findViewById(R.id.busTime);
             busDate = itemView.findViewById(R.id.busDate);
-            statusText = itemView.findViewById(R.id.statusText); // XML එකේ දීපු ID එක
+            statusText = itemView.findViewById(R.id.statusText);
             callBtn = itemView.findViewById(R.id.callBtnBg);
         }
     }

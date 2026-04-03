@@ -93,7 +93,6 @@ public class TripModel {
         this.seats = seats;
     }
 
-    // 2. මෙන්න මේ Getter එක නැති නිසයි Adapter එකේ error එක ආවේ
     public Timestamp getTimestamp() {
         return timestamp;
     }

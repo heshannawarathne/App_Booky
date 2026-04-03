@@ -21,6 +21,7 @@ import com.aurasoft.booky.model.ScheduleModel;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,7 +31,27 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public SearchResultsAdapter(List<ScheduleModel> busList) {
-        this.busList = busList;
+        this.busList = filterUpcomingBuses(busList);
+    }
+
+    private List<ScheduleModel> filterUpcomingBuses(List<ScheduleModel> fullList) {
+        List<ScheduleModel> filteredList = new ArrayList<>();
+        long currentTime = System.currentTimeMillis();
+
+        for (ScheduleModel bus : fullList) {
+            if (bus.getDeparture_time() != null) {
+                long busTime = bus.getDeparture_time().toDate().getTime();
+                if (busTime > currentTime) {
+                    filteredList.add(bus);
+                }
+            }
+        }
+        return filteredList;
+    }
+
+    public void updateList(List<ScheduleModel> newList) {
+        this.busList = filterUpcomingBuses(newList);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -64,11 +85,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                         if (bookedCount >= totalSeats) {
                             holder.sheatBookStatus.setText("Fully Booked");
                             holder.sheatBookStatus.setTextColor(Color.RED);
-
                             holder.btnBookNow.setEnabled(false);
                             holder.btnBookNow.setText("FULL");
-
-                            holder.itemView.setOnClickListener(null);
                         } else {
                             int available = totalSeats - bookedCount;
                             holder.sheatBookStatus.setText("Available: " + available + " Seats");
@@ -77,16 +95,10 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                             );
                             holder.btnBookNow.setEnabled(true);
                             holder.btnBookNow.setText("Book Now");
-                            holder.btnBookNow.setAlpha(1.0f);
-
-                            holder.itemView.setOnClickListener(v -> {
-                                Toast.makeText(v.getContext(), "Opening seat selection for " + bus.getSchedule_id(), Toast.LENGTH_SHORT).show();
-                            });
                         }
                     }
                 });
 
-        // --- Call Button Logic ---
         holder.btnCall.setOnClickListener(v -> {
             String number = bus.getPhone_number();
             if (v.getContext().checkSelfPermission(android.Manifest.permission.CALL_PHONE)
@@ -99,18 +111,15 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             }
         });
 
-        // --- Book Now Button Logic ---
         holder.btnBookNow.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, SeatSelectionActivity.class);
-
             int priceValue = 0;
             try {
                 priceValue = Integer.parseInt(String.valueOf(bus.getPrice()));
             } catch (Exception e) {
                 priceValue = 0;
             }
-
             intent.putExtra("SCHEDULE_ID", bus.getSchedule_id());
             intent.putExtra("TICKET_PRICE", priceValue);
             context.startActivity(intent);

@@ -83,20 +83,31 @@ public class SearchResultsFragment extends Fragment {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
             Date selectedDate = sdf.parse(dateStr);
-
             if (selectedDate == null) return;
 
             Calendar calendar = Calendar.getInstance();
+            Calendar nowCalendar = Calendar.getInstance();
+
             calendar.setTime(selectedDate);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
+
+
+            if (calendar.get(Calendar.YEAR) == nowCalendar.get(Calendar.YEAR) &&
+                    calendar.get(Calendar.DAY_OF_YEAR) == nowCalendar.get(Calendar.DAY_OF_YEAR)) {
+                calendar.setTime(new Date());
+            } else {
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+            }
             Timestamp start = new Timestamp(calendar.getTime());
 
-            calendar.set(Calendar.HOUR_OF_DAY, 23);
-            calendar.set(Calendar.MINUTE, 59);
-            calendar.set(Calendar.SECOND, 59);
-            Timestamp end = new Timestamp(calendar.getTime());
+
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(selectedDate);
+            endCalendar.set(Calendar.HOUR_OF_DAY, 23);
+            endCalendar.set(Calendar.MINUTE, 59);
+            endCalendar.set(Calendar.SECOND, 59);
+            Timestamp end = new Timestamp(endCalendar.getTime());
 
             FirebaseFirestore.getInstance().collection("Schedules")
                     .whereEqualTo("from", from)
@@ -108,14 +119,16 @@ public class SearchResultsFragment extends Fragment {
                         busList.clear();
                         for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                             ScheduleModel model = doc.toObject(ScheduleModel.class);
-                            model.setSchedule_id(doc.getId());
-                            busList.add(model);
+                            if (model != null) {
+                                model.setSchedule_id(doc.getId());
+                                busList.add(model);
+                            }
                         }
 
                         if (tvCount != null) {
                             tvCount.setText(busList.size() > 0 ? busList.size() + " Available Buses" : "No Buses Available");
                         }
-                        adapter.notifyDataSetChanged();
+                        adapter.updateList(busList);
                     })
                     .addOnFailureListener(e -> {
                         Log.e("FIRESTORE_ERROR", e.getMessage());
