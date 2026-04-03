@@ -133,7 +133,7 @@
                         android:layout_width="272dp"
                         android:layout_height="51dp"
                         android:layout_below="@id/fLabel"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="10dp"
 
                         android:layout_marginTop="-24dp"
 
@@ -181,7 +181,7 @@
                         android:layout_width="263dp"
                         android:layout_height="52dp"
                         android:layout_below="@id/tLabel"
-                        android:layout_marginStart="5dp"
+                        android:layout_marginStart="10dp"
                         android:layout_marginTop="-24dp"
                         android:layout_marginEnd="10dp"
                         android:layout_toEndOf="@id/tIcon"

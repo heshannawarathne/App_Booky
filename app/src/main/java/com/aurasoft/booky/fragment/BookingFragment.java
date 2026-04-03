@@ -227,30 +227,24 @@ public class BookingFragment extends Fragment {
             Date selectedDate = sdf.parse(selectedDateStr);
             Calendar calendar = Calendar.getInstance();
 
-            // අද දිනය සහ වෙලාව ගන්නවා
             Calendar now = Calendar.getInstance();
 
-            // සසඳන්න ලේසි වෙන්න දිනය විතරක් වෙන් කරගමු
             Calendar selectedCal = Calendar.getInstance();
             selectedCal.setTime(selectedDate);
 
             Date dayStart;
 
-            // 1. යූසර් තෝරලා තියෙන්නේ අද දිනයද කියලා බලනවා
             if (selectedCal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
                     selectedCal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
 
-                // අද නම්: සර්ච් එක පටන් ගන්නේ දැන් වෙලාවෙන් (Current Time)
                 dayStart = now.getTime();
             } else {
-                // වෙනත් දවසක් නම්: ඒ දවසේ උදේ 12:00 ඉඳන් පෙන්වනවා
                 selectedCal.set(Calendar.HOUR_OF_DAY, 0);
                 selectedCal.set(Calendar.MINUTE, 0);
                 selectedCal.set(Calendar.SECOND, 0);
                 dayStart = selectedCal.getTime();
             }
 
-            // දවසේ අවසානය (රාත්‍රී 11:59)
             selectedCal.set(Calendar.HOUR_OF_DAY, 23);
             selectedCal.set(Calendar.MINUTE, 59);
             selectedCal.set(Calendar.SECOND, 59);
@@ -258,7 +252,6 @@ public class BookingFragment extends Fragment {
 
             if (loadingDialog != null) loadingDialog.show();
 
-            // Firestore Query එක
             db.collection("Schedules")
                     .whereEqualTo("from", from)
                     .whereEqualTo("to", to)
@@ -294,12 +287,10 @@ public class BookingFragment extends Fragment {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) return;
 
-        // "Users" collection එකට real-time සවන් දෙනවා
         db.collection("Users").document(currentUser.getUid()).addSnapshotListener((doc, error) -> {
             if (error != null) return;
 
             if (doc != null && doc.exists()) {
-                // නම සෙට් කිරීම
                 String dbName = doc.getString("name");
                 if (dbName != null && !dbName.isEmpty()) {
                     userName.setText("Hello, " + dbName.split(" ")[0] + "!");
@@ -307,7 +298,6 @@ public class BookingFragment extends Fragment {
                     userName.setText("Hello, " + currentUser.getDisplayName().split(" ")[0] + "!");
                 }
 
-                // ප්‍රොෆයිල් පින්තූරය Glide හරහා ලෝඩ් කිරීම
                 String imageUrl = doc.getString("profileImageUrl");
                 if (imageUrl != null && !imageUrl.isEmpty() && isAdded()) {
                     Glide.with(this)
