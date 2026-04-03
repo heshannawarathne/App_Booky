@@ -40,6 +40,8 @@ public class ScheduleFragment extends Fragment {
     private FirebaseFirestore db;
     private AlertDialog loadingDialog;
 
+    private long lastClickTime = 0;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_schedule, container, false);
@@ -63,6 +65,12 @@ public class ScheduleFragment extends Fragment {
 
 
         adapter.setOnItemClickListener(model -> {
+
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastClickTime < 1000) {
+                return;
+            }
+            lastClickTime = currentTime;
             Intent intent = new Intent(getContext(), SeatSelectionActivity.class);
             intent.putExtra("SCHEDULE_ID", model.getSchedule_id());
 
