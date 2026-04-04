@@ -110,7 +110,7 @@ public class ScheduleFragment extends Fragment {
 
         Calendar cal = Calendar.getInstance();
 
-        cal.add(Calendar.HOUR_OF_DAY, -8);
+        cal.add(Calendar.HOUR_OF_DAY, -2);
 
         Timestamp thresholdTime = new Timestamp(cal.getTime());
 
@@ -133,7 +133,7 @@ public class ScheduleFragment extends Fragment {
                     adapter.updateList(scheduleList);
 
                     if (scheduleList.isEmpty()) {
-                        Toast.makeText(getContext(), "No schedules found within the last 8 hours.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No schedules found within the last 2 hours.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {

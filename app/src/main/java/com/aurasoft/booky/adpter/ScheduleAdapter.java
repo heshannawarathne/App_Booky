@@ -63,6 +63,8 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
         ScheduleModel model = scheduleList.get(position);
         String scheduleId = model.getSchedule_id();
 
+        long TWO_HOURS_IN_MS = 7200000;
+
         holder.busNumber.setText("no - " + model.getBus_no());
         holder.busRoute.setText(model.getFrom() + " - " + model.getTo());
 
@@ -75,7 +77,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
             holder.busDate.setText(dateFormat.format(model.getDeparture_time().toDate()));
 
-            if (currentTime > departureMillis) {
+            if (currentTime > (departureMillis + TWO_HOURS_IN_MS)) {
+                holder.statusText.setText("COMPLETED");
+                holder.statusText.setTextColor(Color.GRAY);
+                holder.itemView.setAlpha(0.5f); // නිම වූ ගමන් නිසා පෙනුම මඳක් අඩු කළා
+            } else if (currentTime > departureMillis) {
                 holder.statusText.setText("IN PROGRESS");
                 holder.statusText.setTextColor(Color.parseColor("#FF9800"));
             } else {

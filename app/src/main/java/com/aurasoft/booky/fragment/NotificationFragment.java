@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,8 @@ public class NotificationFragment extends Fragment {
     private AlertDialog loadingDialog;
     private boolean isFirstLoad = true;
 
+    private ImageView btnBack;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notification, container, false);
@@ -58,13 +61,20 @@ public class NotificationFragment extends Fragment {
         recyclerView = view.findViewById(R.id.rvNotifications);
         tvEmpty = view.findViewById(R.id.tvEmpty);
         btnClearAll = view.findViewById(R.id.btnClearAll);
-
+        btnBack = view.findViewById(R.id.btnBack);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         notificationList = new ArrayList<>();
         adapter = new NotificationAdapter(notificationList);
         recyclerView.setAdapter(adapter);
 
         loadNotifications();
+
+        btnBack.setOnClickListener(v -> {
+            if (getActivity() != null) {
+
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
 
         btnClearAll.setOnClickListener(v -> showCustomClearDialog());
 

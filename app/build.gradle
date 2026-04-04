@@ -106,7 +106,12 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
 
+    def lifecycle_version = "2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
 
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+
+    implementation "androidx.fragment:fragment-ktx:1.6.1"
 
 
 }
