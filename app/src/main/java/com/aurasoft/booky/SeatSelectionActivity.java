@@ -339,15 +339,18 @@ public class SeatSelectionActivity extends AppCompatActivity implements SeatAdap
                         for (SeatModel seat : seatList) {
                             if (seat.getSeatName().trim().equals(seatNo.trim())) {
 
-                                if ("pending".equals(status) && expiry != null && currentTime > expiry) {
-                                    seat.setStatus(0);
-                                } else {
-                                    if (currentUserId != null && currentUserId.equals(userId)) {
+                                if ("pending".equals(status)) {
+                                    if (currentTime > expiry) {
+                                        seat.setStatus(0); // Expired -> Available
+                                    } else if (currentUserId != null && currentUserId.equals(userId)) {
                                         seat.setStatus(1);
                                         seat.setSelectedGender(gender);
                                     } else {
                                         seat.setStatus("female".equalsIgnoreCase(gender) ? 3 : 2);
                                     }
+                                } else if ("Booked".equals(status)) {
+
+                                    seat.setStatus("female".equalsIgnoreCase(gender) ? 3 : 2);
                                 }
                                 break;
                             }

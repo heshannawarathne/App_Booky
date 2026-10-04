@@ -80,7 +80,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.Schedu
             if (currentTime > (departureMillis + TWO_HOURS_IN_MS)) {
                 holder.statusText.setText("COMPLETED");
                 holder.statusText.setTextColor(Color.GRAY);
-                holder.itemView.setAlpha(0.5f); // නිම වූ ගමන් නිසා පෙනුම මඳක් අඩු කළා
+                holder.itemView.setAlpha(0.5f);
             } else if (currentTime > departureMillis) {
                 holder.statusText.setText("IN PROGRESS");
                 holder.statusText.setTextColor(Color.parseColor("#FF9800"));

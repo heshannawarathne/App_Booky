@@ -24,9 +24,12 @@
         <receiver
             android:name=".NotificationReceiver"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
+                <!-- Boot completed සඳහා (Phone එක restart වුණාට පසු) -->
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- AlarmManager එකෙන් එන Custom Broadcast එක සඳහා (මෙන්න මේකයි අඩු) -->
+                <action android:name="com.aurasoft.booky.SHOW_NOTIFICATION" />
             </intent-filter>
         </receiver>
 

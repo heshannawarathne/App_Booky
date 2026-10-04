@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/profileImg"
                 android:layout_marginTop="20dp"
-                android:text="Book your Seat"
+                android:text="Find your Bus"
                 android:textColor="@color/white_alltime"
                 android:textSize="28sp"
                 android:textStyle="bold" />
