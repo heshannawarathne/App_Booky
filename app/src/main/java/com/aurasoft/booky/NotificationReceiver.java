@@ -32,7 +32,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         saveToFirestore(userId, title, message);
     }
 
-    private void showNotification(Context context, String title, String message) {
+    public static void showNotification(Context context, String title, String message) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         String CHANNEL_ID = "bus_alerts_channel";
 
@@ -40,10 +40,11 @@ public class NotificationReceiver extends BroadcastReceiver {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Bus Trip Alerts",
-                    NotificationManager.IMPORTANCE_HIGH
+                    NotificationManager.IMPORTANCE_HIGH // Screen එක On වී Pop-up වීමට
             );
             channel.enableLights(true);
             channel.enableVibration(true);
+            // Lock screen එකේ සම්පූර්ණයෙන්ම content එක පෙන්වීමට
             channel.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC);
 
             if (notificationManager != null) {
@@ -58,15 +59,15 @@ public class NotificationReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX) // MAX priority දීම
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // Public lockscreen
 
         if (notificationManager != null) {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
