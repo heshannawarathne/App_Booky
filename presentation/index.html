@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booky — Smart Bus Booking & Tracking Ecosystem</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background-color: #090d12;
+      color: #f0f6fc;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: scale(0.98);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .glass-card {
+      background: rgba(16, 22, 30, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(58, 123, 115, 0.22);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(78, 175, 163, 0.5);
+      box-shadow: 0 10px 25px -5px rgba(58, 123, 115, 0.25);
+    }
+
+    .pulse-glow {
+      box-shadow: 0 0 45px -5px rgba(58, 123, 115, 0.35);
+    }
+
+    .amber-glow {
+      box-shadow: 0 0 50px -5px rgba(245, 158, 11, 0.3);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .floating {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 40%, #5eead4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Animated Circuit Stream Lines */
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -36;
+      }
+    }
+
+    .animated-stream {
+      stroke-dasharray: 6 6;
+      animation: dash 1.4s linear infinite;
+    }
+
+    .animated-stream-reverse {
+      stroke-dasharray: 6 6;
+      animation: dash 1.4s linear infinite reverse;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.15); opacity: 0.15; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    .pulse-ring {
+      animation: pulseRing 3s ease-in-out infinite;
+    }
+
+    /* Subtle Elegant Card Entrance Animation */
+    @keyframes subtleEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anim-card {
+      opacity: 0;
+    }
+
+    .slide.active .anim-card-1 {
+      animation: subtleEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+    }
+    .slide.active .anim-card-2 {
+      animation: subtleEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s forwards;
+    }
+    .slide.active .anim-card-3 {
+      animation: subtleEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards;
+    }
+    .slide.active .anim-card-4 {
+      animation: subtleEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between relative bg-gradient-to-br from-[#070b0f] via-[#0b1218] to-[#090f14]">
+
+  <!-- Ambient Glow Backdrops -->
+  <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#3A7B73] opacity-15 rounded-full blur-[140px] pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#225750] opacity-15 rounded-full blur-[160px] pointer-events-none"></div>
+
+  <!-- SEMI-TRANSPARENT HALF-LOGO WATERMARK ON RIGHT SIDE -->
+  <div class="fixed -right-36 sm:-right-44 top-1/2 -translate-y-1/2 w-[460px] sm:w-[580px] h-[460px] sm:h-[580px] pointer-events-none select-none z-0 opacity-[0.06] filter grayscale-[20%] contrast-125 transition-all">
+    <img src="booky_logo.png" alt="Booky Watermark" class="w-full h-full object-contain" />
+  </div>
+
+  <!-- Top Progress Bar -->
+  <div class="w-full bg-[#161b22] h-1.5 fixed top-0 left-0 z-50">
+    <div id="progressBar" class="bg-gradient-to-r from-[#2dd4bf] to-[#0d9488] h-full transition-all duration-300" style="width: 25%;"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full px-8 pt-6 pb-2 flex justify-between items-center z-40">
+   
+    </div>
+
+    <!-- Slide Index Pills -->
+    <div class="flex items-center gap-2 bg-[#161b22]/90 border border-gray-800 px-4 py-1.5 rounded-full text-xs text-gray-300">
+      <span id="slideIndicator" class="font-mono text-emerald-400 font-semibold">01</span>
+      <span class="text-gray-500">/</span>
+      <span class="font-mono text-gray-400">04</span>
+    </div>
+
+    <!-- Fullscreen Button -->
+    <div class="flex items-center gap-3">
+      <button onclick="toggleFullScreen()" class="p-2 rounded-lg bg-gray-800/60 hover:bg-gray-700/80 text-gray-300 border border-gray-700/50 transition-all text-xs flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+       
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDES CONTAINER -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-6 sm:px-12 flex items-center justify-center z-10 relative">
+
+    <!-- ================= SLIDE 1: TITLE SLIDE ================= -->
+    <section class="slide active flex-col items-center justify-center text-center w-full max-w-4xl py-6" data-index="1">
+      <div class="relative mb-8 floating">
+        <div class="w-32 h-32 rounded-full overflow-hidden p-1 shadow-2xl shadow-emerald-500/20 bg-gradient-to-tr from-[#1b4e47] via-[#3A7B73] to-[#5eead4]">
+          <img src="booky_logo.png" alt="Booky Logo" class="w-full h-full object-cover rounded-full" />
+        </div>
+        <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+          <span>✓</span> LIVE
+        </div>
+      </div>
+
+      <div class="inline-block px-4 py-1.5 mb-4 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 text-xs font-semibold tracking-wider uppercase">
+        Mobile-based M-commerce Application
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4 gradient-text">
+        Booky : Smart Bus Booking & Tracking Ecosystem
+      </h1>
+
+      <p class="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+        A unified passenger booking experience paired with a centralized transit management admin panel.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs">
+        <div class="px-5 py-2.5 rounded-xl bg-gray-900/80 border border-gray-700/60 text-gray-300 flex items-center gap-2 shadow-sm">
+          <span class="text-emerald-400 font-semibold">Presented by:</span>
+          <span class="text-white font-medium">Pramod Heshan Nawarathna</span>
+        </div>
+        <div class="px-5 py-2.5 rounded-xl bg-gray-900/80 border border-gray-700/60 text-gray-300 flex items-center gap-2 shadow-sm">
+          
+          <span class="text-white font-medium">NIC - 200313301140</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 2: PROBLEM STATEMENT (WITH SUBTLE ENTRANCE ANIMATION) ================= -->
+    <section class="slide flex-col justify-center w-full py-4" data-index="2">
+      <div class="mb-10 text-center">
+        <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Problem Statement</h2>
+        <p class="text-gray-400 text-sm mt-2">Key challenges in the current public transport system</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl mx-auto">
+        <!-- Point 1 -->
+        <div class="glass-card anim-card anim-card-1 rounded-2xl p-6 border-l-4 border-l-red-500 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-red-950/60 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0 text-2xl font-bold">
+            ⏳
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Long queues and manual ticketing
+          </h3>
+        </div>
+
+        <!-- Point 2 -->
+        <div class="glass-card anim-card anim-card-2 rounded-2xl p-6 border-l-4 border-l-orange-500 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-950/60 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0 text-2xl font-bold">
+            🚫
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            No real-time information
+          </h3>
+        </div>
+
+        <!-- Point 3 -->
+        <div class="glass-card anim-card anim-card-3 rounded-2xl p-6 border-l-4 border-l-yellow-500 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-yellow-950/60 border border-yellow-500/30 flex items-center justify-center text-yellow-400 shrink-0 text-2xl font-bold">
+            ⚠️
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Double-booking and seat confusion
+          </h3>
+        </div>
+
+        <!-- Point 4 -->
+        <div class="glass-card anim-card anim-card-4 rounded-2xl p-6 border-l-4 border-l-rose-500 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-rose-950/60 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 text-2xl font-bold">
+            🚌
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Missed buses
+          </h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 3: PROPOSED SOLUTION (WITH SUBTLE ENTRANCE ANIMATION) ================= -->
+    <section class="slide flex-col justify-center w-full py-4" data-index="3">
+      <div class="mb-10 text-center">
+        <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Proposed Solution</h2>
+        <p class="text-gray-400 text-sm mt-2">Booky smart transit platform</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl mx-auto">
+        <!-- Solution 1 -->
+        <div class="glass-card anim-card anim-card-1 rounded-2xl p-6 border-l-4 border-l-emerald-400 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-950/70 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0 text-2xl font-bold">
+            📱
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Easy mobile bus search and seat reservation
+          </h3>
+        </div>
+
+        <!-- Solution 2 -->
+        <div class="glass-card anim-card anim-card-2 rounded-2xl p-6 border-l-4 border-l-teal-400 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-teal-950/70 border border-teal-500/40 flex items-center justify-center text-teal-300 shrink-0 text-2xl font-bold">
+            🔒
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Temporary seat locking and Map pickup selection
+          </h3>
+        </div>
+
+        <!-- Solution 3 -->
+        <div class="glass-card anim-card anim-card-3 rounded-2xl p-6 border-l-4 border-l-cyan-400 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-950/70 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0 text-2xl font-bold">
+            ⏰
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Smart Reminders
+          </h3>
+        </div>
+
+        <!-- Solution 4 -->
+        <div class="glass-card anim-card anim-card-4 rounded-2xl p-6 border-l-4 border-l-indigo-400 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-950/70 border border-indigo-500/40 flex items-center justify-center text-indigo-300 shrink-0 text-2xl font-bold">
+            💳
+          </div>
+          <h3 class="text-xl font-bold text-white leading-snug">
+            Automated email E-tickets and PayHere payment integration
+          </h3>
+        </div>
+      </div>
+    </section>
+
+        <!-- ================= SLIDE 4: SMART WIDE-SCREEN ANIMATED ECOSYSTEM ================= -->
+    <section class="slide flex-col justify-center items-center w-full max-w-7xl px-4 py-8 text-center my-auto" data-index="4">
+      
+      <!-- Top Title Area -->
+      <div class="mb-10 text-center">
+        <h2 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight">System Ecosystem</h2>
+        <p class="text-gray-400 text-base sm:text-lg mt-3">Real-Time Bi-Directional Connection</p>
+      </div>
+
+      <!-- MAIN EXPANDED CONNECTION CANVAS -->
+      <div class="w-full flex flex-col lg:flex-row items-center justify-between gap-6 px-4">
+
+        <!-- Left Node: Passenger Mobile App -->
+        <div class="glass-card rounded-3xl p-8 sm:p-10 border border-emerald-500/40 w-full lg:w-96 flex flex-col items-center text-center relative z-20 pulse-glow bg-[#101720]/90">
+          <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-emerald-900 to-teal-500 flex items-center justify-center text-white text-5xl mb-5 shadow-xl shadow-emerald-500/30">
+            📱
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Mobile App</h3>
+           <div class="mt-6 pt-5 border-t border-gray-800/80 w-full flex flex-col gap-2">
+           
+          </div>
+          <p class="text-sm text-emerald-400 font-semibold mt-1">Passenger Client</p>
+
+         
+        </div>
+
+        <!-- Connection 1: Mobile <-> Firebase (Wide Animated Stream) -->
+        <div class="hidden lg:flex flex-1 flex-col items-center justify-center px-4">
+          <span class="text-xs font-mono text-emerald-400 font-bold mb-2 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-500/30 shadow">
+            REAL-TIME
+          </span>
+          <svg class="w-full h-12" viewBox="0 0 220 36" fill="none">
+            <path d="M 0 18 L 220 18" stroke="#1f2937" stroke-width="4" />
+            <path d="M 0 13 L 220 13" stroke="#10b981" stroke-width="3" class="animated-stream" />
+            <path d="M 220 23 L 0 23" stroke="#5eead4" stroke-width="3" class="animated-stream-reverse" />
+          </svg>
+        </div>
+
+        <!-- Center Node: Cloud Firebase Backbone -->
+        <div class="relative z-20 flex flex-col items-center w-full lg:w-[420px]">
+          <div class="absolute w-56 h-56 rounded-full bg-amber-500/10 border border-amber-500/30 pulse-ring pointer-events-none"></div>
+
+          <div class="glass-card rounded-3xl p-8 sm:p-10 border-2 border-amber-500/60 w-full flex flex-col items-center text-center relative z-20 amber-glow bg-[#141b24]">
+            <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-600 via-orange-500 to-yellow-400 flex items-center justify-center text-white text-5xl mb-5 shadow-xl shadow-orange-500/30 floating">
+              🔥
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Cloud Firebase</h3>
+            <div class="mt-6 pt-5 border-t border-gray-800/80 w-full flex flex-col gap-2">
+              
+              
+            </div>
+            <p class="text-sm text-amber-400 font-semibold mt-1">Central Real-Time Backbone</p>
+
+            
+          </div>
+        </div>
+
+        <!-- Connection 2: Firebase <-> Admin (Wide Animated Stream) -->
+        <div class="hidden lg:flex flex-1 flex-col items-center justify-center px-4">
+          <span class="text-xs font-mono text-cyan-400 font-bold mb-2 bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-500/30 shadow">
+            LIVE SYNC
+          </span>
+          <svg class="w-full h-12" viewBox="0 0 220 36" fill="none">
+            <path d="M 0 18 L 220 18" stroke="#1f2937" stroke-width="4" />
+            <path d="M 0 13 L 220 13" stroke="#06b6d4" stroke-width="3" class="animated-stream" />
+            <path d="M 220 23 L 0 23" stroke="#67e8f9" stroke-width="3" class="animated-stream-reverse" />
+          </svg>
+        </div>
+
+        <!-- Right Node: Web Admin Panel -->
+        <div class="glass-card rounded-3xl p-8 sm:p-10 border border-cyan-500/40 w-full lg:w-96 flex flex-col items-center text-center relative z-20 pulse-glow bg-[#101720]/90">
+          <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-cyan-900 to-blue-500 flex items-center justify-center text-white text-5xl mb-5 shadow-xl shadow-cyan-500/30">
+            🖥️
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Admin Panel</h3>
+          <div class="mt-6 pt-5 border-t border-gray-800/80 w-full flex flex-col gap-2">
+            
+          </div>
+          <p class="text-sm text-cyan-400 font-semibold mt-1">Transit Operator</p>
+
+          
+        </div>
+
+      </div>
+
+     
+
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Controls -->
+  <footer class="w-full px-8 py-5 flex justify-between items-center z-40 bg-[#070b0f]/80 backdrop-blur border-t border-gray-800/80">
+    <div class="text-xs text-gray-400 hidden sm:flex items-center gap-2">
+      
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+      <button id="prevBtn" onclick="prevSlide()" class="px-5 py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-white font-medium text-xs border border-gray-700 transition flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Previous
+      </button>
+
+      <!-- Thumbnails / Dots -->
+      <div id="dotsContainer" class="flex items-center gap-2"></div>
+
+      <button id="nextBtn" onclick="nextSlide()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs border border-emerald-400/30 transition shadow-lg shadow-emerald-950 flex items-center gap-2 cursor-pointer">
+        Next
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Interactive Slide Navigation Script -->
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 4;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dotsContainer = document.getElementById('dotsContainer');
+
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('button');
+      dot.className = `w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${i === 1 ? 'bg-emerald-400 w-6' : 'bg-gray-700 hover:bg-gray-500'}`;
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      progressBar.style.width = `${(currentSlide / totalSlides) * 100}%`;
+      slideIndicator.innerText = currentSlide.toString().padStart(2, '0');
+
+      prevBtn.disabled = currentSlide === 1;
+      nextBtn.innerHTML = currentSlide === totalSlides ? 'Live Demo →' : `Next <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>`;
+
+      Array.from(dotsContainer.children).forEach((dot, idx) => {
+        if (idx + 1 === currentSlide) {
+          dot.className = 'w-6 h-2.5 rounded-full bg-emerald-400 transition-all duration-300 cursor-pointer';
+        } else {
+          dot.className = 'w-2.5 h-2.5 rounded-full bg-gray-700 hover:bg-gray-500 transition-all duration-300 cursor-pointer';
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlide();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      }
+    });
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    updateSlide();
+  </script>
+</body>
+</html>

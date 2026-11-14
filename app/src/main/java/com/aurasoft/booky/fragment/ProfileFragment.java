@@ -1,5 +1,7 @@
 package com.aurasoft.booky.fragment;
 
+
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -61,14 +63,12 @@ public class ProfileFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // ViewModel එක නිවැරදිව initialize කිරීම
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         initViews(view);
         setupLoadingDialog();
         checkLoginProvider();
 
-        // Data වෙනස් වන විට UI එක ඉබේම update වීමට observer එකක් භාවිතා කරයි
         if (mAuth.getUid() != null) {
             viewModel.getUserData(mAuth.getUid()).observe(getViewLifecycleOwner(), data -> {
                 if (data != null) {
